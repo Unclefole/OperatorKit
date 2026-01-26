@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Siri capability for App Intents -->
+    <key>com.apple.developer.siri</key>
+    <true/>
+    
+    <!-- App Groups for shared data (if needed for widgets) -->
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.operatorkit.shared</string>
+    </array>
+</dict>
+</plist>

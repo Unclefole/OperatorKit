@@ -1,0 +1,681 @@
+import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+
+struct DraftOutputView: View {
+    @EnvironmentObject var appState: AppState
+    @State private var selectedTab: Int = 0
+    @State private var isEditing: Bool = false
+    @State private var editedBody: String = ""
+    @State private var showingCitations: Bool = false
+    
+    var body: some View {
+        ZStack {
+            // Background
+            Color(UIColor.systemGroupedBackground)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Flow Step Header (Phase 5C)
+                FlowStepHeaderView(
+                    step: .draft,
+                    subtitle: "Review the generated draft"
+                )
+                
+                // Status Strip (Phase 5C)
+                FlowStatusStripView(onRecoveryAction: handleRecoveryAction)
+                
+                // Header
+                headerView
+                
+                // Content
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Context Summary Chips (Phase 5C)
+                        ContextSummaryChipsView()
+                        
+                        // Confidence Badge
+                        if let draft = appState.currentDraft {
+                            confidenceBadge(draft)
+                        }
+                        
+                        // Safety Notes
+                        if let draft = appState.currentDraft, !draft.safetyNotes.isEmpty {
+                            safetyNotesCard(draft)
+                        }
+                        
+                        // Tab Selector
+                        tabSelector
+                        
+                        // Draft Content
+                        if let draft = appState.currentDraft {
+                            switch selectedTab {
+                            case 0:
+                                draftCard(draft)
+                            case 1:
+                                actionItemsCard(draft)
+                            case 2:
+                                citationsCard(draft)
+                            default:
+                                draftCard(draft)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    .padding(.bottom, 160)
+                }
+                
+                Spacer()
+            }
+            
+            // Bottom Actions
+            VStack {
+                Spacer()
+                bottomActions
+            }
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            if let draft = appState.currentDraft {
+                editedBody = draft.content.body
+            }
+        }
+    }
+    
+    // MARK: - Recovery Action Handler (Phase 5C)
+    private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
+        switch action {
+        case .goHome:
+            appState.returnHome()
+        case .retryCurrentStep:
+            appState.clearError()
+        case .addMoreContext:
+            appState.navigateTo(.contextPicker)
+        case .editRequest:
+            appState.navigateTo(.intentInput)
+        default:
+            appState.clearError()
+        }
+    }
+    
+    // MARK: - Header
+    private var headerView: some View {
+        HStack {
+            Button(action: {
+                appState.navigateBack()
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.blue)
+            }
+            
+            Spacer()
+            
+            Text("Review Draft")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            Spacer()
+            
+            Button(action: {
+                appState.returnHome()
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+    }
+    
+    // MARK: - Confidence Badge
+    private func confidenceBadge(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                // Confidence Icon
+                ZStack {
+                    Circle()
+                        .fill(confidenceColor(draft.confidenceLevel).opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    
+                    Image(systemName: draft.confidenceLevel.icon)
+                        .font(.system(size: 20))
+                        .foregroundColor(confidenceColor(draft.confidenceLevel))
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(confidenceLabel(draft.confidenceLevel))
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(confidenceColor(draft.confidenceLevel))
+                    
+                    Text(confidenceDescription(draft.confidenceLevel))
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                
+                Spacer()
+            }
+            
+            // Fallback indicator (non-alarmist)
+            if let metadata = draft.modelMetadata, metadata.backend == .deterministic, draft.usedFallback {
+                fallbackIndicator
+            }
+        }
+        .padding(16)
+        .background(confidenceColor(draft.confidenceLevel).opacity(0.05))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(confidenceColor(draft.confidenceLevel).opacity(0.2), lineWidth: 1)
+        )
+    }
+    
+    // MARK: - Fallback Indicator (Non-alarmist)
+    private var fallbackIndicator: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "cpu")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+            
+            Text("Deterministic fallback used")
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+            
+            Text("A simpler on-device method was used to ensure reliability.")
+                .font(.caption2)
+                .foregroundColor(.gray)
+                .lineLimit(1)
+        }
+        .padding(10)
+        .background(Color.gray.opacity(0.05))
+        .cornerRadius(8)
+    }
+    
+    private func confidenceColor(_ level: DraftOutput.ConfidenceLevel) -> Color {
+        switch level {
+        case .high: return .green
+        case .medium: return .blue
+        case .low: return .orange
+        case .veryLow: return .red
+        }
+    }
+    
+    private func confidenceDescription(_ level: DraftOutput.ConfidenceLevel) -> String {
+        switch level {
+        case .high: return "This draft was generated with strong alignment to your selected context."
+        case .medium: return "The request is clear, but some details may require your judgment."
+        case .low: return "The request is clear, but some details may require your judgment."
+        case .veryLow: return "OperatorKit could not generate a reliable draft from the provided context."
+        }
+    }
+    
+    private func confidenceLabel(_ level: DraftOutput.ConfidenceLevel) -> String {
+        switch level {
+        case .high: return "High confidence"
+        case .medium: return "Needs review"
+        case .low: return "Needs review"
+        case .veryLow: return "Insufficient confidence"
+        }
+    }
+    
+    // MARK: - Safety Notes Card
+    private func safetyNotesCard(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.blue)
+                
+                Text("Before You Continue")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(draft.safetyNotes, id: \.self) { note in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 12))
+                            .foregroundColor(.blue)
+                            .padding(.top, 2)
+                        
+                        Text(note)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.blue.opacity(0.05))
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Tab Selector
+    private var tabSelector: some View {
+        let tabs = ["Draft", "Actions", "Sources"]
+        
+        return HStack(spacing: 0) {
+            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                Button(action: {
+                    selectedTab = index
+                }) {
+                    VStack(spacing: 8) {
+                        HStack(spacing: 4) {
+                            Text(tab)
+                                .font(.subheadline)
+                                .fontWeight(selectedTab == index ? .semibold : .regular)
+                            
+                            // Badge for citations count
+                            if index == 2, let draft = appState.currentDraft, !draft.citations.isEmpty {
+                                Text("\(draft.citations.count)")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(selectedTab == index ? Color.blue : Color.gray)
+                                    .cornerRadius(8)
+                            }
+                        }
+                        .foregroundColor(selectedTab == index ? .primary : .gray)
+                        
+                        Rectangle()
+                            .fill(selectedTab == index ? Color.blue : Color.clear)
+                            .frame(height: 2)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+    
+    // MARK: - Draft Card
+    private func draftCard(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack {
+                Image(systemName: draft.type.icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(.blue)
+                
+                Text(draft.type.rawValue)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Button(action: {
+                    isEditing.toggle()
+                }) {
+                    Text(isEditing ? "Done" : "Edit")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
+            }
+            
+            Divider()
+            
+            // Email metadata (if email)
+            if draft.type == .email {
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("To:")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .frame(width: 60, alignment: .leading)
+                        Text(draft.content.recipient ?? "[Add recipient]")
+                            .font(.subheadline)
+                        Spacer()
+                    }
+                    HStack {
+                        Text("Subject:")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .frame(width: 60, alignment: .leading)
+                        Text(draft.content.subject ?? "[Add subject]")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                    }
+                }
+                
+                Divider()
+            }
+            
+            // Content
+            if isEditing {
+                TextEditor(text: $editedBody)
+                    .font(.body)
+                    .frame(minHeight: 200)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(8)
+            } else {
+                Text(draft.content.body)
+                    .font(.body)
+                    .foregroundColor(.primary)
+            }
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+    }
+    
+    // MARK: - Action Items Card
+    private func actionItemsCard(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "checklist")
+                    .font(.system(size: 18))
+                    .foregroundColor(.green)
+                
+                Text("Action Items")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Text("\(draft.actionItems.count) items")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            
+            Divider()
+            
+            if draft.actionItems.isEmpty {
+                HStack {
+                    Image(systemName: "checkmark.circle")
+                        .foregroundColor(.gray)
+                    Text("No action items extracted")
+                        .font(.body)
+                        .foregroundColor(.gray)
+                }
+                .padding(.vertical, 20)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(draft.actionItems, id: \.self) { item in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "circle")
+                                .font(.system(size: 18))
+                                .foregroundColor(.gray)
+                            
+                            Text(item)
+                                .font(.body)
+                            
+                            Spacer()
+                        }
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+    }
+    
+    // MARK: - Citations Card
+    private func citationsCard(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "link")
+                    .font(.system(size: 18))
+                    .foregroundColor(.purple)
+                
+                Text("Sources Used")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                if !draft.citations.isEmpty {
+                    Text(draft.citations.summary)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+            
+            Divider()
+            
+            if draft.citations.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .font(.system(size: 32))
+                        .foregroundColor(.gray)
+                    Text("No sources cited")
+                        .font(.body)
+                        .foregroundColor(.gray)
+                    Text("Add context to improve draft quality")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(draft.citations) { citation in
+                        citationRow(citation)
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+    }
+    
+    private func citationRow(_ citation: Citation) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: citation.sourceType.icon)
+                .font(.system(size: 18))
+                .foregroundColor(citationColor(citation.sourceType))
+                .frame(width: 24)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(citation.label)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                
+                Text(citation.truncatedSnippet)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .lineLimit(2)
+                
+                Text(citation.formattedTimestamp)
+                    .font(.caption2)
+                    .foregroundColor(.gray.opacity(0.8))
+            }
+            
+            Spacer()
+        }
+        .padding(12)
+        .background(Color.gray.opacity(0.05))
+        .cornerRadius(8)
+    }
+    
+    private func citationColor(_ type: Citation.SourceType) -> Color {
+        switch type {
+        case .calendarEvent: return .red
+        case .emailThread: return .blue
+        case .file: return .orange
+        case .note: return .yellow
+        }
+    }
+    
+    // MARK: - Bottom Actions
+    private var bottomActions: some View {
+        VStack(spacing: 12) {
+            // Fallback warning if needed
+            if let draft = appState.currentDraft {
+                if draft.requiresFallbackConfirmation {
+                    fallbackWarning(draft)
+                } else if draft.isBlocked {
+                    blockedWarning(draft)
+                }
+            }
+            
+            // Action buttons
+            HStack(spacing: 12) {
+                Button(action: {
+                    appState.navigateBack()
+                }) {
+                    Text("Back")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                }
+                
+                Button(action: {
+                    proceedToApproval()
+                }) {
+                    Text(proceedButtonText)
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(proceedButtonEnabled ? Color.blue : Color.gray.opacity(0.4))
+                        .cornerRadius(12)
+                }
+                .disabled(!proceedButtonEnabled)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 20)
+        .background(
+            Color.white
+                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+        )
+    }
+    
+    private func fallbackWarning(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                Image(systemName: "info.circle.fill")
+                    .foregroundColor(.orange)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Needs review")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    
+                    Text("The request is clear, but some details may require your judgment.")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+            }
+            
+            // Helper text for Proceed Anyway
+            Text("You are choosing to continue with a draft that may need adjustment.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .padding(.leading, 36)
+        }
+        .padding(12)
+        .background(Color.orange.opacity(0.1))
+        .cornerRadius(8)
+    }
+    
+    private func blockedWarning(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "info.circle.fill")
+                    .foregroundColor(.orange)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Insufficient confidence")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                    
+                    Text("OperatorKit could not generate a reliable draft from the provided context.")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+            }
+            
+            // Recovery options
+            HStack(spacing: 12) {
+                Button(action: { appState.navigateTo(.intentInput) }) {
+                    Text("Edit request")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.blue)
+                }
+                
+                Text("or")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Button(action: { appState.navigateTo(.contextPicker) }) {
+                    Text("Add more context")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.blue)
+                }
+                
+                Spacer()
+            }
+            .padding(.leading, 36)
+        }
+        .padding(12)
+        .background(Color.orange.opacity(0.1))
+        .cornerRadius(8)
+    }
+    
+    private var proceedButtonText: String {
+        guard let draft = appState.currentDraft else { return "Continue" }
+        
+        if draft.isBlocked {
+            return "Cancel"
+        } else if draft.requiresFallbackConfirmation {
+            return "Proceed anyway"
+        } else {
+            return "Continue to Approval"
+        }
+    }
+    
+    private var proceedButtonEnabled: Bool {
+        guard let draft = appState.currentDraft else { return false }
+        return !draft.isBlocked
+    }
+    
+    private func proceedToApproval() {
+        guard let draft = appState.currentDraft else { return }
+        
+        // Check if routing to fallback
+        if draft.requiresFallbackConfirmation {
+            // Route to fallback for confirmation
+            appState.navigateTo(.fallback)
+        } else {
+            // Direct to approval
+            appState.navigateTo(.approval)
+        }
+    }
+}
+
+#Preview {
+    DraftOutputView()
+        .environmentObject(AppState())
+}

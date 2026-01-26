@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000000000000000000000000000
+schemaVersion=1
+generated=2026-01-24
+note=Placeholder seal. Run build script to generate actual dependency hash.

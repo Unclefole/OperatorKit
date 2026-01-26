@@ -1,0 +1,1138 @@
+{
+  "corpus_id": "negative-examples-v1",
+  "version": "1.0.0",
+  "schema_version": 1,
+  "created_at": "2026-01-24",
+  "corpus_metadata": {
+    "purpose": "Negative examples with irrelevant or insufficient context",
+    "domain_distribution": {
+      "email": 10,
+      "calendar": 10,
+      "notes": 5,
+      "tasks": 5,
+      "general": 20
+    },
+    "total_examples": 50,
+    "negative_examples": 50,
+    "generation_method": "hand_verified_negative"
+  },
+  "examples": [
+    {
+      "example_id": "neg-001",
+      "domain": "general",
+      "user_intent": "Do the thing",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Ambiguous intent without actionable context",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Intent too vague, no context provided"
+      }
+    },
+    {
+      "example_id": "neg-002",
+      "domain": "email",
+      "user_intent": "Send it",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No recipient or content specified",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No recipient, no subject, no content indication"
+      }
+    },
+    {
+      "example_id": "neg-003",
+      "domain": "calendar",
+      "user_intent": "Schedule something",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No event details provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No time, no participants, no event description"
+      }
+    },
+    {
+      "example_id": "neg-004",
+      "domain": "general",
+      "user_intent": "Help",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Single word intent, no actionable information",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Intent provides no actionable information"
+      }
+    },
+    {
+      "example_id": "neg-005",
+      "domain": "email",
+      "user_intent": "Reply to that email about weather",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-irrelevant-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Dentist Appointment",
+            "synthetic_date": "2026-01-30T11:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Context is irrelevant to intent",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Context (calendar event) does not match intent (email about weather)"
+      }
+    },
+    {
+      "example_id": "neg-006",
+      "domain": "calendar",
+      "user_intent": "Move the meeting with the CEO to next year",
+      "selected_context": [
+        {
+          "context_type": "note_stub",
+          "context_id": "ctx-irrelevant-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Grocery List",
+            "synthetic_snippet": "[SYNTHETIC] Milk, eggs, bread..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No matching calendar event found",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Context (grocery list note) unrelated to calendar event modification"
+      }
+    },
+    {
+      "example_id": "neg-007",
+      "domain": "tasks",
+      "user_intent": "Mark the task as done",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No task specified",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No task context provided, cannot identify which task"
+      }
+    },
+    {
+      "example_id": "neg-008",
+      "domain": "notes",
+      "user_intent": "Update the notes",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No note specified and no update content",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No note context and no specification of what to update"
+      }
+    },
+    {
+      "example_id": "neg-009",
+      "domain": "email",
+      "user_intent": "Email the person about the thing they mentioned",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Vague references with no identifiable entities",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No person identified, no topic specified"
+      }
+    },
+    {
+      "example_id": "neg-010",
+      "domain": "general",
+      "user_intent": "Make it happen",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-irrelevant-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Random Document",
+            "synthetic_snippet": "[SYNTHETIC] Some unrelated text content..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Ambiguous intent, context does not clarify action",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Vague intent not clarified by generic context"
+      }
+    },
+    {
+      "example_id": "neg-011",
+      "domain": "email",
+      "user_intent": "Forward the attachment",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-irrelevant-004",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Lunch Break",
+            "synthetic_date": "2026-01-24T12:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No attachment source identified",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Context is calendar event, not an email with attachment"
+      }
+    },
+    {
+      "example_id": "neg-012",
+      "domain": "calendar",
+      "user_intent": "Add to calendar",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No event details provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No information about what to add to calendar"
+      }
+    },
+    {
+      "example_id": "neg-013",
+      "domain": "general",
+      "user_intent": "Do what I asked earlier",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Reference to prior context not available",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No prior context available in session"
+      }
+    },
+    {
+      "example_id": "neg-014",
+      "domain": "email",
+      "user_intent": "Write an email to discuss the project with the team",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "ctx-irrelevant-005",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Buy groceries",
+            "synthetic_date": "2026-01-25"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Context does not relate to project or team",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Task about groceries unrelated to project discussion"
+      }
+    },
+    {
+      "example_id": "neg-015",
+      "domain": "notes",
+      "user_intent": "Summarize everything",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No source material to summarize",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No documents, notes, or content provided to summarize"
+      }
+    },
+    {
+      "example_id": "neg-016",
+      "domain": "calendar",
+      "user_intent": "Remind me about that",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No referent for 'that'",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Pronoun reference with no antecedent"
+      }
+    },
+    {
+      "example_id": "neg-017",
+      "domain": "general",
+      "user_intent": "Process the request",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No request specified",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Generic action verb with no specific request"
+      }
+    },
+    {
+      "example_id": "neg-018",
+      "domain": "email",
+      "user_intent": "Reply yes",
+      "selected_context": [
+        {
+          "context_type": "note_stub",
+          "context_id": "ctx-irrelevant-006",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Shopping List",
+            "synthetic_snippet": "[SYNTHETIC] Items to purchase..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No email to reply to",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Context is a note, not an email to reply to"
+      }
+    },
+    {
+      "example_id": "neg-019",
+      "domain": "tasks",
+      "user_intent": "Add it to my list",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No item specified to add",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No specification of what to add"
+      }
+    },
+    {
+      "example_id": "neg-020",
+      "domain": "general",
+      "user_intent": "Fix the problem",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No problem specified",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No description of what problem to fix"
+      }
+    },
+    {
+      "example_id": "neg-021",
+      "domain": "calendar",
+      "user_intent": "Change the time",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No event or new time specified",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No event context and no target time"
+      }
+    },
+    {
+      "example_id": "neg-022",
+      "domain": "email",
+      "user_intent": "BCC someone on that",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No email context and no recipient specified",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Vague pronouns, no identifiable email or person"
+      }
+    },
+    {
+      "example_id": "neg-023",
+      "domain": "notes",
+      "user_intent": "Write it down",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No content specified to write",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No indication of what to write"
+      }
+    },
+    {
+      "example_id": "neg-024",
+      "domain": "general",
+      "user_intent": "Can you",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Incomplete intent",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Truncated or incomplete request"
+      }
+    },
+    {
+      "example_id": "neg-025",
+      "domain": "email",
+      "user_intent": "Send an urgent email",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-irrelevant-007",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Recipe Collection",
+            "synthetic_snippet": "[SYNTHETIC] Italian recipes for pasta..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No recipient, subject, or relevant content",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Recipe document unrelated to urgent email request"
+      }
+    },
+    {
+      "example_id": "neg-026",
+      "domain": "calendar",
+      "user_intent": "Delete it",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No item specified to delete",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Pronoun with no referent"
+      }
+    },
+    {
+      "example_id": "neg-027",
+      "domain": "tasks",
+      "user_intent": "Complete the task from yesterday's meeting",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-irrelevant-008",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Newsletter",
+            "synthetic_date": "2026-01-24",
+            "synthetic_snippet": "[SYNTHETIC] Industry news and updates..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Context does not contain task from meeting",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Newsletter email does not contain meeting tasks"
+      }
+    },
+    {
+      "example_id": "neg-028",
+      "domain": "general",
+      "user_intent": "Whatever you think is best",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No actionable intent provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Delegation without any task specification"
+      }
+    },
+    {
+      "example_id": "neg-029",
+      "domain": "email",
+      "user_intent": "Follow up",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No prior communication to follow up on",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No email, contact, or topic specified"
+      }
+    },
+    {
+      "example_id": "neg-030",
+      "domain": "calendar",
+      "user_intent": "Book the room",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No room, time, or event specified",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No context about which room, when, or for what"
+      }
+    },
+    {
+      "example_id": "neg-031",
+      "domain": "notes",
+      "user_intent": "Make a note about the discussion",
+      "selected_context": [
+        {
+          "context_type": "contact_card",
+          "context_id": "ctx-irrelevant-009",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Restaurant Recommendation"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No discussion context provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Contact card does not contain discussion content"
+      }
+    },
+    {
+      "example_id": "neg-032",
+      "domain": "general",
+      "user_intent": "Yes",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Affirmation without context",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Single word response with no prior context"
+      }
+    },
+    {
+      "example_id": "neg-033",
+      "domain": "email",
+      "user_intent": "Send the usual",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No template or pattern identified",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No established pattern or recipient"
+      }
+    },
+    {
+      "example_id": "neg-034",
+      "domain": "tasks",
+      "user_intent": "Remind me later",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No reminder subject or time specified",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No content for reminder and no specific time"
+      }
+    },
+    {
+      "example_id": "neg-035",
+      "domain": "calendar",
+      "user_intent": "Cancel everything",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Overly broad action without specificity",
+        "risk_level": "elevated"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Dangerous scope, requires clarification"
+      }
+    },
+    {
+      "example_id": "neg-036",
+      "domain": "general",
+      "user_intent": "Handle that situation",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No situation context provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Vague reference with no actionable detail"
+      }
+    },
+    {
+      "example_id": "neg-037",
+      "domain": "email",
+      "user_intent": "Draft something nice",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No recipient, occasion, or content specified",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Subjective request without specifics"
+      }
+    },
+    {
+      "example_id": "neg-038",
+      "domain": "notes",
+      "user_intent": "Document the thing we talked about",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No conversation context available",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Reference to conversation not in context"
+      }
+    },
+    {
+      "example_id": "neg-039",
+      "domain": "calendar",
+      "user_intent": "When is it",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No event reference provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Question with no identifiable subject"
+      }
+    },
+    {
+      "example_id": "neg-040",
+      "domain": "general",
+      "user_intent": "Take care of it",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-irrelevant-010",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Birthday Party",
+            "synthetic_date": "2026-02-15T18:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Vague action with unrelated context",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Pronoun 'it' has no clear referent to calendar event"
+      }
+    },
+    {
+      "example_id": "neg-041",
+      "domain": "email",
+      "user_intent": "Respond appropriately",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No message to respond to",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No email context and subjective 'appropriately'"
+      }
+    },
+    {
+      "example_id": "neg-042",
+      "domain": "tasks",
+      "user_intent": "Prioritize",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No tasks to prioritize",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Single word with no task context"
+      }
+    },
+    {
+      "example_id": "neg-043",
+      "domain": "calendar",
+      "user_intent": "Clear my afternoon",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-irrelevant-011",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Weekly Newsletter",
+            "synthetic_snippet": "[SYNTHETIC] Top stories this week..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No calendar context to clear",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Email context does not provide calendar information"
+      }
+    },
+    {
+      "example_id": "neg-044",
+      "domain": "general",
+      "user_intent": "Do the needful",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Colloquial phrase with no specific action",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Vague idiom with no actionable content"
+      }
+    },
+    {
+      "example_id": "neg-045",
+      "domain": "notes",
+      "user_intent": "Add more details",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No note to add to and no details provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No source note and no content to add"
+      }
+    },
+    {
+      "example_id": "neg-046",
+      "domain": "email",
+      "user_intent": "Include everyone",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No email context and 'everyone' undefined",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "No email to modify and vague recipient reference"
+      }
+    },
+    {
+      "example_id": "neg-047",
+      "domain": "calendar",
+      "user_intent": "Add another meeting",
+      "selected_context": [
+        {
+          "context_type": "note_stub",
+          "context_id": "ctx-irrelevant-012",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Personal Goals",
+            "synthetic_snippet": "[SYNTHETIC] Things I want to accomplish..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No meeting details provided",
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Personal goals note unrelated to meeting creation"
+      }
+    },
+    {
+      "example_id": "neg-048",
+      "domain": "general",
+      "user_intent": "Maybe",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "Non-actionable response",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Single word with no actionable meaning"
+      }
+    },
+    {
+      "example_id": "neg-049",
+      "domain": "tasks",
+      "user_intent": "Put that on my radar",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No 'that' specified",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Pronoun reference without antecedent"
+      }
+    },
+    {
+      "example_id": "neg-050",
+      "domain": "general",
+      "user_intent": "Just do whatever",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-irrelevant-013",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Book Summary",
+            "synthetic_snippet": "[SYNTHETIC] Key takeaways from the novel..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "insufficient_context",
+        "should_trigger_safety_gate": true
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "trigger_reason": "No actionable intent provided",
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "is_negative_example": true,
+        "expected_failure_reason": "Vague delegation with unrelated context"
+      }
+    }
+  ]
+}

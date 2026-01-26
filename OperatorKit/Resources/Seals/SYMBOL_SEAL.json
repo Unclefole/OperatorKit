@@ -1,0 +1,17 @@
+{
+  "symbolListHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "forbiddenSymbolCount": 0,
+  "forbiddenFrameworkPresent": false,
+  "frameworkChecks": [
+    {"framework": "URLSession", "detected": false, "severity": "none"},
+    {"framework": "CFNetwork", "detected": false, "severity": "none"},
+    {"framework": "NSURLConnection", "detected": false, "severity": "none"},
+    {"framework": "nw_connection", "detected": false, "severity": "none"},
+    {"framework": "WebKit", "detected": false, "severity": "none"},
+    {"framework": "JavaScriptCore", "detected": false, "severity": "none"},
+    {"framework": "SafariServices", "detected": false, "severity": "none"}
+  ],
+  "totalSymbolsScanned": 0,
+  "schemaVersion": 1,
+  "generatedAtDayRounded": "2026-01-24"
+}

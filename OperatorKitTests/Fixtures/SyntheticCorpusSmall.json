@@ -1,0 +1,2382 @@
+{
+  "corpus_id": "corpus-small-v1",
+  "version": "1.0.0",
+  "schema_version": 1,
+  "created_at": "2026-01-24",
+  "corpus_metadata": {
+    "purpose": "Generated corpus for distribution matching verification",
+    "domain_distribution": {
+      "email": 40,
+      "calendar": 30,
+      "notes": 15,
+      "tasks": 10,
+      "general": 5
+    },
+    "total_examples": 100,
+    "negative_examples": 0,
+    "generation_method": "template_generated"
+  },
+  "examples": [
+    {
+      "example_id": "gen-email-001",
+      "domain": "email",
+      "user_intent": "Compose an email to confirm the appointment time",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Consultation Appointment",
+            "synthetic_date": "2026-01-28T09:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "confirmation"]
+      }
+    },
+    {
+      "example_id": "gen-email-002",
+      "domain": "email",
+      "user_intent": "Write a message to request more information about the proposal",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Business Proposal",
+            "synthetic_snippet": "[SYNTHETIC] Proposal for new service offering..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "inquiry"]
+      }
+    },
+    {
+      "example_id": "gen-email-003",
+      "domain": "email",
+      "user_intent": "Draft a response accepting the meeting invitation",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Meeting Invitation",
+            "synthetic_participants": ["user@example.com", "organizer@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "response"]
+      }
+    },
+    {
+      "example_id": "gen-email-004",
+      "domain": "email",
+      "user_intent": "Send a reminder about the pending document review",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "gen-ctx-004",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Document Review Task",
+            "synthetic_date": "2026-01-27"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "reminder"]
+      }
+    },
+    {
+      "example_id": "gen-email-005",
+      "domain": "email",
+      "user_intent": "Reply to the question about project timeline",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-005",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Timeline Question",
+            "synthetic_participants": ["user@example.com", "stakeholder@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "reply"]
+      }
+    },
+    {
+      "example_id": "gen-email-006",
+      "domain": "email",
+      "user_intent": "Forward the summary to the leadership team",
+      "selected_context": [
+        {
+          "context_type": "note_stub",
+          "context_id": "gen-ctx-006",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Meeting Summary",
+            "synthetic_snippet": "[SYNTHETIC] Key points discussed..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "forward"]
+      }
+    },
+    {
+      "example_id": "gen-email-007",
+      "domain": "email",
+      "user_intent": "Write an email thanking someone for their assistance",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "gratitude"]
+      }
+    },
+    {
+      "example_id": "gen-email-008",
+      "domain": "email",
+      "user_intent": "Draft an email requesting a deadline extension",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "gen-ctx-008",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Deliverable",
+            "synthetic_date": "2026-01-25"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "request"]
+      }
+    },
+    {
+      "example_id": "gen-email-009",
+      "domain": "email",
+      "user_intent": "Compose a message to introduce myself to new colleagues",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "introduction"]
+      }
+    },
+    {
+      "example_id": "gen-email-010",
+      "domain": "email",
+      "user_intent": "Send an update about the ongoing initiative",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-010",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Initiative Progress Report",
+            "synthetic_snippet": "[SYNTHETIC] Current status and milestones..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "update"]
+      }
+    },
+    {
+      "example_id": "gen-email-011",
+      "domain": "email",
+      "user_intent": "Reply confirming receipt of the materials",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-011",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Materials Sent",
+            "synthetic_participants": ["user@example.com", "sender@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "confirmation"]
+      }
+    },
+    {
+      "example_id": "gen-email-012",
+      "domain": "email",
+      "user_intent": "Write to schedule a phone call for next week",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "scheduling"]
+      }
+    },
+    {
+      "example_id": "gen-email-013",
+      "domain": "email",
+      "user_intent": "Send a note of apology for missing the meeting",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-013",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team Sync",
+            "synthetic_date": "2026-01-23T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "apology"]
+      }
+    },
+    {
+      "example_id": "gen-email-014",
+      "domain": "email",
+      "user_intent": "Draft a message asking for feedback on my work",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "feedback"]
+      }
+    },
+    {
+      "example_id": "gen-email-015",
+      "domain": "email",
+      "user_intent": "Write an email to delegate the task to a team member",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "gen-ctx-015",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Report Generation",
+            "synthetic_date": "2026-01-28"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "delegation"]
+      }
+    },
+    {
+      "example_id": "gen-email-016",
+      "domain": "email",
+      "user_intent": "Reply with my availability for the proposed times",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-016",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Meeting Time Options",
+            "synthetic_participants": ["user@example.com", "scheduler@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "scheduling"]
+      }
+    },
+    {
+      "example_id": "gen-email-017",
+      "domain": "email",
+      "user_intent": "Send a message about the upcoming event",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-017",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team Celebration",
+            "synthetic_date": "2026-02-05T17:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "event"]
+      }
+    },
+    {
+      "example_id": "gen-email-018",
+      "domain": "email",
+      "user_intent": "Compose a message to inquire about pricing details",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "inquiry"]
+      }
+    },
+    {
+      "example_id": "gen-email-019",
+      "domain": "email",
+      "user_intent": "Write to express interest in the opportunity",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-019",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Partnership Opportunity",
+            "synthetic_participants": ["user@example.com", "partner@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "interest"]
+      }
+    },
+    {
+      "example_id": "gen-email-020",
+      "domain": "email",
+      "user_intent": "Draft a response declining the offer politely",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-020",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Service Offer",
+            "synthetic_participants": ["user@example.com", "vendor@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "decline"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-001",
+      "domain": "calendar",
+      "user_intent": "Create a meeting for the team standup tomorrow morning",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "create"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-002",
+      "domain": "calendar",
+      "user_intent": "Schedule a review session for next Friday afternoon",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "create"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-003",
+      "domain": "calendar",
+      "user_intent": "Block time for deep work on Wednesday",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "focus"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-004",
+      "domain": "calendar",
+      "user_intent": "Move the planning meeting to next week",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-024",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Planning Meeting",
+            "synthetic_date": "2026-01-24T14:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "modify"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-005",
+      "domain": "calendar",
+      "user_intent": "Reschedule the client call to Thursday",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-025",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Client Call",
+            "synthetic_date": "2026-01-26T15:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "reschedule"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-006",
+      "domain": "calendar",
+      "user_intent": "Add a weekly team sync meeting",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "recurring"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-007",
+      "domain": "calendar",
+      "user_intent": "Cancel the appointment scheduled for today",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-027",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Appointment",
+            "synthetic_date": "2026-01-24T11:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "delete_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "delete"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-008",
+      "domain": "calendar",
+      "user_intent": "Set up a recurring check-in every Monday",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "recurring"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-009",
+      "domain": "calendar",
+      "user_intent": "Change the meeting duration to 45 minutes",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-029",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Discussion",
+            "synthetic_date": "2026-01-25T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "modify"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-010",
+      "domain": "calendar",
+      "user_intent": "Schedule a lunch with a colleague",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "social"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-011",
+      "domain": "calendar",
+      "user_intent": "Add travel time before the client meeting",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-031",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Client Meeting",
+            "synthetic_date": "2026-01-27T14:00:00Z",
+            "synthetic_location": "[SYNTHETIC] Client Office"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "travel"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-012",
+      "domain": "calendar",
+      "user_intent": "Update the meeting location to the conference room",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-032",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Strategy Session",
+            "synthetic_date": "2026-01-25T15:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "location"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-013",
+      "domain": "calendar",
+      "user_intent": "Block off the entire morning for project work",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "focus"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-014",
+      "domain": "calendar",
+      "user_intent": "Create a reminder for the submission deadline",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "gen-ctx-034",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Submission Due",
+            "synthetic_date": "2026-01-30"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "reminder"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-015",
+      "domain": "calendar",
+      "user_intent": "Schedule a brainstorming session with the design team",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "collaboration"]
+      }
+    },
+    {
+      "example_id": "gen-notes-001",
+      "domain": "notes",
+      "user_intent": "Create meeting notes from the discussion",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-036",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team Discussion",
+            "synthetic_date": "2026-01-24T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "meeting"]
+      }
+    },
+    {
+      "example_id": "gen-notes-002",
+      "domain": "notes",
+      "user_intent": "Draft an outline for the presentation",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "outline"]
+      }
+    },
+    {
+      "example_id": "gen-notes-003",
+      "domain": "notes",
+      "user_intent": "Summarize the key points from the document",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-038",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Strategy Document",
+            "synthetic_snippet": "[SYNTHETIC] Key strategic initiatives..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "summary"]
+      }
+    },
+    {
+      "example_id": "gen-notes-004",
+      "domain": "notes",
+      "user_intent": "Write down ideas for the new feature",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "brainstorm"]
+      }
+    },
+    {
+      "example_id": "gen-notes-005",
+      "domain": "notes",
+      "user_intent": "Create a list of action items from the call",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-040",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Client Call",
+            "synthetic_date": "2026-01-24T15:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "action_items"]
+      }
+    },
+    {
+      "example_id": "gen-notes-006",
+      "domain": "notes",
+      "user_intent": "Document the feedback received",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-041",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Feedback Email",
+            "synthetic_snippet": "[SYNTHETIC] Here are my thoughts on the proposal..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "feedback"]
+      }
+    },
+    {
+      "example_id": "gen-notes-007",
+      "domain": "notes",
+      "user_intent": "Make a checklist for the project launch",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "checklist"]
+      }
+    },
+    {
+      "example_id": "gen-notes-008",
+      "domain": "notes",
+      "user_intent": "Compile the research findings into notes",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-043",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Research Data",
+            "synthetic_snippet": "[SYNTHETIC] Survey results and analysis..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "research"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-001",
+      "domain": "tasks",
+      "user_intent": "Add a task to complete the review by Friday",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "deadline"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-002",
+      "domain": "tasks",
+      "user_intent": "Create a reminder to follow up with the vendor",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "follow_up"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-003",
+      "domain": "tasks",
+      "user_intent": "Add preparing the presentation to my task list",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "preparation"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-004",
+      "domain": "tasks",
+      "user_intent": "Set a reminder to submit the expense report",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "admin"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-005",
+      "domain": "tasks",
+      "user_intent": "Add updating the documentation to my tasks",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "documentation"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-006",
+      "domain": "tasks",
+      "user_intent": "Create a task to review the contract",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-049",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Service Contract",
+            "synthetic_snippet": "[SYNTHETIC] Terms and conditions..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "review"]
+      }
+    },
+    {
+      "example_id": "gen-general-001",
+      "domain": "general",
+      "user_intent": "Show me my schedule for tomorrow",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_calendar",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["general", "query"]
+      }
+    },
+    {
+      "example_id": "gen-general-002",
+      "domain": "general",
+      "user_intent": "What are my upcoming deadlines",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_tasks",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["general", "query"]
+      }
+    },
+    {
+      "example_id": "gen-general-003",
+      "domain": "general",
+      "user_intent": "Find recent emails about the project",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["general", "search"]
+      }
+    },
+    {
+      "example_id": "gen-email-021",
+      "domain": "email",
+      "user_intent": "Write a quick thank you note to the interviewer",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-053",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Interview",
+            "synthetic_date": "2026-01-24T11:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "gratitude"]
+      }
+    },
+    {
+      "example_id": "gen-email-022",
+      "domain": "email",
+      "user_intent": "Send a follow-up about the pending approval",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-054",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Approval Request",
+            "synthetic_date": "2026-01-20",
+            "synthetic_participants": ["user@example.com", "approver@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "follow_up"]
+      }
+    },
+    {
+      "example_id": "gen-email-023",
+      "domain": "email",
+      "user_intent": "Reply with an update on the progress",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-055",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Status Request",
+            "synthetic_participants": ["user@example.com", "manager@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "status"]
+      }
+    },
+    {
+      "example_id": "gen-email-024",
+      "domain": "email",
+      "user_intent": "Draft an email requesting a meeting",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "request"]
+      }
+    },
+    {
+      "example_id": "gen-email-025",
+      "domain": "email",
+      "user_intent": "Send a message sharing the final report",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-057",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Final Report",
+            "synthetic_snippet": "[SYNTHETIC] Conclusions and recommendations..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "share"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-016",
+      "domain": "calendar",
+      "user_intent": "Add a reminder before the important presentation",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-058",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Executive Presentation",
+            "synthetic_date": "2026-01-30T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "reminder"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-017",
+      "domain": "calendar",
+      "user_intent": "Book time for learning and development",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "personal"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-018",
+      "domain": "calendar",
+      "user_intent": "Schedule time to work on the budget review",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "work"]
+      }
+    },
+    {
+      "example_id": "gen-notes-009",
+      "domain": "notes",
+      "user_intent": "Capture the main takeaways from the workshop",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-061",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Leadership Workshop",
+            "synthetic_date": "2026-01-24T09:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "workshop"]
+      }
+    },
+    {
+      "example_id": "gen-notes-010",
+      "domain": "notes",
+      "user_intent": "Draft thoughts on the new process",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "reflection"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-007",
+      "domain": "tasks",
+      "user_intent": "Remind me to send the weekly update",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "recurring"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-008",
+      "domain": "tasks",
+      "user_intent": "Add a task to book travel arrangements",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-064",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Conference Trip",
+            "synthetic_date": "2026-02-15"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "travel"]
+      }
+    },
+    {
+      "example_id": "gen-general-004",
+      "domain": "general",
+      "user_intent": "Check for any new messages today",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["general", "inbox"]
+      }
+    },
+    {
+      "example_id": "gen-general-005",
+      "domain": "general",
+      "user_intent": "What meetings do I have next week",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_calendar",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["general", "schedule"]
+      }
+    },
+    {
+      "example_id": "gen-email-026",
+      "domain": "email",
+      "user_intent": "Notify the team about the schedule change",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-067",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team Offsite",
+            "synthetic_date": "2026-02-01T09:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "notification"]
+      }
+    },
+    {
+      "example_id": "gen-email-027",
+      "domain": "email",
+      "user_intent": "Write back to confirm the details",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-068",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Event Details",
+            "synthetic_participants": ["user@example.com", "organizer@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "confirmation"]
+      }
+    },
+    {
+      "example_id": "gen-email-028",
+      "domain": "email",
+      "user_intent": "Send a reminder about the upcoming deadline",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "gen-ctx-069",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Milestone",
+            "synthetic_date": "2026-01-31"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "reminder"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-019",
+      "domain": "calendar",
+      "user_intent": "Set up a coffee chat with the new team member",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "social"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-020",
+      "domain": "calendar",
+      "user_intent": "Reserve the afternoon for client demos",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "block"]
+      }
+    },
+    {
+      "example_id": "gen-notes-011",
+      "domain": "notes",
+      "user_intent": "Create a summary of the quarterly results",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-072",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Q4 Report",
+            "synthetic_snippet": "[SYNTHETIC] Financial performance metrics..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "summary"]
+      }
+    },
+    {
+      "example_id": "gen-notes-012",
+      "domain": "notes",
+      "user_intent": "Write talking points for the team meeting",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-073",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team All Hands",
+            "synthetic_date": "2026-01-27T11:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "preparation"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-009",
+      "domain": "tasks",
+      "user_intent": "Create a task to finalize the presentation deck",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "deliverable"]
+      }
+    },
+    {
+      "example_id": "gen-tasks-010",
+      "domain": "tasks",
+      "user_intent": "Add scheduling the performance review to my tasks",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["tasks", "hr"]
+      }
+    },
+    {
+      "example_id": "gen-email-029",
+      "domain": "email",
+      "user_intent": "Respond to the request for information",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-076",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Information Request",
+            "synthetic_participants": ["user@example.com", "requester@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "response"]
+      }
+    },
+    {
+      "example_id": "gen-email-030",
+      "domain": "email",
+      "user_intent": "Send an email about the policy update",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-077",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Policy Document v2",
+            "synthetic_snippet": "[SYNTHETIC] Updated guidelines and procedures..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "announcement"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-021",
+      "domain": "calendar",
+      "user_intent": "Schedule a retrospective meeting for the sprint",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "agile"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-022",
+      "domain": "calendar",
+      "user_intent": "Move the training session to the larger room",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-079",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Training Session",
+            "synthetic_date": "2026-01-28T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "location"]
+      }
+    },
+    {
+      "example_id": "gen-email-031",
+      "domain": "email",
+      "user_intent": "Draft a message to discuss collaboration opportunities",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "outreach"]
+      }
+    },
+    {
+      "example_id": "gen-email-032",
+      "domain": "email",
+      "user_intent": "Reply asking for clarification on the requirements",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-081",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Requirements",
+            "synthetic_participants": ["user@example.com", "pm@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "clarification"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-023",
+      "domain": "calendar",
+      "user_intent": "Add a wellness break to my calendar",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "wellness"]
+      }
+    },
+    {
+      "example_id": "gen-notes-013",
+      "domain": "notes",
+      "user_intent": "List the key decisions from the leadership meeting",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-083",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Leadership Sync",
+            "synthetic_date": "2026-01-24T14:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "decisions"]
+      }
+    },
+    {
+      "example_id": "gen-email-033",
+      "domain": "email",
+      "user_intent": "Send a birthday greeting to a colleague",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "personal"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-024",
+      "domain": "calendar",
+      "user_intent": "Block my calendar for an out of office day",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "ooo"]
+      }
+    },
+    {
+      "example_id": "gen-email-034",
+      "domain": "email",
+      "user_intent": "Write a message to onboard the new contractor",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "onboarding"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-025",
+      "domain": "calendar",
+      "user_intent": "Set up a recurring one-on-one with my direct report",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "management"]
+      }
+    },
+    {
+      "example_id": "gen-notes-014",
+      "domain": "notes",
+      "user_intent": "Create interview notes template",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "template"]
+      }
+    },
+    {
+      "example_id": "gen-notes-015",
+      "domain": "notes",
+      "user_intent": "Draft minutes from the board meeting",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-089",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Board Meeting",
+            "synthetic_date": "2026-01-24T09:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["notes", "minutes"]
+      }
+    },
+    {
+      "example_id": "gen-email-035",
+      "domain": "email",
+      "user_intent": "Send the contract for signature",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "gen-ctx-090",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Signed Contract",
+            "synthetic_snippet": "[SYNTHETIC] Final version ready for execution..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "elevated"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "contract"]
+      }
+    },
+    {
+      "example_id": "gen-email-036",
+      "domain": "email",
+      "user_intent": "Reply to accept the proposal terms",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-091",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Proposal Terms",
+            "synthetic_participants": ["user@example.com", "vendor@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "acceptance"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-026",
+      "domain": "calendar",
+      "user_intent": "Add the product launch to my calendar",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "gen-ctx-092",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Launch Announcement",
+            "synthetic_snippet": "[SYNTHETIC] Product launch scheduled for March 1st..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "milestone"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-027",
+      "domain": "calendar",
+      "user_intent": "Shorten the meeting to 30 minutes",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-093",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Status Update",
+            "synthetic_date": "2026-01-25T16:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "modify"]
+      }
+    },
+    {
+      "example_id": "gen-email-037",
+      "domain": "email",
+      "user_intent": "Draft an email announcing the new hire",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "announcement"]
+      }
+    },
+    {
+      "example_id": "gen-email-038",
+      "domain": "email",
+      "user_intent": "Send a message about the changed priorities",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "update"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-028",
+      "domain": "calendar",
+      "user_intent": "Schedule time for quarterly planning",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "planning"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-029",
+      "domain": "calendar",
+      "user_intent": "Remove the cancelled workshop from my calendar",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "gen-ctx-097",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Skills Workshop",
+            "synthetic_date": "2026-01-29T13:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "delete_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "delete"]
+      }
+    },
+    {
+      "example_id": "gen-email-039",
+      "domain": "email",
+      "user_intent": "Write to request access to the system",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "request"]
+      }
+    },
+    {
+      "example_id": "gen-email-040",
+      "domain": "email",
+      "user_intent": "Send a quick note about the delay",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["email", "notification"]
+      }
+    },
+    {
+      "example_id": "gen-calendar-030",
+      "domain": "calendar",
+      "user_intent": "Create a placeholder for the annual review",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1,
+      "metadata": {
+        "generation_source": "template_generated",
+        "tags": ["calendar", "hr"]
+      }
+    }
+  ]
+}

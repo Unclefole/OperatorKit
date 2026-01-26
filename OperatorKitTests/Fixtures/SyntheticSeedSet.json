@@ -1,0 +1,1929 @@
+{
+  "corpus_id": "seed-set-v1",
+  "version": "1.0.0",
+  "schema_version": 1,
+  "created_at": "2026-01-24",
+  "corpus_metadata": {
+    "purpose": "Hand-verified seed set for distribution matching",
+    "domain_distribution": {
+      "email": 25,
+      "calendar": 20,
+      "notes": 15,
+      "tasks": 15,
+      "documents": 10,
+      "general": 15
+    },
+    "total_examples": 100,
+    "negative_examples": 0,
+    "generation_method": "hand_verified"
+  },
+  "examples": [
+    {
+      "example_id": "seed-email-001",
+      "domain": "email",
+      "user_intent": "Send a follow-up email to the client about the project status",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Update Discussion",
+            "synthetic_date": "2026-01-20",
+            "synthetic_participants": ["user@example.com", "client@test.com"],
+            "synthetic_snippet": "[SYNTHETIC] We discussed the timeline for deliverables..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "client@test.com",
+          "synthetic_subject": "[SYNTHETIC] Follow-up: Project Status",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-002",
+      "domain": "email",
+      "user_intent": "Draft a response to the meeting invitation",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team Sync Meeting",
+            "synthetic_date": "2026-01-25T10:00:00Z",
+            "synthetic_participants": ["user@example.com", "team@example.com"],
+            "synthetic_location": "[SYNTHETIC] Conference Room A"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "team@example.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Team Sync Meeting",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-003",
+      "domain": "email",
+      "user_intent": "Write an email to schedule a call with the vendor",
+      "selected_context": [
+        {
+          "context_type": "contact_card",
+          "context_id": "ctx-contact-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Vendor Contact",
+            "synthetic_snippet": "[SYNTHETIC] Primary contact for procurement..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "vendor@test.com",
+          "synthetic_subject": "[SYNTHETIC] Schedule a Call",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-004",
+      "domain": "email",
+      "user_intent": "Reply to the support ticket about the integration issue",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Support Ticket #12345",
+            "synthetic_date": "2026-01-22",
+            "synthetic_participants": ["user@example.com", "support@test.com"],
+            "synthetic_snippet": "[SYNTHETIC] The API integration is returning errors..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "support@test.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Support Ticket #12345",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-005",
+      "domain": "email",
+      "user_intent": "Send a thank you note after the interview",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Interview with Hiring Manager",
+            "synthetic_date": "2026-01-23T14:00:00Z",
+            "synthetic_participants": ["user@example.com", "hiring@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "hiring@test.com",
+          "synthetic_subject": "[SYNTHETIC] Thank You",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-001",
+      "domain": "calendar",
+      "user_intent": "Schedule a meeting with the team for next week",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Existing Team Standup",
+            "synthetic_date": "2026-01-27T09:00:00Z",
+            "synthetic_participants": ["user@example.com", "team@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Team Meeting",
+          "synthetic_event_date": "2026-01-28T10:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-002",
+      "domain": "calendar",
+      "user_intent": "Block time for focused work tomorrow afternoon",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Focus Time",
+          "synthetic_event_date": "2026-01-25T14:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-003",
+      "domain": "calendar",
+      "user_intent": "Reschedule the dentist appointment to next month",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-004",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Dentist Appointment",
+            "synthetic_date": "2026-01-30T11:00:00Z",
+            "synthetic_location": "[SYNTHETIC] 123 Example Street"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Dentist Appointment",
+          "synthetic_event_date": "2026-02-15T11:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-004",
+      "domain": "calendar",
+      "user_intent": "Set up a recurring weekly standup meeting",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Weekly Standup",
+          "synthetic_event_date": "2026-01-27T09:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-005",
+      "domain": "calendar",
+      "user_intent": "Add a reminder for the deadline on Friday",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "ctx-task-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Deadline",
+            "synthetic_date": "2026-01-31"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Deadline Reminder",
+          "synthetic_event_date": "2026-01-31T09:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-001",
+      "domain": "notes",
+      "user_intent": "Create a meeting summary from the discussion",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-005",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Quarterly Review",
+            "synthetic_date": "2026-01-24T15:00:00Z",
+            "synthetic_participants": ["user@example.com", "manager@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Meeting Summary: Quarterly Review"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-002",
+      "domain": "notes",
+      "user_intent": "Draft talking points for the presentation",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Product Roadmap",
+            "synthetic_snippet": "[SYNTHETIC] Key features for Q1 include..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Presentation Talking Points"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-003",
+      "domain": "notes",
+      "user_intent": "Write down the key decisions from the call",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-006",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Strategy Call",
+            "synthetic_date": "2026-01-24T11:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Key Decisions: Strategy Call"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-001",
+      "domain": "tasks",
+      "user_intent": "Add a task to follow up with the client",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Proposal Review",
+            "synthetic_participants": ["user@example.com", "client@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Follow up with client on proposal"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-002",
+      "domain": "tasks",
+      "user_intent": "Create a reminder to submit the report",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Submit weekly report"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-003",
+      "domain": "tasks",
+      "user_intent": "Add to my todo list to review the contract",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Service Agreement",
+            "synthetic_snippet": "[SYNTHETIC] Terms and conditions for the partnership..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Review service agreement"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-documents-001",
+      "domain": "documents",
+      "user_intent": "Summarize the key points from the report",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Annual Report 2025",
+            "synthetic_snippet": "[SYNTHETIC] Financial highlights and performance metrics..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Summary: Annual Report 2025"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-documents-002",
+      "domain": "documents",
+      "user_intent": "Extract action items from the meeting notes",
+      "selected_context": [
+        {
+          "context_type": "note_stub",
+          "context_id": "ctx-note-001",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Sprint Planning Notes",
+            "synthetic_snippet": "[SYNTHETIC] Action items discussed: implement feature X, review PR..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Action items from sprint planning"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-001",
+      "domain": "general",
+      "user_intent": "Help me prepare for the upcoming presentation",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-007",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Board Presentation",
+            "synthetic_date": "2026-02-01T14:00:00Z"
+          }
+        },
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-004",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Q4 Results",
+            "synthetic_snippet": "[SYNTHETIC] Revenue growth and market expansion..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Preparation: Board Presentation"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-002",
+      "domain": "general",
+      "user_intent": "What meetings do I have tomorrow",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_calendar",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-003",
+      "domain": "general",
+      "user_intent": "Check my schedule for next week",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_calendar",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-006",
+      "domain": "email",
+      "user_intent": "Decline the meeting invitation politely",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-008",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Optional Team Outing",
+            "synthetic_date": "2026-01-30T18:00:00Z",
+            "synthetic_participants": ["user@example.com", "social@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "social@example.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Team Outing",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-007",
+      "domain": "email",
+      "user_intent": "Forward the document to the legal team",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-005",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Partnership Agreement Draft",
+            "synthetic_snippet": "[SYNTHETIC] Terms of the proposed partnership..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "legal@example.com",
+          "synthetic_subject": "[SYNTHETIC] FW: Partnership Agreement Draft",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-008",
+      "domain": "email",
+      "user_intent": "Acknowledge receipt of the invoice",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-004",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Invoice #2026-001",
+            "synthetic_date": "2026-01-24",
+            "synthetic_participants": ["user@example.com", "billing@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "billing@test.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Invoice #2026-001",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-009",
+      "domain": "email",
+      "user_intent": "Ask for clarification on the project requirements",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-005",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Specifications",
+            "synthetic_date": "2026-01-23",
+            "synthetic_participants": ["user@example.com", "pm@test.com"],
+            "synthetic_snippet": "[SYNTHETIC] Please review the attached specifications..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "pm@test.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Project Specifications - Clarification Needed",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-010",
+      "domain": "email",
+      "user_intent": "Introduce myself to the new team member",
+      "selected_context": [
+        {
+          "context_type": "contact_card",
+          "context_id": "ctx-contact-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] New Team Member",
+            "synthetic_snippet": "[SYNTHETIC] Recently joined the engineering team..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "newmember@example.com",
+          "synthetic_subject": "[SYNTHETIC] Welcome to the Team",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-006",
+      "domain": "calendar",
+      "user_intent": "Cancel the meeting scheduled for tomorrow",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-009",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Review Session",
+            "synthetic_date": "2026-01-25T13:00:00Z",
+            "synthetic_participants": ["user@example.com", "reviewer@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "delete_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Review Session"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-007",
+      "domain": "calendar",
+      "user_intent": "Move the meeting to 3pm instead",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-010",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Planning Session",
+            "synthetic_date": "2026-01-25T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Planning Session",
+          "synthetic_event_date": "2026-01-25T15:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-008",
+      "domain": "calendar",
+      "user_intent": "Schedule a one-on-one with my manager",
+      "selected_context": [
+        {
+          "context_type": "contact_card",
+          "context_id": "ctx-contact-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Manager Contact"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] 1:1 with Manager",
+          "synthetic_event_date": "2026-01-27T11:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-009",
+      "domain": "calendar",
+      "user_intent": "Add a lunch break to my calendar",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Lunch Break",
+          "synthetic_event_date": "2026-01-24T12:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-010",
+      "domain": "calendar",
+      "user_intent": "Create a placeholder for the flight departure",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Flight Departure",
+          "synthetic_event_date": "2026-02-10T08:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-004",
+      "domain": "notes",
+      "user_intent": "Jot down my thoughts on the proposal",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-006",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Budget Proposal",
+            "synthetic_snippet": "[SYNTHETIC] Proposed allocation for the next fiscal year..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Thoughts on Budget Proposal"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-005",
+      "domain": "notes",
+      "user_intent": "Make a checklist for the trip",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-011",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Business Trip",
+            "synthetic_date": "2026-02-10"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Trip Checklist"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-006",
+      "domain": "notes",
+      "user_intent": "Record the feedback from the demo",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-012",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Product Demo",
+            "synthetic_date": "2026-01-24T14:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Feedback: Product Demo"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-004",
+      "domain": "tasks",
+      "user_intent": "Remind me to call the contractor next week",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Call contractor"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-005",
+      "domain": "tasks",
+      "user_intent": "Add a task to review the pull request",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Review pull request"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-006",
+      "domain": "tasks",
+      "user_intent": "Set a reminder to renew the subscription",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Renew subscription"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-documents-003",
+      "domain": "documents",
+      "user_intent": "Find the section about pricing in the contract",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-007",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Vendor Contract",
+            "synthetic_snippet": "[SYNTHETIC] Payment terms and pricing structure..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "query_document",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-004",
+      "domain": "general",
+      "user_intent": "What are my priorities for today",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_tasks",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-005",
+      "domain": "general",
+      "user_intent": "Show me my unread emails",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-011",
+      "domain": "email",
+      "user_intent": "Send a reminder about the upcoming deadline",
+      "selected_context": [
+        {
+          "context_type": "task_item",
+          "context_id": "ctx-task-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Milestone",
+            "synthetic_date": "2026-01-31"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "team@example.com",
+          "synthetic_subject": "[SYNTHETIC] Reminder: Project Milestone Deadline",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-012",
+      "domain": "email",
+      "user_intent": "Write a status update email to stakeholders",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-008",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Weekly Status Report",
+            "synthetic_snippet": "[SYNTHETIC] Progress on key initiatives..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "stakeholders@example.com",
+          "synthetic_subject": "[SYNTHETIC] Weekly Status Update",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-013",
+      "domain": "email",
+      "user_intent": "Request feedback on the design mockups",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-009",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] UI Mockups v2",
+            "synthetic_snippet": "[SYNTHETIC] Updated designs for the dashboard..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "design@example.com",
+          "synthetic_subject": "[SYNTHETIC] Feedback Request: UI Mockups v2",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-014",
+      "domain": "email",
+      "user_intent": "Confirm attendance for the conference",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-013",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Tech Conference 2026",
+            "synthetic_date": "2026-03-15T09:00:00Z",
+            "synthetic_location": "[SYNTHETIC] Convention Center"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "conference@test.com",
+          "synthetic_subject": "[SYNTHETIC] Attendance Confirmation",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-015",
+      "domain": "email",
+      "user_intent": "Send the agenda for tomorrow's meeting",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-014",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Product Roadmap Discussion",
+            "synthetic_date": "2026-01-25T10:00:00Z",
+            "synthetic_participants": ["user@example.com", "product@example.com"]
+          }
+        },
+        {
+          "context_type": "note_stub",
+          "context_id": "ctx-note-002",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Meeting Agenda",
+            "synthetic_snippet": "[SYNTHETIC] Topics to discuss: Q1 priorities, resource allocation..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "product@example.com",
+          "synthetic_subject": "[SYNTHETIC] Agenda: Product Roadmap Discussion",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-011",
+      "domain": "calendar",
+      "user_intent": "Extend the meeting by 30 minutes",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-015",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Architecture Review",
+            "synthetic_date": "2026-01-25T14:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Architecture Review"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-012",
+      "domain": "calendar",
+      "user_intent": "Add the training session to my calendar",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-006",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Training Announcement",
+            "synthetic_date": "2026-01-24",
+            "synthetic_snippet": "[SYNTHETIC] Join us for the new tool training on Feb 5th..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Tool Training",
+          "synthetic_event_date": "2026-02-05T10:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-007",
+      "domain": "notes",
+      "user_intent": "Compile the research findings",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-010",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Market Research Data",
+            "synthetic_snippet": "[SYNTHETIC] Survey results and analysis..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Research Findings Summary"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-008",
+      "domain": "notes",
+      "user_intent": "Draft the project scope document",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-007",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Project Kickoff Discussion",
+            "synthetic_snippet": "[SYNTHETIC] Key deliverables and timeline discussed..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Project Scope Draft"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-007",
+      "domain": "tasks",
+      "user_intent": "Create action items from the retrospective",
+      "selected_context": [
+        {
+          "context_type": "note_stub",
+          "context_id": "ctx-note-003",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Sprint Retrospective Notes",
+            "synthetic_snippet": "[SYNTHETIC] Areas for improvement: communication, testing..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Retrospective action items"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-008",
+      "domain": "tasks",
+      "user_intent": "Add a reminder to prepare the demo environment",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-016",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Client Demo",
+            "synthetic_date": "2026-01-28T15:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Prepare demo environment"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-006",
+      "domain": "general",
+      "user_intent": "Summarize my activities from last week",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_activities",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-007",
+      "domain": "general",
+      "user_intent": "Find my notes from the workshop",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-017",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Strategy Workshop",
+            "synthetic_date": "2026-01-20T09:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "query_notes",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-016",
+      "domain": "email",
+      "user_intent": "Reply to the newsletter subscription confirmation",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-008",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Subscription Confirmed",
+            "synthetic_date": "2026-01-24",
+            "synthetic_participants": ["user@example.com", "news@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "news@test.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Subscription Confirmed",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-017",
+      "domain": "email",
+      "user_intent": "Escalate the issue to the engineering lead",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-009",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Critical Bug Report",
+            "synthetic_date": "2026-01-24",
+            "synthetic_participants": ["user@example.com", "support@example.com"],
+            "synthetic_snippet": "[SYNTHETIC] Users are experiencing login failures..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "eng-lead@example.com",
+          "synthetic_subject": "[SYNTHETIC] ESCALATION: Critical Bug Report",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "elevated"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-018",
+      "domain": "email",
+      "user_intent": "Request time off for the holidays",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "hr@example.com",
+          "synthetic_subject": "[SYNTHETIC] Time Off Request",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-013",
+      "domain": "calendar",
+      "user_intent": "Block off the afternoon for interviews",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Interview Block",
+          "synthetic_event_date": "2026-01-27T13:00:00Z"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-014",
+      "domain": "calendar",
+      "user_intent": "Update the meeting location to the new office",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-018",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Team Offsite",
+            "synthetic_date": "2026-02-01T09:00:00Z",
+            "synthetic_location": "[SYNTHETIC] Old Office Location"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Team Offsite"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-009",
+      "domain": "notes",
+      "user_intent": "Create an outline for the blog post",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-011",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Content Strategy",
+            "synthetic_snippet": "[SYNTHETIC] Target audience and key messages..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Blog Post Outline"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-010",
+      "domain": "notes",
+      "user_intent": "List the pros and cons of each option",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-010",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Vendor Comparison",
+            "synthetic_snippet": "[SYNTHETIC] Three options to consider for the implementation..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Vendor Options Analysis"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-009",
+      "domain": "tasks",
+      "user_intent": "Add a todo to update the documentation",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Update documentation"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-010",
+      "domain": "tasks",
+      "user_intent": "Create a checklist for the release process",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Release checklist"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-008",
+      "domain": "general",
+      "user_intent": "When is my next meeting",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_calendar",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-009",
+      "domain": "general",
+      "user_intent": "List all my pending tasks",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_tasks",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-019",
+      "domain": "email",
+      "user_intent": "Apologize for the delay in response",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-011",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Pending Request",
+            "synthetic_date": "2026-01-15",
+            "synthetic_participants": ["user@example.com", "partner@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "partner@test.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Pending Request - Apologies for Delay",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-020",
+      "domain": "email",
+      "user_intent": "Share the meeting recording with attendees",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-019",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] All Hands Meeting",
+            "synthetic_date": "2026-01-24T11:00:00Z",
+            "synthetic_participants": ["user@example.com", "allhands@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "allhands@example.com",
+          "synthetic_subject": "[SYNTHETIC] Recording: All Hands Meeting",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-calendar-015",
+      "domain": "calendar",
+      "user_intent": "Add a reminder an hour before the presentation",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-020",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Investor Presentation",
+            "synthetic_date": "2026-01-30T14:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "modify_calendar_event",
+        "draft_fields": {
+          "synthetic_event_title": "[SYNTHETIC] Investor Presentation"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-general-010",
+      "domain": "general",
+      "user_intent": "Search for emails about the budget",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "query_email",
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": false,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-021",
+      "domain": "email",
+      "user_intent": "CC the finance team on the budget email",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-012",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Q1 Budget Proposal",
+            "synthetic_participants": ["user@example.com", "manager@example.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "finance@example.com",
+          "synthetic_subject": "[SYNTHETIC] FW: Q1 Budget Proposal",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-022",
+      "domain": "email",
+      "user_intent": "Send a brief update on the status",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "team@example.com",
+          "synthetic_subject": "[SYNTHETIC] Quick Update",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-notes-011",
+      "domain": "notes",
+      "user_intent": "Write down the client requirements",
+      "selected_context": [
+        {
+          "context_type": "calendar_event",
+          "context_id": "ctx-cal-021",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Requirements Gathering",
+            "synthetic_date": "2026-01-24T10:00:00Z"
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "create_note",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Client Requirements"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-011",
+      "domain": "tasks",
+      "user_intent": "Set a reminder to backup the database",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Backup database"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-tasks-012",
+      "domain": "tasks",
+      "user_intent": "Add expense report submission to my tasks",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "create_task",
+        "draft_fields": {
+          "synthetic_subject": "[SYNTHETIC] Submit expense report"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "low"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-023",
+      "domain": "email",
+      "user_intent": "Notify the team about the policy change",
+      "selected_context": [
+        {
+          "context_type": "document_snippet",
+          "context_id": "ctx-doc-012",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Updated Work Policy",
+            "synthetic_snippet": "[SYNTHETIC] New guidelines for remote work..."
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "team@example.com",
+          "synthetic_subject": "[SYNTHETIC] Policy Update Notification",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-024",
+      "domain": "email",
+      "user_intent": "Ask about the shipping status of the order",
+      "selected_context": [
+        {
+          "context_type": "email_stub",
+          "context_id": "ctx-email-013",
+          "synthetic_content": {
+            "synthetic_title": "[SYNTHETIC] Order Confirmation #98765",
+            "synthetic_date": "2026-01-20",
+            "synthetic_participants": ["user@example.com", "orders@test.com"]
+          }
+        }
+      ],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "orders@test.com",
+          "synthetic_subject": "[SYNTHETIC] Re: Order #98765 - Shipping Status",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    },
+    {
+      "example_id": "seed-email-025",
+      "domain": "email",
+      "user_intent": "Congratulate the team on the successful launch",
+      "selected_context": [],
+      "expected_native_outcome": {
+        "action_id": "compose_email",
+        "draft_fields": {
+          "synthetic_recipient": "team@example.com",
+          "synthetic_subject": "[SYNTHETIC] Congratulations on the Launch!",
+          "synthetic_body_placeholder": "[SYNTHETIC_BODY_PLACEHOLDER]"
+        },
+        "should_trigger_safety_gate": false
+      },
+      "safety_gate": {
+        "requires_approval": true,
+        "risk_level": "standard"
+      },
+      "schema_version": 1
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Siri Usage Description -->
+    <!-- Must match PrivacyStrings.Siri.usageDescription -->
+    <key>NSSiriUsageDescription</key>
+    <string>OperatorKit uses Siri to let you start requests by voice. Siri only opens the app and pre-fills your request—it cannot execute actions or access your data. You always review and approve before anything happens.</string>
+    
+    <!-- Calendar Usage Description -->
+    <!-- Must match PrivacyStrings.Calendar.usageDescription -->
+    <key>NSCalendarsUsageDescription</key>
+    <string>OperatorKit uses calendar access to show your events so you can select which ones to include as context for your requests. Events are only read when you explicitly select them.</string>
+    
+    <!-- Reminders Usage Description -->
+    <!-- Must match PrivacyStrings.Reminders.usageDescription -->
+    <key>NSRemindersUsageDescription</key>
+    <string>OperatorKit uses reminders access to create reminders on your behalf when you explicitly request and confirm them. Reminders are only created after you review and approve the details.</string>
+    
+    <!-- App Intents vocabulary -->
+    <key>INIntentsSupported</key>
+    <array>
+        <string>HandleIntentIntent</string>
+        <string>HandleMeetingIntent</string>
+        <string>HandleEmailIntent</string>
+    </array>
+    
+    <!-- Supported interface orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- NO background modes - Siri is router only -->
+    <!-- <key>UIBackgroundModes</key> is intentionally NOT included -->
+</dict>
+</plist>
