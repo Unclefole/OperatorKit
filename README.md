@@ -5,3 +5,5 @@ This repository currently contains the initial iOS scaffold and supporting
 documentation. Architecture and capabilities will be layered incrementally.
 
 Status: Initial scaffold (v0)
+
+Roadmap: Core operator primitives (starting next).
