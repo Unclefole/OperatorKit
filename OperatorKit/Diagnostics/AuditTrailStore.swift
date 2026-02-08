@@ -1,10 +1,16 @@
 import Foundation
+import CryptoKit
 
 // ============================================================================
-// CUSTOMER AUDIT TRAIL STORE (Phase 10P)
+// CUSTOMER AUDIT TRAIL STORE (Phase 10P + Hardening)
 //
-// UserDefaults-backed ring buffer for customer audit events.
+// File-backed ring buffer for customer audit events with crash-safe writes.
 // Max 500 events, with purge controls.
+//
+// PERSISTENCE:
+// - Primary: Documents/OperatorKit/Audit/audit_trail.json
+// - Backup:  Documents/OperatorKit/Audit/audit_trail.json.backup
+// - Checksum: Documents/OperatorKit/Audit/audit_trail.checksum
 //
 // CONSTRAINTS (ABSOLUTE):
 // ❌ No user content
@@ -13,38 +19,99 @@ import Foundation
 // ✅ Ring buffer with cap
 // ✅ Purge controls in UI
 // ✅ Content-free invariants
+// ✅ Atomic writes (tmp -> replace)
+// ✅ Auto-recovery from backup
+// ✅ SHA256 checksum for tamper detection
+// ✅ File protection: completeUntilFirstUserAuthentication
 //
 // See: docs/SAFETY_CONTRACT.md
 // ============================================================================
 
 @MainActor
 public final class CustomerAuditTrailStore: ObservableObject {
-    
+
     // MARK: - Singleton
-    
+
     public static let shared = CustomerAuditTrailStore()
-    
+
     // MARK: - Constants
-    
+
     /// Maximum number of events to store
     public static let maxEvents = 500
-    
-    // MARK: - Storage
-    
-    private let defaults: UserDefaults
-    private let storageKey = "com.operatorkit.customer.audit.trail"
+
+    // MARK: - File Paths
+
+    private static var auditDirectory: URL {
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return documentsURL.appendingPathComponent("OperatorKit/Audit", isDirectory: true)
+    }
+
+    private static var mainFileURL: URL {
+        auditDirectory.appendingPathComponent("audit_trail.json")
+    }
+
+    private static var backupFileURL: URL {
+        auditDirectory.appendingPathComponent("audit_trail.json.backup")
+    }
+
+    private static var checksumFileURL: URL {
+        auditDirectory.appendingPathComponent("audit_trail.checksum")
+    }
+
+    // MARK: - Legacy Storage (for migration)
+
+    private let legacyDefaults: UserDefaults
+    private let legacyStorageKey = "com.operatorkit.customer.audit.trail"
     private let schemaVersionKey = "com.operatorkit.customer.audit.schema_version"
-    
+
     // MARK: - State
-    
+
     @Published public private(set) var events: [CustomerAuditEvent]
-    
+
+    /// Indicates if data was recovered from backup on last load
+    public private(set) var wasRecoveredFromBackup: Bool = false
+
     // MARK: - Initialization
-    
+
     private init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
+        self.legacyDefaults = defaults
         self.events = []
         loadEvents()
+    }
+
+    /// Test-only initializer for dependency injection
+    internal init(defaults: UserDefaults, testDirectory: URL?) {
+        self.legacyDefaults = defaults
+        self.events = []
+        if let testDir = testDirectory {
+            _testDirectoryOverride = testDir
+        }
+        loadEvents()
+    }
+
+    // MARK: - Test Support
+
+    private var _testDirectoryOverride: URL?
+
+    private var effectiveMainFileURL: URL {
+        if let override = _testDirectoryOverride {
+            return override.appendingPathComponent("audit_trail.json")
+        }
+        return Self.mainFileURL
+    }
+
+    private var effectiveBackupFileURL: URL {
+        if let override = _testDirectoryOverride {
+            return override.appendingPathComponent("audit_trail.json.backup")
+        }
+        return Self.backupFileURL
+    }
+
+    private var effectiveChecksumFileURL: URL {
+        if let override = _testDirectoryOverride {
+            return override.appendingPathComponent("audit_trail.checksum")
+        }
+        return Self.checksumFileURL
     }
     
     // MARK: - Recording
@@ -154,42 +221,96 @@ public final class CustomerAuditTrailStore: ObservableObject {
     /// Purges all audit events (user-initiated only)
     public func purgeAll() {
         events = []
-        defaults.removeObject(forKey: storageKey)
-        
+        removeAllFiles()
+
         logDebug("Customer audit trail purged", category: .diagnostics)
     }
-    
+
     /// Purges events older than N days
     public func purgeOlderThan(days: Int) {
         let cutoff = dayRoundedDate(daysAgo: days)
         events = events.filter { $0.createdAtDayRounded >= cutoff }
         saveEvents()
-        
+
         logDebug("Customer audit trail purged events older than \(days) days", category: .diagnostics)
     }
-    
+
     // MARK: - Reset (for testing)
-    
+
     public func reset() {
         events = []
-        defaults.removeObject(forKey: storageKey)
+        removeAllFiles()
     }
-    
-    // MARK: - Private
-    
+
+    // MARK: - Private - File Operations
+
     private func loadEvents() {
-        guard let data = defaults.data(forKey: storageKey),
-              let decoded = try? JSONDecoder().decode([CustomerAuditEvent].self, from: data) else {
+        // 1. Try migration from legacy UserDefaults first
+        if let legacyData = legacyDefaults.data(forKey: legacyStorageKey),
+           let legacyEvents = try? JSONDecoder().decode([CustomerAuditEvent].self, from: legacyData) {
+            logDebug("CustomerAuditTrailStore: Migrating from UserDefaults", category: .diagnostics)
+            events = legacyEvents
+            saveEvents() // Persist to file
+            legacyDefaults.removeObject(forKey: legacyStorageKey) // Clean up legacy
             return
         }
-        events = decoded
-    }
-    
-    private func saveEvents() {
-        if let encoded = try? JSONEncoder().encode(events) {
-            defaults.set(encoded, forKey: storageKey)
-            defaults.set(CustomerAuditEvent.currentSchemaVersion, forKey: schemaVersionKey)
+
+        // 2. Load from file with recovery
+        guard let result = AtomicFileWriter.readWithRecovery(
+            from: effectiveMainFileURL,
+            backupURL: effectiveBackupFileURL,
+            checksumURL: effectiveChecksumFileURL
+        ) else {
+            // No file exists yet, start fresh
+            events = []
+            return
         }
+
+        wasRecoveredFromBackup = result.wasRecovered
+
+        // 3. Decode events
+        guard let decoded = try? JSONDecoder().decode([CustomerAuditEvent].self, from: result.data) else {
+            logError("CustomerAuditTrailStore: Failed to decode events", category: .diagnostics)
+            events = []
+            return
+        }
+
+        events = decoded
+
+        if wasRecoveredFromBackup {
+            logDebug("CustomerAuditTrailStore: Loaded \(events.count) events (recovered from backup)", category: .diagnostics)
+        } else {
+            logDebug("CustomerAuditTrailStore: Loaded \(events.count) events", category: .diagnostics)
+        }
+    }
+
+    private func saveEvents() {
+        guard let encoded = try? JSONEncoder().encode(events) else {
+            logError("CustomerAuditTrailStore: Failed to encode events", category: .diagnostics)
+            return
+        }
+
+        let success = AtomicFileWriter.writeAtomically(
+            data: encoded,
+            to: effectiveMainFileURL,
+            backupURL: effectiveBackupFileURL,
+            checksumURL: effectiveChecksumFileURL
+        )
+
+        if success {
+            logDebug("CustomerAuditTrailStore: Saved \(events.count) events", category: .diagnostics)
+        } else {
+            logError("CustomerAuditTrailStore: Failed to save events (app continues)", category: .diagnostics)
+        }
+    }
+
+    private func removeAllFiles() {
+        let fileManager = FileManager.default
+        try? fileManager.removeItem(at: effectiveMainFileURL)
+        try? fileManager.removeItem(at: effectiveBackupFileURL)
+        try? fileManager.removeItem(at: effectiveChecksumFileURL)
+        // Also clean up legacy UserDefaults
+        legacyDefaults.removeObject(forKey: legacyStorageKey)
     }
     
     private func dayRoundedNow() -> String {
@@ -312,5 +433,145 @@ extension CustomerAuditTrailStore {
             policyDecision: reason,
             tierAtTime: tier
         )
+    }
+}
+
+// ============================================================================
+// ATOMIC FILE WRITER (Inlined for Build Reliability)
+//
+// Crash-safe file writes with atomic tmp -> replace pattern.
+// ============================================================================
+
+/// Crash-safe file writer with backup and checksum support
+private enum AtomicFileWriter {
+
+    /// Writes data atomically with backup and checksum
+    @discardableResult
+    static func writeAtomically(
+        data: Data,
+        to url: URL,
+        backupURL: URL? = nil,
+        checksumURL: URL? = nil
+    ) -> Bool {
+        let fileManager = FileManager.default
+
+        // 1. Ensure directory exists
+        let directory = url.deletingLastPathComponent()
+        do {
+            try fileManager.createDirectory(
+                at: directory,
+                withIntermediateDirectories: true,
+                attributes: [
+                    .protectionKey: FileProtectionType.completeUntilFirstUserAuthentication
+                ]
+            )
+        } catch {
+            logError("AtomicFileWriter: Directory creation failed: \(error)", category: .diagnostics)
+            return false
+        }
+
+        // 2. Create backup of existing file (if exists and backup URL provided)
+        if let backupURL = backupURL, fileManager.fileExists(atPath: url.path) {
+            do {
+                if fileManager.fileExists(atPath: backupURL.path) {
+                    try fileManager.removeItem(at: backupURL)
+                }
+                try fileManager.copyItem(at: url, to: backupURL)
+            } catch {
+                logError("AtomicFileWriter: Backup creation failed: \(error)", category: .diagnostics)
+            }
+        }
+
+        // 3. Write to temp file
+        let tempURL = url.appendingPathExtension("tmp")
+        do {
+            try data.write(
+                to: tempURL,
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+            )
+        } catch {
+            logError("AtomicFileWriter: Temp write failed: \(error)", category: .diagnostics)
+            return false
+        }
+
+        // 4. Replace main file with temp file
+        do {
+            if fileManager.fileExists(atPath: url.path) {
+                _ = try fileManager.replaceItemAt(url, withItemAt: tempURL)
+            } else {
+                try fileManager.moveItem(at: tempURL, to: url)
+            }
+        } catch {
+            logError("AtomicFileWriter: Replace failed: \(error)", category: .diagnostics)
+            try? fileManager.removeItem(at: tempURL)
+            return false
+        }
+
+        // 5. Write checksum (if URL provided)
+        if let checksumURL = checksumURL {
+            let checksum = computeChecksum(data)
+            do {
+                try checksum.write(to: checksumURL, atomically: true, encoding: .utf8)
+            } catch {
+                logError("AtomicFileWriter: Checksum write failed: \(error)", category: .diagnostics)
+            }
+        }
+
+        return true
+    }
+
+    /// Reads data with automatic recovery from backup if main file is corrupted
+    static func readWithRecovery(
+        from url: URL,
+        backupURL: URL?,
+        checksumURL: URL?
+    ) -> (data: Data, wasRecovered: Bool)? {
+        let fileManager = FileManager.default
+
+        // 1. Try reading main file
+        if let data = try? Data(contentsOf: url) {
+            if let checksumURL = checksumURL,
+               let storedChecksum = try? String(contentsOf: checksumURL, encoding: .utf8) {
+                let computedChecksum = computeChecksum(data)
+                if storedChecksum.trimmingCharacters(in: .whitespacesAndNewlines) == computedChecksum {
+                    return (data, false)
+                } else {
+                    logError("AtomicFileWriter: Checksum mismatch, trying backup", category: .diagnostics)
+                }
+            } else {
+                return (data, false)
+            }
+        }
+
+        // 2. Main file failed or corrupted, try backup
+        guard let backupURL = backupURL,
+              fileManager.fileExists(atPath: backupURL.path),
+              let backupData = try? Data(contentsOf: backupURL) else {
+            return nil
+        }
+
+        logDebug("AtomicFileWriter: Recovered from backup", category: .diagnostics)
+
+        // 3. Restore backup to main
+        do {
+            try backupData.write(
+                to: url,
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+            )
+            if let checksumURL = checksumURL {
+                let checksum = computeChecksum(backupData)
+                try? checksum.write(to: checksumURL, atomically: true, encoding: .utf8)
+            }
+        } catch {
+            logError("AtomicFileWriter: Failed to restore backup: \(error)", category: .diagnostics)
+        }
+
+        return (backupData, true)
+    }
+
+    /// Computes SHA256 checksum of data
+    static func computeChecksum(_ data: Data) -> String {
+        let hash = SHA256.hash(data: data)
+        return hash.compactMap { String(format: "%02x", $0) }.joined()
     }
 }

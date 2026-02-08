@@ -387,9 +387,7 @@ struct EvalRunDetailView: View {
     }
 }
 
-// MARK: - Identifiable Extension for Sheet
-
-extension EvalRun: Identifiable { }
+// EvalRun already conforms to Identifiable
 
 #Preview {
     QualityReportView()

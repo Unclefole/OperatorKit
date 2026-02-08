@@ -132,7 +132,7 @@ public final class AppStoreSubmissionBuilder {
     
     // MARK: - Claim Registry
     
-    private func buildClaimRegistryExport() -> ClaimRegistrySummaryExport? {
+    private func buildClaimRegistryExport() -> SubmissionClaimRegistrySummaryExport? {
         let projectRoot = findProjectRoot()
         let registryPath = (projectRoot as NSString).appendingPathComponent("docs/CLAIM_REGISTRY.md")
         
@@ -172,7 +172,7 @@ public final class AppStoreSubmissionBuilder {
             }
         }
         
-        return ClaimRegistrySummaryExport(
+        return SubmissionClaimRegistrySummaryExport(
             registrySchemaVersion: schemaVersion,
             totalClaims: claimIds.count,
             claimIds: claimIds.sorted(),
@@ -182,10 +182,10 @@ public final class AppStoreSubmissionBuilder {
     
     // MARK: - Preflight
     
-    private func buildPreflightExport() -> PreflightSummaryExport? {
+    private func buildPreflightExport() -> SubmissionPreflightSummaryExport? {
         // Preflight status from last run (if available)
         // For now, return a placeholder indicating not run
-        return PreflightSummaryExport(
+        return SubmissionPreflightSummaryExport(
             status: "not_run",
             passedCount: 0,
             failedCount: 0,
@@ -195,8 +195,8 @@ public final class AppStoreSubmissionBuilder {
     
     // MARK: - Quality Gate
     
-    private func buildQualityGateExport() -> QualityGateExport? {
-        return QualityGateExport(
+    private func buildQualityGateExport() -> SubmissionQualityGateExport? {
+        return SubmissionQualityGateExport(
             status: "not_run",
             criteriaCount: 10,
             passedCriteria: 0,
@@ -206,8 +206,8 @@ public final class AppStoreSubmissionBuilder {
     
     // MARK: - Regression Sentinel
     
-    private func buildRegressionSentinelExport() -> RegressionSentinelExport? {
-        return RegressionSentinelExport(
+    private func buildRegressionSentinelExport() -> SubmissionRegressionSentinelExport? {
+        return SubmissionRegressionSentinelExport(
             status: "not_run",
             baselineVersion: nil,
             lastRunDate: nil

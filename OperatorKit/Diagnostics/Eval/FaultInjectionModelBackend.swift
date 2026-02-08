@@ -120,13 +120,13 @@ final class FaultInjectionModelBackend: OnDeviceModel {
     /// Generate output with empty body (validation should catch)
     private func generateMalformedOutput(input: ModelInput) -> DraftOutput {
         DraftOutput(
-            outputType: input.outputType,
-            body: "",  // EMPTY - should fail validation
+            draftBody: "",  // EMPTY - should fail validation
             subject: "Test Subject",
             actionItems: [],
             confidence: 0.85,
             citations: [],
-            safetyNotes: ["Review before sending."]
+            safetyNotes: ["Review before sending."],
+            outputType: input.outputType
         )
     }
     
@@ -154,13 +154,13 @@ final class FaultInjectionModelBackend: OnDeviceModel {
         ]
         
         return DraftOutput(
-            outputType: input.outputType,
-            body: "This is a test draft with invalid citations.",
+            draftBody: "This is a test draft with invalid citations.",
             subject: "Test Subject",
             actionItems: [],
             confidence: 0.90,
             citations: invalidCitations,  // All invalid
-            safetyNotes: ["Review before sending."]
+            safetyNotes: ["Review before sending."],
+            outputType: input.outputType
         )
     }
     
@@ -171,39 +171,39 @@ final class FaultInjectionModelBackend: OnDeviceModel {
         
         // If we get here (shouldn't in timeout test), return valid output
         return DraftOutput(
-            outputType: input.outputType,
-            body: "This response was delayed and should have timed out.",
+            draftBody: "This response was delayed and should have timed out.",
             subject: "Slow Response Test",
             actionItems: [],
             confidence: 0.85,
             citations: [],
-            safetyNotes: ["Review before sending."]
+            safetyNotes: ["Review before sending."],
+            outputType: input.outputType
         )
     }
     
     /// Generate output without safety notes (validation should catch)
     private func generateMissingSafetyNotes(input: ModelInput) -> DraftOutput {
         DraftOutput(
-            outputType: input.outputType,
-            body: "This is a test draft without safety notes.",
+            draftBody: "This is a test draft without safety notes.",
             subject: "Test Subject",
             actionItems: [],
             confidence: 0.85,
             citations: [],
-            safetyNotes: []  // EMPTY - should fail safety validation
+            safetyNotes: [],  // EMPTY - should fail safety validation
+            outputType: input.outputType
         )
     }
     
     /// Generate email draft without subject (validation should catch)
     private func generateEmptyEmailSubject(input: ModelInput) -> DraftOutput {
         DraftOutput(
-            outputType: .emailDraft,
-            body: "This is a test email draft without a subject.",
+            draftBody: "This is a test email draft without a subject.",
             subject: "",  // EMPTY - should fail email validation
             actionItems: [],
             confidence: 0.85,
             citations: [],
-            safetyNotes: ["Review before sending."]
+            safetyNotes: ["Review before sending."],
+            outputType: .emailDraft
         )
     }
 }

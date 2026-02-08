@@ -6,6 +6,7 @@ import UIKit
 
 struct ExecutionProgressView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var nav: AppNavigationState
     @StateObject private var executionEngine = ExecutionEngine.shared
     @State private var showingResult: Bool = false
     @State private var showingMailComposer: Bool = false
@@ -37,6 +38,16 @@ struct ExecutionProgressView: View {
         .onAppear {
             if appState.executionResult != nil {
                 showingResult = true
+
+                // EXECUTION FIX: Auto-present mail composer if ready
+                // INVARIANT: Composer only pre-fills - user must manually tap Send
+                // This provides a seamless UX: approval → composer appears automatically
+                if executionEngine.canPresentMailComposer && !showingMailComposer {
+                    // Short delay to let view settle before presenting sheet
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showingMailComposer = true
+                    }
+                }
             }
         }
         .mailComposerSheet(
@@ -149,16 +160,27 @@ struct ExecutionProgressView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
+            Button(action: { nav.goBack() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.blue)
+            }
+
             Spacer()
-            
-            Text("Result")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
+
+            Button(action: { nav.goHome() }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.gray)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Success Icon
@@ -422,12 +444,12 @@ struct ExecutionProgressView: View {
     private func viewMemory() {
         // Clear execution state but keep the result for memory view
         appState.setCompleted()
-        appState.navigateTo(.memory)
+        nav.navigate(to: .memory)
     }
-    
+
     /// Go home and reset flow completely
     private func goHome() {
-        appState.returnHome()
+        nav.goHome()
     }
     
     // MARK: - Helpers

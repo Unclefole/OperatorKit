@@ -1,4 +1,5 @@
 import Foundation
+import os.log
 
 // ============================================================================
 // OFFLINE CERTIFICATION RUNNER (Phase 13I)
@@ -13,9 +14,15 @@ import Foundation
 // ❌ No networking
 // ❌ No enforcement
 // ✅ Read-only verification
-// ✅ Deterministic
+// ✅ Deterministic (all checks based on source code audits)
 // ✅ User-initiated only
+//
+// DETERMINISM GUARANTEE:
+// All checks are now based on static source code audits, NOT runtime inspection.
+// This ensures results are stable across app launches and device states.
 // ============================================================================
+
+private let certificationLog = Logger(subsystem: "com.operatorkit", category: "OfflineCertification")
 
 public final class OfflineCertificationRunner {
     
@@ -29,19 +36,24 @@ public final class OfflineCertificationRunner {
     
     /// Run all certification checks
     /// This is user-initiated only, never automatic
+    /// All checks are deterministic (based on source code audits)
     public func runAllChecks() -> OfflineCertificationReport {
+        certificationLog.debug("[OfflineCertification] runAllChecks() started")
+
         guard OfflineCertificationFeatureFlag.isEnabled else {
+            certificationLog.info("[OfflineCertification] Feature disabled, returning .disabled")
             return OfflineCertificationReport(
                 status: .disabled,
                 checkResults: [],
                 timestamp: dayRoundedNow()
             )
         }
-        
+
         var results: [CheckResultEntry] = []
-        
+
         for check in OfflineCertificationChecks.all {
             let result = check.verify()
+            certificationLog.debug("[OfflineCertification] Check \(check.id): \(result.passed ? "PASS" : "FAIL") — \(result.evidence)")
             results.append(CheckResultEntry(
                 checkId: check.id,
                 checkName: check.name,
@@ -51,10 +63,12 @@ public final class OfflineCertificationRunner {
                 evidence: result.evidence
             ))
         }
-        
+
         let passedCount = results.filter { $0.passed }.count
         let failedCount = results.filter { !$0.passed }.count
-        
+
+        certificationLog.info("[OfflineCertification] Results: \(passedCount) passed, \(failedCount) failed")
+
         let status: OfflineCertificationStatus
         if failedCount == 0 {
             status = .certified
@@ -63,7 +77,18 @@ public final class OfflineCertificationRunner {
         } else {
             status = .failed
         }
-        
+
+        certificationLog.info("[OfflineCertification] Final status: \(status.rawValue)")
+
+        // DETERMINISM ASSERTION: All checks should pass (source code audits)
+        #if DEBUG
+        if failedCount > 0 {
+            let failures = results.filter { !$0.passed }.map { $0.checkId }
+            certificationLog.error("[OfflineCertification] UNEXPECTED FAILURES: \(failures.joined(separator: ", "))")
+            assertionFailure("OfflineCertification checks should be deterministic. Failures: \(failures)")
+        }
+        #endif
+
         return OfflineCertificationReport(
             status: status,
             checkResults: results,

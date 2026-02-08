@@ -5,14 +5,15 @@ import UIKit
 
 struct ContextPickerView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var nav: AppNavigationState
     @StateObject private var contextAssembler = ContextAssembler.shared
     @StateObject private var calendarService = CalendarService.shared
-    
+
     // User selections (using String IDs for calendar events from EventKit)
     @State private var selectedCalendarEventIds: Set<String> = []
     @State private var selectedEmailIds: Set<UUID> = []
     @State private var selectedFileIds: Set<UUID> = []
-    
+
     // UI State
     @State private var showingCalendarPermissionAlert: Bool = false
     @State private var isRequestingCalendarAccess: Bool = false
@@ -87,32 +88,27 @@ struct ContextPickerView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
+            Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
-            Text("Select Context")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
-            Button(action: {
-                appState.returnHome()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
+
+            Button(action: { nav.goHome() }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.gray)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Intent Summary Card
@@ -400,12 +396,12 @@ struct ContextPickerView: View {
     private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
         switch action {
         case .goHome:
-            appState.returnHome()
+            nav.goHome()
         case .retryCurrentStep:
             appState.clearError()
             loadAvailableContext()
         case .editRequest:
-            appState.navigateTo(.intentInput)
+            nav.navigate(to: .intent)
         case .openSettings:
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
@@ -473,7 +469,7 @@ struct ContextPickerView: View {
                 let plan = Planner.shared.createPlan(intent: intent, context: context)
                 appState.executionPlan = plan
                 
-                appState.navigateTo(.planPreview)
+                nav.navigate(to: .preview)
             }
         }
     }
@@ -628,32 +624,7 @@ struct ContextChip: View {
     }
 }
 
-// MARK: - Color Extension
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-}
+// MARK: - Color Extension moved to DesignTokens.swift
 
 #Preview {
     ContextPickerView()

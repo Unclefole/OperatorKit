@@ -130,7 +130,7 @@ public final class SalesKitPacketBuilder {
     private func buildEnterpriseReadiness() -> EnterpriseReadinessSummary? {
         // Check components
         let safetyValid = SafetyContractValidator.shared.isValid
-        let qualityPassing = QualityGate.shared.currentResult?.status == .passing
+        let qualityPassing = QualityGate.shared.currentResult?.status == .pass
         let launchReady = LaunchChecklistValidator.shared.validate().isLaunchReady
         
         let status: String

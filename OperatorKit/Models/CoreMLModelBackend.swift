@@ -313,8 +313,9 @@ final class CoreMLModelBackend: OnDeviceModel {
         let description = model.modelDescription
         
         // Check input features to determine model type
-        let inputNames = description.inputDescriptionsByName.keys.map { $0.lowercased() }
-        let outputNames = description.outputDescriptionsByName.keys.map { $0.lowercased() }
+        // DETERMINISM FIX: Sort keys to ensure consistent iteration order
+        let inputNames = description.inputDescriptionsByName.keys.sorted().map { $0.lowercased() }
+        let outputNames = description.outputDescriptionsByName.keys.sorted().map { $0.lowercased() }
         
         // Text classifier: typically has "text" input and "label"/"class" output
         if inputNames.contains(where: { $0.contains("text") || $0.contains("input") }) &&
@@ -398,7 +399,7 @@ final class CoreMLModelBackend: OnDeviceModel {
         }
         
         // Run prediction
-        let prediction = try model.prediction(from: featureProvider)
+        let prediction = try await model.prediction(from: featureProvider)
         
         // Extract output
         let (outputText, confidence) = extractTextClassifierOutput(from: prediction, input: input)
@@ -441,7 +442,8 @@ final class CoreMLModelBackend: OnDeviceModel {
             if let value = prediction.featureValue(for: featureName) {
                 switch value.type {
                 case .string:
-                    if let text = value.stringValue {
+                    let text = value.stringValue
+                    if !text.isEmpty {
                         outputText = text
                     }
                     

@@ -53,14 +53,16 @@ struct ModelCapabilities: Equatable, Codable {
     )
     
     /// Check if capabilities match the required output type
-    func supports(outputType: ModelInput.OutputType) -> Bool {
+    func supports(outputType: DraftOutput.OutputType) -> Bool {
         switch outputType {
         case .emailDraft:
             return canDraftEmail
-        case .meetingSummary, .docSummary:
+        case .meetingSummary, .documentSummary:
             return canSummarize
         case .taskList:
             return canExtractActions
+        case .reminder:
+            return canGenerateReminder
         }
     }
 }

@@ -188,7 +188,7 @@ struct OutputValidator {
     
     /// Validate body is non-empty
     private static func validateBody(_ output: DraftOutput) -> ValidationWarning? {
-        if output.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if output.draftBody.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
             return ValidationWarning(
                 code: .emptyBody,
                 message: "Draft body is empty",
@@ -243,7 +243,11 @@ struct OutputValidator {
             return .empty
         }
         
-        let validContextIds = Set(input.contextItems.items.map { $0.id })
+        // Collect all valid context IDs from calendar, email, and file items
+        var validContextIds = Set<String>()
+        validContextIds.formUnion(input.contextItems.calendarItems.compactMap { $0.eventIdentifier ?? $0.id.uuidString })
+        validContextIds.formUnion(input.contextItems.emailItems.compactMap { $0.messageIdentifier ?? $0.id.uuidString })
+        validContextIds.formUnion(input.contextItems.fileItems.compactMap { $0.fileURL?.absoluteString ?? $0.id.uuidString })
         var invalidIds: [String] = []
         
         for citation in output.citations {
@@ -316,15 +320,15 @@ struct OutputValidator {
         }
         
         return DraftOutput(
-            outputType: output.outputType,
-            body: output.body,
+            draftBody: output.draftBody,
             subject: output.subject,
-            actionItems: output.actionItems.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
+            actionItems: output.actionItems.filter { !$0.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty },
             confidence: validation.adjustedConfidence,
             citations: output.citations.filter { citation in
                 !validation.citationValidity.invalidIds.contains(citation.sourceId)
             },
-            safetyNotes: correctedNotes
+            safetyNotes: correctedNotes,
+            outputType: output.outputType
         )
     }
 }

@@ -255,7 +255,8 @@ public enum TeamError: Error, LocalizedError {
     case alreadyMember
     case networkError(Error)
     case serverError(String)
-    
+    case invalidDateCalculation
+
     public var errorDescription: String? {
         switch self {
         case .notSignedIn:
@@ -276,6 +277,8 @@ public enum TeamError: Error, LocalizedError {
             return "Network error: \(error.localizedDescription)"
         case .serverError(let message):
             return "Server error: \(message)"
+        case .invalidDateCalculation:
+            return "Could not calculate expiration date."
         }
     }
 }

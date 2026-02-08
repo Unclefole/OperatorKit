@@ -204,10 +204,10 @@ public struct ConversionSummary: Codable {
     }
 }
 
-// MARK: - Conversion Export Packet
+// MARK: - Ledger Conversion Export
 
-/// Export packet for conversion data (user-initiated only)
-public struct ConversionExportPacket: Codable {
+/// Export packet for conversion data from ledger (user-initiated only)
+public struct LedgerConversionExport: Codable {
     
     /// When exported
     public let exportedAt: Date

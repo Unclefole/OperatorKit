@@ -175,6 +175,58 @@ public struct ExecutionDiagnosticsSnapshot: Codable, Equatable {
     }
 }
 
+// MARK: - Execution Diagnostics (Singleton)
+
+/// Main interface for execution diagnostics
+/// Provides a singleton for convenient access
+@MainActor
+public final class ExecutionDiagnostics: ObservableObject {
+
+    // MARK: - Singleton
+
+    public static let shared = ExecutionDiagnostics()
+
+    // MARK: - Dependencies
+
+    private let collector: ExecutionDiagnosticsCollector
+
+    // MARK: - Published State
+
+    @Published public private(set) var totalExecutions: Int = 0
+    @Published public private(set) var successCount: Int = 0
+    @Published public private(set) var failureCount: Int = 0
+
+    // MARK: - Initialization
+
+    private init() {
+        self.collector = ExecutionDiagnosticsCollector()
+    }
+
+    // MARK: - Public Methods
+
+    /// Get current snapshot of execution diagnostics
+    public func currentSnapshot() -> ExecutionDiagnosticsSnapshot {
+        return collector.captureSnapshot()
+    }
+
+    /// Reset diagnostics (for testing)
+    public func reset() {
+        totalExecutions = 0
+        successCount = 0
+        failureCount = 0
+    }
+
+    /// Record an execution result
+    public func recordExecution(success: Bool) {
+        totalExecutions += 1
+        if success {
+            successCount += 1
+        } else {
+            failureCount += 1
+        }
+    }
+}
+
 // MARK: - Execution Diagnostics Collector
 
 /// Collects execution diagnostics from various sources
@@ -188,7 +240,7 @@ public final class ExecutionDiagnosticsCollector {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         usageLedger: UsageLedger = .shared,
         memoryStore: MemoryStore = .shared
     ) {

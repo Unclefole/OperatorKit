@@ -124,7 +124,7 @@ final class ContextAssembler: ObservableObject {
         if calendarService.isAuthorized {
             return "Authorized"
         } else {
-            switch calendarService.authorizationStatus {
+            switch calendarService.authorizationState {
             case .notDetermined:
                 return "Not Requested"
             case .denied:

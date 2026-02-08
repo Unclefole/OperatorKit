@@ -40,6 +40,8 @@ final class AppState: ObservableObject {
         case memory
         case workflows
         case workflowDetail
+        case customTemplateDetail
+        case manageTemplates
         case fallback
         case privacy
     }
@@ -131,21 +133,29 @@ final class AppState: ObservableObject {
     @Published var pendingTwoKeyConfirmations: [UUID: Date] = [:]
     
     // MARK: - Workflow State
-    
+
     @Published var selectedWorkflowTemplate: WorkflowTemplate?
+    @Published var selectedCustomTemplate: CustomWorkflowTemplate?
     
     // MARK: - Siri Routing State
-    
+
     /// Text prefilled by Siri (must be reviewed by user)
     @Published var siriPrefillText: String?
-    
+
     /// Source of Siri route
     @Published var siriRouteSource: SiriRouteSource?
-    
+
     /// Whether this flow was launched from Siri
     var wasLaunchedFromSiri: Bool {
         siriRouteSource != nil
     }
+
+    // MARK: - Intent Type Hint (Quick Actions)
+
+    /// Optional hint for intent type from quick action buttons
+    /// INVARIANT: This is a HINT only — user must still provide their own input text
+    /// NO pre-filled rawText is injected from quick actions
+    @Published var intentTypeHint: IntentRequest.IntentType?
     
     // MARK: - Navigation Actions
     
@@ -175,15 +185,20 @@ final class AppState: ObservableObject {
     
     func startNewOperation() {
         // Reset operation state
+        resetOperationState()
+        navigateTo(.intentInput)
+    }
+
+    func resetOperationState() {
         selectedIntent = nil
         selectedContext = nil
         executionPlan = nil
         currentDraft = nil
         approvalGranted = false
         executionResult = nil
-        navigateTo(.intentInput)
+        intentTypeHint = nil
     }
-    
+
     func setIntent(_ intent: IntentRequest) {
         selectedIntent = intent
         navigateTo(.contextPicker)
@@ -237,23 +252,26 @@ final class AppState: ObservableObject {
         currentDraft = nil
         approvalGranted = false
         executionResult = nil
-        
+
+        // Clear intent type hint (quick actions)
+        intentTypeHint = nil
+
         // Clear flow status (Phase 5B)
         flowStatus = .idle
         currentError = nil
         isExecutionInProgress = false
-        
+
         // Clear two-key confirmations (Phase 5B)
         pendingTwoKeyConfirmations.removeAll()
-        
+
         // Clear Siri state
         clearSiriState()
-        
+
         // Optionally reset onboarding
         if !keepOnboardingSeen {
             hasCompletedOnboarding = false
         }
-        
+
         log("AppState: Flow reset (keepOnboardingSeen: \(keepOnboardingSeen))")
     }
     

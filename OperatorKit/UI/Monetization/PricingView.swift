@@ -154,7 +154,7 @@ struct PricingView: View {
     
     private var lifetimeSovereignCard: some View {
         let lifetimeProduct = entitlementManager.products.first { StoreKitProductIDs.isLifetimeSovereign($0.id) }
-        let isLifetimeOwner = entitlementManager.currentStatus.isLifetime
+        let isLifetimeOwner = entitlementManager.status.isLifetime
         
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -352,12 +352,16 @@ struct PricingView: View {
             
             HStack(spacing: 16) {
                 Button("Terms of Service") {
-                    // Open terms
+                    if let url = URL(string: "https://operatorkit.app/terms") {
+                        UIApplication.shared.open(url)
+                    }
                 }
                 .font(.caption2)
-                
+
                 Button("Privacy Policy") {
-                    // Open privacy
+                    if let url = URL(string: "https://operatorkit.app/privacy") {
+                        UIApplication.shared.open(url)
+                    }
                 }
                 .font(.caption2)
             }
@@ -592,14 +596,14 @@ private struct ProductButton: View {
     }
     
     private func introOfferText(_ offer: Product.SubscriptionOffer) -> String {
-        switch offer.paymentMode {
-        case .freeTrial:
+        // Handle all known payment modes
+        if offer.paymentMode == .freeTrial {
             return "Free trial available"
-        case .payAsYouGo:
+        } else if offer.paymentMode == .payAsYouGo {
             return "Intro offer available"
-        case .payUpFront:
+        } else if offer.paymentMode == .payUpFront {
             return "Discounted first period"
-        @unknown default:
+        } else {
             return ""
         }
     }

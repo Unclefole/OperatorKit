@@ -41,6 +41,7 @@ struct ExecutionResultModel: Identifiable, Equatable {
     }
     
     /// Convenience initializer without explicit audit trail (creates minimal trail)
+    @MainActor
     init(
         id: UUID = UUID(),
         draft: Draft,
@@ -244,7 +245,11 @@ struct AuditTrail: Equatable {
             modelMetadata: draft.modelMetadata,
             confidenceSnapshot: snapshot,
             reminderWriteInfo: nil,
-            calendarWriteInfo: nil
+            calendarWriteInfo: nil,
+            validationPass: true,
+            timeoutOccurred: false,
+            citationValidityPass: true,
+            promptScaffoldHash: nil
         )
     }
     
@@ -273,7 +278,11 @@ struct AuditTrail: Equatable {
             modelMetadata: modelMetadata,
             confidenceSnapshot: confidenceSnapshot,
             reminderWriteInfo: writeInfo,
-            calendarWriteInfo: calendarWriteInfo
+            calendarWriteInfo: calendarWriteInfo,
+            validationPass: validationPass,
+            timeoutOccurred: timeoutOccurred,
+            citationValidityPass: citationValidityPass,
+            promptScaffoldHash: promptScaffoldHash
         )
     }
     
@@ -308,7 +317,11 @@ struct AuditTrail: Equatable {
             modelMetadata: modelMetadata,
             confidenceSnapshot: confidenceSnapshot,
             reminderWriteInfo: reminderWriteInfo,
-            calendarWriteInfo: writeInfo
+            calendarWriteInfo: writeInfo,
+            validationPass: validationPass,
+            timeoutOccurred: timeoutOccurred,
+            citationValidityPass: citationValidityPass,
+            promptScaffoldHash: promptScaffoldHash
         )
     }
     

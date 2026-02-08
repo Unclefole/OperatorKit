@@ -122,7 +122,7 @@ public enum SyncSafetyConfig {
     ]
     
     /// Syncable packet types (metadata only)
-    public enum SyncablePacketType: String, CaseIterable {
+    public enum SyncablePacketType: String, CaseIterable, Codable {
         case qualityExport = "quality_export"
         case diagnosticsExport = "diagnostics_export"
         case policyExport = "policy_export"

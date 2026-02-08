@@ -47,9 +47,8 @@ public struct LaunchTrustCalibrationView: View {
     
     public var body: some View {
         ZStack {
-            // Background
-            Color(.systemBackground)
-                .ignoresSafeArea()
+            // Background - using design system
+            OKBackgroundView()
             
             VStack(spacing: 0) {
                 // Header
@@ -74,29 +73,35 @@ public struct LaunchTrustCalibrationView: View {
     }
     
     // MARK: - Header View
-    
+
     private var headerView: some View {
         VStack(spacing: 16) {
-            // Icon
-            Image(systemName: isComplete ? "checkmark.shield.fill" : "shield.lefthalf.filled")
-                .font(.system(size: 64))
-                .foregroundColor(isComplete ? .green : .blue)
-                .animation(.easeInOut(duration: 0.3), value: isComplete)
-            
+            // Logo / Icon
+            if isComplete {
+                // Success state: checkmark shield
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.system(size: 64))
+                    .foregroundColor(.green)
+            } else {
+                // Calibrating state: OperatorKit logo
+                OperatorKitLogoView(size: .extraLarge, showText: false)
+            }
+
             // Title
             Text(isComplete ? "System Verified" : "Trust Calibration")
-                .font(.title)
-                .fontWeight(.bold)
-            
+                .font(OKTypography.title())
+                .foregroundColor(OKColors.textPrimary)
+
             // Subtitle
             Text(isComplete
                  ? "This device is operating in Zero-Network mode."
                  : "Verifying security posture...")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(OKTypography.subheadline())
+                .foregroundColor(OKColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
         }
+        .animation(.easeInOut(duration: 0.3), value: isComplete)
     }
     
     // MARK: - Steps List View
@@ -150,7 +155,7 @@ public struct LaunchTrustCalibrationView: View {
             // Explanation text
             Text("Each check reads existing proof artifacts.\nNo data leaves your device.")
                 .font(.caption)
-                .foregroundColor(.tertiary)
+                .foregroundColor(Color.gray.opacity(0.6))
                 .multilineTextAlignment(.center)
         }
     }

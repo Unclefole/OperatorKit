@@ -25,6 +25,9 @@ struct SyncSettingsView: View {
     
     // Sync enabled toggle (OFF by default)
     @AppStorage(SyncFeatureFlag.storageKey) private var syncEnabled = SyncFeatureFlag.defaultToggleState
+
+    // Biometric gate state
+    @State private var isBiometricPending = false
     
     // Sign in flow
     @State private var showingSignIn = false
@@ -113,15 +116,44 @@ struct SyncSettingsView: View {
     
     private var syncToggleSection: some View {
         Section {
-            Toggle(isOn: $syncEnabled) {
+            Toggle(isOn: Binding(
+                get: { syncEnabled },
+                set: { newValue in
+                    if newValue {
+                        // SECURITY GATE: Enabling sync requires biometric
+                        isBiometricPending = true
+                        Task {
+                            let success = await GovernanceSettingsStore.shared.setCloudSyncEnabled(true)
+                            await MainActor.run {
+                                isBiometricPending = false
+                                if !success {
+                                    // Biometric denied — revert toggle
+                                    syncEnabled = false
+                                }
+                            }
+                        }
+                    } else {
+                        // Disabling sync is always allowed (safety-positive)
+                        syncEnabled = false
+                    }
+                }
+            )) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Enable Cloud Sync")
-                        .font(.body)
+                    HStack(spacing: 6) {
+                        Text("Enable Cloud Sync")
+                            .font(.body)
+                        if BiometricGate.isAvailable {
+                            Image(systemName: "faceid")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     Text("Sync metadata-only packets to the cloud")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
+            .disabled(isBiometricPending)
             
             if !syncEnabled {
                 HStack(spacing: 12) {

@@ -14,6 +14,10 @@ import Foundation
 // INVARIANT: Dates are day-rounded where applicable
 // INVARIANT: Safe for sharing/auditing
 // INVARIANT: Integrity is advisory and local only (Phase 9C)
+// INVARIANT: UUIDs are used strictly for record identification and UI diffing.
+// INVARIANT: UUIDs are NEVER included in proof hash computation.
+// Hash inputs are limited to schemaVersion, status fields, counts,
+// and day-rounded timestamps only.
 //
 // See: docs/SAFETY_CONTRACT.md
 // ============================================================================
@@ -36,11 +40,11 @@ public struct ExportQualityPacket: Codable {
     
     // MARK: - Safety Contract
     
-    public let safetyContractStatus: SafetyContractExport
+    public let safetyContractStatus: EvalSafetyContractExport
     
     // MARK: - Quality Gate
     
-    public let qualityGateResult: QualityGateExport
+    public let qualityGateResult: EvalQualityGateExport
     
     // MARK: - Coverage
     
@@ -77,14 +81,14 @@ public struct ExportQualityPacket: Codable {
 
 // MARK: - Sub-structures
 
-public struct SafetyContractExport: Codable {
+public struct EvalSafetyContractExport: Codable {
     public let currentHash: String
     public let expectedHash: String
     public let isUnchanged: Bool
     public let lastUpdateReason: String
 }
 
-public struct QualityGateExport: Codable {
+public struct EvalQualityGateExport: Codable {
     public let status: String
     public let reasons: [String]
     public let goldenCaseCount: Int
@@ -160,7 +164,7 @@ public final class QualityPacketExporter {
         
         // Safety contract
         let safetyStatus = SafetyContractSnapshot.getStatus()
-        let safetyExport = SafetyContractExport(
+        let safetyExport = EvalSafetyContractExport(
             currentHash: safetyStatus.currentHash ?? "unknown",
             expectedHash: safetyStatus.expectedHash ?? "unknown",
             isUnchanged: safetyStatus.isUnchanged,
@@ -172,7 +176,7 @@ public final class QualityPacketExporter {
             goldenCaseStore: goldenCaseStore,
             evalRunner: evalRunner
         ).evaluate()
-        let gateExport = QualityGateExport(
+        let gateExport = EvalQualityGateExport(
             status: gateResult.status.rawValue,
             reasons: gateResult.reasons,
             goldenCaseCount: gateResult.metrics.goldenCaseCount,

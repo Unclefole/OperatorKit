@@ -607,13 +607,11 @@ struct ParticipantModel: Identifiable, Equatable {
     }
     
     init?(from attendee: EKParticipant) {
-        guard let name = attendee.name ?? attendee.url?.absoluteString else {
-            return nil
-        }
+        let attendeeName = attendee.name ?? attendee.url.absoluteString
         
         self.id = UUID()
-        self.name = name
-        self.email = attendee.url?.absoluteString.replacingOccurrences(of: "mailto:", with: "")
+        self.name = attendeeName
+        self.email = attendee.url.absoluteString.replacingOccurrences(of: "mailto:", with: "")
         self.isOrganizer = attendee.isCurrentUser
         
         switch attendee.participantStatus {

@@ -466,9 +466,22 @@ struct ConfirmWriteView: View {
         return PermissionManager.shared.currentState.remindersGranted
     }
     
+    @MainActor
     private func openSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+            #if DEBUG
+            print("[ConfirmWriteView] ❌ Failed to create settings URL")
+            #endif
+            return
+        }
+
+        Task { @MainActor in
+            let success = await UIApplication.shared.open(url)
+            #if DEBUG
+            if !success {
+                print("[ConfirmWriteView] ❌ Failed to open Settings URL")
+            }
+            #endif
         }
     }
     

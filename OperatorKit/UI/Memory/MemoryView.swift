@@ -5,7 +5,12 @@ import UIKit
 #endif
 
 struct MemoryView: View {
+    /// When true, this view is the root of a tab (not pushed via Route).
+    /// Back button hides; Home button switches to the Home tab.
+    var isTabRoot: Bool = false
+
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var nav: AppNavigationState
     @StateObject private var memoryStore = MemoryStore.shared
     @State private var searchText: String = ""
     @State private var selectedFilter: FilterOption = .all
@@ -105,36 +110,44 @@ struct MemoryView: View {
     }
     
     // MARK: - Header
+    // ARCHITECTURE: Context-aware navigation header.
+    // When isTabRoot == true  → back button hidden (nothing to pop), home switches tab.
+    // When isTabRoot == false → pushed via Route, back pops, home resets path.
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+            if isTabRoot {
+                // Tab root: no back destination — use invisible spacer to keep layout balanced
+                Color.clear
+                    .frame(width: 24, height: 24)
+            } else {
+                Button(action: { nav.goBack() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.blue)
+                }
             }
-            
+
             Spacer()
-            
-            Text("Memory")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
-            // Item count badge
-            Text("\(memoryStore.items.count)")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.blue)
-                .cornerRadius(10)
+
+            Button(action: {
+                if isTabRoot {
+                    nav.goHomeTab()
+                } else {
+                    nav.goHome()
+                }
+            }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.gray)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Search Bar
@@ -195,15 +208,35 @@ struct MemoryView: View {
             Image(systemName: "tray")
                 .font(.system(size: 48))
                 .foregroundColor(.gray.opacity(0.5))
-            
+
             Text("No items found")
                 .font(.headline)
                 .foregroundColor(.gray)
-            
+
             Text("Your drafts and completed operations will appear here.\nAll data is stored securely on your device.")
                 .font(.subheadline)
                 .foregroundColor(.gray.opacity(0.8))
                 .multilineTextAlignment(.center)
+
+            // CTA — route user to create their first request
+            Button(action: {
+                nav.goHome()
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 16))
+                    Text("Create a new request")
+                        .font(.system(size: 15, weight: .medium))
+                }
+                .foregroundColor(OKColors.intelligenceStart)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(OKColors.intelligenceStart.opacity(0.08))
+                )
+            }
+            .padding(.top, 8)
         }
         .padding(.vertical, 60)
     }
@@ -221,8 +254,9 @@ struct MemoryItemRow: View {
         case .sentEmail: return "envelope.fill"
         case .summary: return "doc.text.fill"
         case .actionItems: return "checkmark.square.fill"
-        case .reminder: return "bell.fill"
+        case .reminder, .createdReminder: return "bell.fill"
         case .documentReview: return "doc.text.magnifyingglass"
+        case .calendarEvent, .createdCalendarEvent, .updatedCalendarEvent: return "calendar"
         }
     }
     
@@ -231,7 +265,8 @@ struct MemoryItemRow: View {
         case .draftedEmail, .sentEmail: return .blue
         case .summary, .documentReview: return .orange
         case .actionItems: return .green
-        case .reminder: return .purple
+        case .reminder, .createdReminder: return .purple
+        case .calendarEvent, .createdCalendarEvent, .updatedCalendarEvent: return .red
         }
     }
     

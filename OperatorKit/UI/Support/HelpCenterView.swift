@@ -60,7 +60,7 @@ struct HelpCenterView: View {
             .sheet(isPresented: $showingMailComposer) {
                 MailComposerView(
                     subject: SupportCopy.emailSubjectTemplate,
-                    body: SupportCopy.emailBodyTemplate,
+                    body: SupportCopy.emailBodyWithDeviceInfo(),
                     recipient: SupportCopy.supportEmail
                 )
             }
@@ -243,7 +243,7 @@ struct HelpCenterView: View {
     private var contactSection: some View {
         Section {
             Button {
-                if MFMailComposeViewController.canSendMail() {
+                if PermissionManager.shared.canSendMail {
                     showingMailComposer = true
                 } else {
                     showingMailError = true
@@ -258,7 +258,7 @@ struct HelpCenterView: View {
         } header: {
             Text("Get Help")
         } footer: {
-            Text("We typically respond within 24-48 hours.")
+            Text("We typically respond within 24-48 hours.\n\(SupportCopy.supportEmail)")
         }
     }
     

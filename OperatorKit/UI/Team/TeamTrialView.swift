@@ -135,25 +135,25 @@ struct TeamTrialView: View {
     
     private var whatsIncludedSection: some View {
         Section {
-            FeatureRow(
+            TeamTrialFeatureRow(
                 icon: "doc.badge.gearshape",
                 title: "Policy Templates",
                 description: "Apply team governance policies"
             )
             
-            FeatureRow(
+            TeamTrialFeatureRow(
                 icon: "chart.bar",
                 title: "Team Diagnostics",
                 description: "View aggregate team metrics"
             )
             
-            FeatureRow(
+            TeamTrialFeatureRow(
                 icon: "doc.text.magnifyingglass",
                 title: "Quality Summaries",
                 description: "Review team quality reports"
             )
             
-            FeatureRow(
+            TeamTrialFeatureRow(
                 icon: "building.2",
                 title: "Enterprise Readiness",
                 description: "Export procurement packets"
@@ -278,7 +278,7 @@ struct TeamTrialView: View {
 
 // MARK: - Feature Row
 
-private struct FeatureRow: View {
+private struct TeamTrialFeatureRow: View {
     let icon: String
     let title: String
     let description: String

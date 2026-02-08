@@ -56,7 +56,7 @@ struct PilotModeView: View {
             }
             .sheet(isPresented: $showingSharePack) {
                 if let url = sharePackURL {
-                    ShareSheet(activityItems: [url])
+                    PilotModeShareSheet(activityItems: [url])
                 }
             }
             .sheet(isPresented: $showingEnterpriseReadiness) {
@@ -482,7 +482,7 @@ public enum PilotEmailTemplates {
 
 // MARK: - Share Sheet
 
-struct ShareSheet: UIViewControllerRepresentable {
+private struct PilotModeShareSheet: UIViewControllerRepresentable {
     let activityItems: [Any]
     
     func makeUIViewController(context: Context) -> UIActivityViewController {

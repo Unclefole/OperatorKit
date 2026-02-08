@@ -11,29 +11,54 @@ import SwiftUI
 
 struct PlanComparisonView: View {
     @StateObject private var entitlementManager = EntitlementManager.shared
-    
+    @State private var showPricing = false
+
     let highlightedTier: SubscriptionTier?
-    
-    init(highlightedTier: SubscriptionTier? = nil) {
+    let onSelectTier: ((SubscriptionTier) -> Void)?
+
+    init(highlightedTier: SubscriptionTier? = nil, onSelectTier: ((SubscriptionTier) -> Void)? = nil) {
         self.highlightedTier = highlightedTier
+        self.onSelectTier = onSelectTier
     }
-    
+
     var body: some View {
         VStack(spacing: 16) {
             // Header
             Text("Compare Plans")
                 .font(.headline)
-            
-            // Tier cards
+
+            // Tier cards - interactive
             VStack(spacing: 12) {
                 ForEach(SubscriptionTier.allCases, id: \.self) { tier in
-                    TierCard(
-                        tier: tier,
-                        isHighlighted: tier == highlightedTier,
-                        isCurrent: tier == entitlementManager.currentTier
-                    )
+                    Button {
+                        selectTier(tier)
+                    } label: {
+                        TierCard(
+                            tier: tier,
+                            isHighlighted: tier == highlightedTier,
+                            isCurrent: tier == entitlementManager.currentTier
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(tier == entitlementManager.currentTier)
                 }
             }
+        }
+        .sheet(isPresented: $showPricing) {
+            PricingView()
+        }
+    }
+
+    private func selectTier(_ tier: SubscriptionTier) {
+        #if DEBUG
+        print("[PlanComparisonView] ✅ Tier selected: \(tier.displayName)")
+        #endif
+
+        if let handler = onSelectTier {
+            handler(tier)
+        } else if tier != .free {
+            // Default: open pricing for upgrades
+            showPricing = true
         }
     }
 }
@@ -118,12 +143,13 @@ private struct TierCard: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isHighlighted ? Color.blue.opacity(0.05) : Color.gray.opacity(0.05))
+                .fill(isCurrent ? Color.green.opacity(0.05) : (isHighlighted ? Color.blue.opacity(0.05) : Color.gray.opacity(0.05)))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isHighlighted ? Color.blue : Color.clear, lineWidth: 2)
+                .stroke(isCurrent ? Color.green : (isHighlighted ? Color.blue : Color.clear), lineWidth: isCurrent ? 2 : (isHighlighted ? 2 : 0))
         )
+        .opacity(isCurrent ? 0.8 : 1.0)
     }
     
     private var tierIcon: String {

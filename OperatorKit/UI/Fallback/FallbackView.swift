@@ -5,7 +5,8 @@ import UIKit
 
 struct FallbackView: View {
     @EnvironmentObject var appState: AppState
-    
+    @EnvironmentObject var nav: AppNavigationState
+
     /// Current draft confidence (from appState)
     private var currentConfidence: Double {
         appState.currentDraft?.confidence ?? 0.0
@@ -64,32 +65,27 @@ struct FallbackView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
+            Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
-            Text(isBlocked ? "More Information Needed" : "Review Recommended")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
-            Button(action: {
-                appState.returnHome()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
+
+            Button(action: { nav.goHome() }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.gray)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Warning Card
@@ -310,10 +306,10 @@ struct FallbackView: View {
                     description: "Select meetings, emails, or files to improve the draft",
                     isPrimary: true,
                     action: {
-                        appState.navigateTo(.contextPicker)
+                        nav.navigate(to: .context)
                     }
                 )
-                
+
                 // Rewrite Intent Option
                 FallbackOptionButton(
                     icon: "pencil.line",
@@ -323,10 +319,10 @@ struct FallbackView: View {
                     isPrimary: false,
                     action: {
                         // Go back to intent input
-                        appState.navigateTo(.intentInput)
+                        nav.navigate(to: .intent)
                     }
                 )
-                
+
                 // Proceed Anyway (only if not blocked)
                 if canProceedAnyway {
                     FallbackOptionButton(
@@ -337,11 +333,11 @@ struct FallbackView: View {
                         isPrimary: false,
                         action: {
                             // Proceed to approval
-                            appState.navigateTo(.approval)
+                            nav.navigate(to: .approval)
                         }
                     )
                 }
-                
+
                 // Cancel Option
                 FallbackOptionButton(
                     icon: "xmark.circle",
@@ -350,7 +346,7 @@ struct FallbackView: View {
                     description: "Return home and begin a new request",
                     isPrimary: false,
                     action: {
-                        appState.returnHome()
+                        nav.goHome()
                     }
                 )
             }
@@ -454,4 +450,5 @@ struct FallbackOptionButton: View {
 #Preview {
     FallbackView()
         .environmentObject(AppState())
+        .environmentObject(AppNavigationState())
 }

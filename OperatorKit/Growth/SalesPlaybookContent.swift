@@ -123,7 +123,8 @@ public enum SalesPlaybookContent {
         PlaybookObjection(
             id: "objection-security-review",
             objection: "We need a security review first",
-            response: "Export the Enterprise Readiness Packet. It includes safety contract, quality metrics, and policy configuration."
+            response: "Export the Enterprise Readiness Packet. It includes safety contract, quality metrics, and policy configuration.",
+            schemaVersion: PlaybookObjection.currentSchemaVersion
         )
     ]
     

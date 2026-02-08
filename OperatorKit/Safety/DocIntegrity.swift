@@ -121,6 +121,15 @@ public enum DocIntegrity {
         "Post-Submission"
     ]
     
+    // MARK: - Document Existence Check
+    
+    /// Checks if a document exists at its path
+    public static func docExists(_ doc: RequiredDoc) -> Bool {
+        guard let projectRoot = Bundle.main.resourcePath else { return false }
+        let fullPath = (projectRoot as NSString).appendingPathComponent(doc.path)
+        return FileManager.default.fileExists(atPath: fullPath)
+    }
+    
     // MARK: - Validation
     
     /// Validates all required documents exist
@@ -224,10 +233,9 @@ public enum DocIntegrity {
             warnings: allWarnings
         )
     }
-}
 
     // MARK: - Hardened Validation (Phase 10J)
-    
+
     /// Hardened validation with detailed section checking
     public static func runHardenedValidation(projectRoot: String) -> DocIntegrityResult {
         var allErrors: [String] = []

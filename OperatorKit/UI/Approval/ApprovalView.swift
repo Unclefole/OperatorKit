@@ -5,7 +5,8 @@ import UIKit
 
 struct ApprovalView: View {
     @EnvironmentObject var appState: AppState
-    @StateObject private var permissionManager = PermissionManager.shared
+    @EnvironmentObject var nav: AppNavigationState
+    @ObservedObject private var permissionManager = PermissionManager.shared
     @State private var sideEffects: [SideEffect] = []
     @State private var allAcknowledged: Bool = false
     @State private var permissionCheck: PermissionCheckResult?
@@ -16,6 +17,7 @@ struct ApprovalView: View {
     @State private var pendingWriteEffectIndex: Int? = nil
     @State private var approvalTimestamp: Date? = nil
     @State private var isExecuting: Bool = false  // Phase 5B: Double-tap prevention
+    @State private var didConfirmLowConfidence: Bool = false  // SECURITY: Explicit low-confidence confirmation tracking
     
     private var canExecute: Bool {
         allAcknowledged && (permissionCheck?.canProceed ?? true) && !isExecuting
@@ -181,34 +183,29 @@ struct ApprovalView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
+            Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
-            Text("Approve Execution")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
-            Button(action: {
-                appState.returnHome()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
+
+            Button(action: { nav.goHome() }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.gray)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
-    
+
     // MARK: - Warning Banner
     private var warningBanner: some View {
         HStack(spacing: 12) {
@@ -296,14 +293,14 @@ struct ApprovalView: View {
                 Spacer()
                 
                 Button(action: {
-                    appState.navigateBack()
+                    nav.goBack()
                 }) {
                     Text("Edit")
                         .font(.subheadline)
                         .foregroundColor(.blue)
                 }
             }
-            
+
             Divider()
             
             // Email metadata (if email)
@@ -610,7 +607,7 @@ struct ApprovalView: View {
             
             // Cancel Button
             Button(action: {
-                appState.returnHome()
+                nav.goHome()
             }) {
                 Text("Cancel")
                     .font(.body)
@@ -629,14 +626,14 @@ struct ApprovalView: View {
     private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
         switch action {
         case .goHome:
-            appState.returnHome()
+            nav.goHome()
         case .retryCurrentStep:
             appState.clearError()
             isExecuting = false
         case .addMoreContext:
-            appState.navigateTo(.contextPicker)
+            nav.navigate(to: .context)
         case .editRequest:
-            appState.navigateTo(.intentInput)
+            nav.navigate(to: .intent)
         case .openSettings:
             if let url = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(url)
@@ -762,55 +759,157 @@ struct ApprovalView: View {
     }
     
     private func executeApproved() {
-        guard let draft = appState.currentDraft else { return }
-        
+        guard let draft = appState.currentDraft else {
+            logError("[EXECUTION_BLOCKED] No draft available")
+            appState.setIdle()
+            isExecuting = false
+            return
+        }
+
+        log("[EXECUTION_START] Beginning kernel-authorized execution flow")
+
         // Use stored approval timestamp or current time
         let timestamp = approvalTimestamp ?? Date()
         
         // Grant approval in AppState
         appState.grantApproval()
-        
-        // INVARIANT CHECK: Full validation
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CONTROL-PLANE: ApprovalGate as PURE ADAPTER.
+        // ALL policy decisions delegated to CapabilityKernel.
+        // ApprovalGate passes didConfirmLowConfidence directly — kernel decides.
+        // ═══════════════════════════════════════════════════════════════════
         let validation = ApprovalGate.shared.canExecute(
             draft: draft,
             approvalGranted: appState.approvalGranted,
             sideEffects: sideEffects,
-            permissionState: permissionManager.currentState
+            permissionState: permissionManager.currentState,
+            didConfirmLowConfidence: didConfirmLowConfidence
         )
-        
-        #if DEBUG
-        assert(validation.canProceed, "INVARIANT VIOLATION: \(validation.reason ?? "Unknown")")
-        #endif
         
         guard validation.canProceed else {
-            logError("Execution blocked: \(validation.reason ?? "Unknown")")
+            logError("[EXECUTION_BLOCKED] Validation failed: \(validation.reason ?? "Unknown")")
+            appState.setIdle()
+            isExecuting = false
             return
         }
-        
-        // Execute
-        let result = ExecutionEngine.shared.execute(
-            draft: draft,
-            sideEffects: sideEffects,
-            approvalGranted: appState.approvalGranted
-        )
-        
-        // Save to persistent memory with full audit trail
-        MemoryStore.shared.addFromExecution(
-            result: result,
-            intent: appState.selectedIntent,
-            context: appState.selectedContext,
-            approvalTimestamp: timestamp
-        )
-        
-        // Phase 10A: Record execution for usage tracking
-        // IMPORTANT: This happens at UI layer ONLY, not in ExecutionEngine
-        if result.status == .success || result.status == .savedDraftOnly || result.status == .partialSuccess {
-            appState.recordExecution()
+
+        // ═══════════════════════════════════════════════════════════════════
+        // KERNEL PIPELINE:
+        // 1. KernelBridge.issueExecutionToken() → token
+        // 2. ExecutionEngine.execute(token:) → result
+        // 3. EvidenceEngine logs everything
+        //
+        // Execution without kernel is IMPOSSIBLE.
+        // ═══════════════════════════════════════════════════════════════════
+        Task {
+            let executionTimeout: UInt64 = 8_000_000_000 // 8 seconds in nanoseconds
+
+            // STEP 1: Issue KernelAuthorizationToken via KernelBridge
+            log("[KERNEL] Requesting authorization token from CapabilityKernel")
+            let token = await KernelBridge.shared.issueExecutionToken(
+                for: draft,
+                sideEffects: self.sideEffects,
+                approvalType: .userConfirm
+            )
+            log("[KERNEL] Token issued — planId: \(token.planId), riskTier: \(token.riskTier.rawValue), valid: \(token.isValid)")
+
+            // STEP 2: Execute with token (HARD GATE inside ExecutionEngine)
+            let result: ExecutionResultModel = await withTaskGroup(of: ExecutionResultModel?.self) { group in
+                // Main execution task — token required
+                group.addTask {
+                    await ExecutionEngine.shared.execute(
+                        draft: draft,
+                        sideEffects: self.sideEffects,
+                        token: token,
+                        intent: self.appState.selectedIntent,
+                        context: self.appState.selectedContext,
+                        approvalTimestamp: timestamp
+                    )
+                }
+
+                // Timeout task
+                group.addTask {
+                    try? await Task.sleep(nanoseconds: executionTimeout)
+                    return nil // Signal timeout
+                }
+
+                // Return first result
+                for await taskResult in group {
+                    group.cancelAll()
+                    if let result = taskResult {
+                        return result
+                    } else {
+                        // Timeout occurred
+                        logError("[EXECUTION_TIMEOUT] Execution exceeded 8 seconds")
+                        return ExecutionResultModel(
+                            draft: draft,
+                            executedSideEffects: [],
+                            status: .failed,
+                            message: "Execution timeout - please try again",
+                            auditTrail: AuditTrail.build(
+                                intent: self.appState.selectedIntent,
+                                context: self.appState.selectedContext,
+                                draft: draft,
+                                sideEffects: self.sideEffects,
+                                permissionState: self.permissionManager.currentState,
+                                approvalTimestamp: timestamp
+                            )
+                        )
+                    }
+                }
+
+                // Fallback (should never reach)
+                return ExecutionResultModel(
+                    draft: draft,
+                    executedSideEffects: [],
+                    status: .failed,
+                    message: "Unexpected execution error",
+                    auditTrail: AuditTrail.build(
+                        intent: self.appState.selectedIntent,
+                        context: self.appState.selectedContext,
+                        draft: draft,
+                        sideEffects: self.sideEffects,
+                        permissionState: self.permissionManager.currentState,
+                        approvalTimestamp: timestamp
+                    )
+                )
+            }
+
+            // STEP 3: Log to EvidenceEngine (unified audit)
+            log("[EVIDENCE] Logging execution to EvidenceEngine")
+            let evidenceOutcome = KernelExecutionOutcome(
+                planId: token.planId,
+                success: result.isSuccess,
+                status: result.isSuccess ? .completed : .failed,
+                startedAt: timestamp,
+                resultSummary: result.message
+            )
+            try? EvidenceEngine.shared.logExecutionOutcome(evidenceOutcome, planId: token.planId)
+
+            // Back on MainActor
+            await MainActor.run {
+                // Save to persistent memory with full audit trail
+                MemoryStore.shared.addFromExecution(
+                    result: result,
+                    intent: appState.selectedIntent,
+                    context: appState.selectedContext,
+                    approvalTimestamp: timestamp
+                )
+
+                // Record execution for usage tracking
+                if result.status == .success || result.status == .savedDraftOnly || result.status == .partialSuccess {
+                    appState.recordExecution()
+                }
+
+                // Update state and navigate
+                appState.executionResult = result
+                appState.setIdle()
+                isExecuting = false
+                log("[EXECUTION_COMPLETE] Status: \(result.status)")
+                nav.navigate(to: .execution)
+            }
         }
-        
-        // Update state and navigate
-        appState.executionResult = result
-        appState.navigateTo(.executionProgress)
     }
 }
 

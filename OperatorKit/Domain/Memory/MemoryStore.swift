@@ -301,9 +301,13 @@ final class MemoryStore: ObservableObject {
     private func mapSideEffectType(_ type: SideEffect.SideEffectType) -> PersistedSideEffect.SideEffectType {
         switch type {
         case .sendEmail: return .sendEmail
+        case .presentEmailDraft: return .sendEmail  // Map to sendEmail for persistence
         case .saveDraft: return .saveDraft
         case .createReminder: return .createReminder
+        case .previewReminder: return .previewReminder
+        case .previewCalendarEvent: return .previewCalendarEvent
         case .createCalendarEvent: return .createCalendarEvent
+        case .updateCalendarEvent: return .updateCalendarEvent
         case .saveToMemory: return .saveToMemory
         }
     }
@@ -367,18 +371,69 @@ final class MemoryStore: ObservableObject {
 
 /// Provides the SwiftData model container for the app
 enum SwiftDataProvider {
-    
+
     static var sharedModelContainer: ModelContainer = {
         let schema = Schema([PersistedMemoryItem.self])
         let modelConfiguration = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false
         )
-        
+
+        // ATTEMPT 1: Normal persistent storage
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+        } catch let primaryError {
+            logError("SwiftDataProvider: Persistent storage failed: \(primaryError)", category: .storageFailure)
+
+            // ATTEMPT 2: In-memory fallback
+            let fallbackConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            do {
+                return try ModelContainer(for: schema, configurations: [fallbackConfig])
+            } catch let fallbackError {
+                logError("CRITICAL: SwiftData container failed. Attempting store reset.", category: .storageFailure)
+                logError("In-memory error: \(fallbackError)", category: .storageFailure)
+
+                // ATTEMPT 3: Delete corrupted store and recreate
+                deleteCorruptedSwiftDataStore()
+
+                do {
+                    return try ModelContainer(for: schema, configurations: [modelConfiguration])
+                } catch let resetError {
+                    logError("UNRECOVERABLE: Store reset failed: \(resetError)", category: .storageFailure)
+                    fatalError("UNRECOVERABLE: SwiftData container could not be recreated after reset. Error: \(resetError)")
+                }
+            }
         }
     }()
+
+    /// Deletes corrupted SwiftData store files safely
+    private static func deleteCorruptedSwiftDataStore() {
+        let fileManager = FileManager.default
+
+        guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            logError("Could not locate Application Support directory", category: .storageFailure)
+            return
+        }
+
+        let storeExtensions = [".sqlite", ".sqlite-shm", ".sqlite-wal"]
+        let storePrefix = "default.store" // SwiftData default store name
+
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: appSupport, includingPropertiesForKeys: nil)
+            for file in contents {
+                let filename = file.lastPathComponent
+                // Only delete SwiftData store files
+                if filename.hasPrefix(storePrefix) || storeExtensions.contains(where: { filename.hasSuffix($0) }) {
+                    do {
+                        try fileManager.removeItem(at: file)
+                        log("Deleted corrupted store file: \(filename)")
+                    } catch {
+                        logError("Failed to delete \(filename): \(error)", category: .storageFailure)
+                    }
+                }
+            }
+        } catch {
+            logError("Failed to enumerate Application Support: \(error)", category: .storageFailure)
+        }
+    }
 }

@@ -34,18 +34,22 @@ final class SiriRoutingBridge: ObservableObject {
     @Published private(set) var prefilledIntentText: String?
     
     // MARK: - App State Reference
-    
+
     /// Weak reference to app state to avoid retain cycles
     private weak var appState: AppState?
-    
+
+    /// Weak reference to navigation state for new navigation system
+    private weak var nav: AppNavigationState?
+
     // MARK: - Initialization
-    
+
     private init() {}
-    
-    /// Configure the bridge with app state
+
+    /// Configure the bridge with app state and navigation
     /// Call this from OperatorKitApp on launch
-    func configure(appState: AppState) {
+    func configure(appState: AppState, nav: AppNavigationState? = nil) {
         self.appState = appState
+        self.nav = nav
     }
     
     // MARK: - Routing (ONLY ALLOWED MUTATION)

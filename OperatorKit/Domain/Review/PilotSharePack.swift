@@ -32,7 +32,7 @@ public struct PilotSharePack: Codable {
     // MARK: - Included Packets
     
     /// Enterprise readiness summary (not full packet to keep size down)
-    public let enterpriseReadinessSummary: EnterpriseReadinessSummary?
+    public let enterpriseReadinessSummary: PilotEnterpriseReadinessSummary?
     
     /// Quality packet summary
     public let qualitySummary: QualityPacketSummary?
@@ -125,7 +125,7 @@ public struct PilotSharePack: Codable {
 
 // MARK: - Summary Types
 
-public struct EnterpriseReadinessSummary: Codable {
+public struct PilotEnterpriseReadinessSummary: Codable {
     public let readinessStatus: String
     public let readinessScore: Int
     public let safetyContractMatch: Bool

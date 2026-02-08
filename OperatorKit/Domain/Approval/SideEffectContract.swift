@@ -142,7 +142,8 @@ struct CalendarEventPayload: Equatable, Codable {
 
 /// Represents changes between original and updated event
 /// INVARIANT: Only generated when originalEventIdentifier is present
-struct CalendarEventDiff: Equatable, Codable {
+/// Note: Tuple properties prevent automatic Codable conformance
+struct CalendarEventDiff: Equatable {
     let titleChanged: (old: String, new: String)?
     let startDateChanged: (old: Date, new: Date)?
     let endDateChanged: (old: Date, new: Date)?
@@ -328,17 +329,18 @@ struct SideEffect: Identifiable, Equatable {
         self.calendarEventPayload = calendarEventPayload
         self.calendarEventDiff = calendarEventDiff
         
-        // INVARIANT: Reminder side effects must have payload
+        // INVARIANT: Enabled reminder side effects must have payload
+        // Note: Disabled effects may be placeholders during planning phase
         #if DEBUG
-        if type == .createReminder || type == .previewReminder {
-            assert(reminderPayload != nil, "INVARIANT VIOLATION: Reminder side effect requires payload")
+        if isEnabled && (type == .createReminder || type == .previewReminder) {
+            assert(reminderPayload != nil, "INVARIANT VIOLATION: Enabled reminder side effect requires payload")
         }
-        // INVARIANT: Calendar side effects must have payload
-        if type == .previewCalendarEvent || type == .createCalendarEvent || type == .updateCalendarEvent {
-            assert(calendarEventPayload != nil, "INVARIANT VIOLATION: Calendar side effect requires payload")
+        // INVARIANT: Enabled calendar side effects must have payload
+        if isEnabled && (type == .previewCalendarEvent || type == .createCalendarEvent || type == .updateCalendarEvent) {
+            assert(calendarEventPayload != nil, "INVARIANT VIOLATION: Enabled calendar side effect requires payload")
         }
         // INVARIANT: Update calendar must have originalEventIdentifier
-        if type == .updateCalendarEvent {
+        if isEnabled && type == .updateCalendarEvent {
             assert(calendarEventPayload?.originalEventIdentifier != nil, "INVARIANT VIOLATION: Update calendar requires originalEventIdentifier from user-selected context")
         }
         #endif

@@ -4,12 +4,21 @@ import UIKit
 #endif
 import EventKit
 
+// MARK: - Paywall Gate (Inlined)
+// Paywall ENABLED for App Store release
+private let _privacyPaywallEnabled: Bool = true
+
 /// Displays and manages privacy controls
 /// INVARIANT: No auto-requesting permissions - user must tap to request
 /// Shows distinct permission states: Not Determined, Denied, Authorized, Restricted, Write-Only
 struct PrivacyControlsView: View {
+    /// When true, this view is the root of a tab (not pushed via Route).
+    /// Back button hides; Home button switches to the Home tab.
+    var isTabRoot: Bool = false
+
     @EnvironmentObject var appState: AppState
-    @StateObject private var permissionManager = PermissionManager.shared
+    @EnvironmentObject var nav: AppNavigationState
+    @ObservedObject private var permissionManager = PermissionManager.shared
     @State private var isRequestingPermission: Bool = false
     @State private var showingSettingsAlert: Bool = false
     @State private var isRefreshing: Bool = false
@@ -40,10 +49,9 @@ struct PrivacyControlsView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            Color(UIColor.systemGroupedBackground)
-                .ignoresSafeArea()
-            
+            // Background - using design system
+            OKBackgroundView()
+
             VStack(spacing: 0) {
                 // Header
                 headerView
@@ -153,39 +161,44 @@ struct PrivacyControlsView: View {
     }
     
     // MARK: - Header
+    // ARCHITECTURE: Context-aware navigation header.
+    // When isTabRoot == true  → back button hidden (nothing to pop), home switches tab.
+    // When isTabRoot == false → pushed via Route, back pops, home resets path.
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
-            }
-            
-            Spacer()
-            
-            Text("Privacy Controls")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            Spacer()
-            
-            // Refresh button
-            Button(action: refreshPermissions) {
-                if isRefreshing {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                } else {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 16, weight: .semibold))
+            if isTabRoot {
+                // Tab root: no back destination — use invisible spacer to keep layout balanced
+                Color.clear
+                    .frame(width: 24, height: 24)
+            } else {
+                Button(action: { nav.goBack() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.blue)
                 }
             }
-            .disabled(isRefreshing)
+
+            Spacer()
+
+            OperatorKitLogoView(size: .small, showText: false)
+
+            Spacer()
+
+            Button(action: {
+                if isTabRoot {
+                    nav.goHomeTab()
+                } else {
+                    nav.goHome()
+                }
+            }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.gray)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Privacy Summary Card
@@ -544,35 +557,59 @@ struct PrivacyControlsView: View {
     
     // MARK: - Data Usage Section
     private var dataUsageSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Data Usage")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+        let guarantees = DataGuarantees.current
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Data Guarantees")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+
+                Spacer()
+
+                // All-safe badge
+                if guarantees.allSafe {
+                    Text("ALL SAFE")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green.opacity(0.1))
+                        .cornerRadius(6)
+                }
+            }
+
             VStack(spacing: 0) {
                 dataRow(
-                    icon: "icloud.slash",
-                    iconColor: .purple,
-                    title: "No Cloud Upload",
-                    subtitle: "All processing happens on your device"
+                    icon: guarantees.cloudUpload ? "icloud.fill" : "icloud.slash",
+                    iconColor: guarantees.cloudUpload ? .orange : .purple,
+                    title: guarantees.cloudUpload ? "Cloud Upload Active" : "No Cloud Upload",
+                    subtitle: guarantees.cloudUpload
+                        ? "Metadata-only packets via Sync module"
+                        : "All processing happens on your device"
                 )
-                
+
                 Divider().padding(.leading, 56)
-                
+
                 dataRow(
-                    icon: "eye.slash",
-                    iconColor: .blue,
-                    title: "No Tracking",
-                    subtitle: "We don't collect analytics or user data"
+                    icon: guarantees.tracking ? "eye" : "eye.slash",
+                    iconColor: guarantees.tracking ? .red : .blue,
+                    title: guarantees.tracking ? "Tracking Active" : "No Tracking",
+                    subtitle: guarantees.tracking
+                        ? "Analytics or telemetry detected"
+                        : "No analytics, telemetry, or user tracking"
                 )
-                
+
                 Divider().padding(.leading, 56)
-                
+
                 dataRow(
-                    icon: "lock.shield",
-                    iconColor: .green,
-                    title: "Encrypted Storage",
-                    subtitle: "Your memory items are encrypted locally"
+                    icon: guarantees.encryptedStorage ? "lock.shield" : "lock.open",
+                    iconColor: guarantees.encryptedStorage ? .green : .red,
+                    title: guarantees.encryptedStorage ? "Encrypted Storage" : "Storage Not Encrypted",
+                    subtitle: guarantees.encryptedStorage
+                        ? "iOS Data Protection encrypts app sandbox"
+                        : "WARNING: Storage encryption unavailable"
                 )
                 
                 Divider().padding(.leading, 56)
@@ -718,20 +755,33 @@ struct PrivacyControlsView: View {
         .padding(16)
     }
     
-    // MARK: - On-Device Model Section (Phase 4A)
+    // MARK: - On-Device Trust Center (Phase 4A + Governance)
     private var onDeviceModelSection: some View {
         let modelRouter = ModelRouter.shared
         let appleAvailability = modelRouter.appleOnDeviceAvailability
-        
+        let mode = IntelligenceMode.current
+
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Image(systemName: "cpu")
+                Image(systemName: mode.icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.indigo)
-                
-                Text("On-Device Intelligence")
+                    .foregroundColor(mode.tintColor)
+
+                Text("On-Device Trust Center")
                     .font(.headline)
                     .fontWeight(.semibold)
+
+                Spacer()
+
+                // Intelligence mode badge
+                Text(mode.displayName)
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundColor(mode.tintColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(mode.tintColor.opacity(0.1))
+                    .cornerRadius(6)
             }
             
             VStack(spacing: 0) {
@@ -745,12 +795,14 @@ struct PrivacyControlsView: View {
                 
                 Divider().padding(.leading, 56)
                 
-                // Network status (always off)
+                // Network status — bound to real AppSecurityConfig state
                 dataRow(
-                    icon: "wifi.slash",
-                    iconColor: .green,
-                    title: "Network Disabled",
-                    subtitle: "All AI runs locally on your device"
+                    icon: GovernanceSettingsStore.shared.networkStatusIcon,
+                    iconColor: GovernanceSettingsStore.shared.networkStatusColor,
+                    title: GovernanceSettingsStore.shared.networkStatusText,
+                    subtitle: AppSecurityConfig.networkAccessAllowed
+                        ? "Sync module only — metadata packets"
+                        : "All AI runs locally on your device"
                 )
             }
             .background(Color.white)
@@ -921,9 +973,40 @@ struct PrivacyControlsView: View {
                     SubscriptionStatusView()
                         .environmentObject(appState)
                 }
-            } else {
+            } else if _privacyPaywallEnabled {
                 UpgradeView()
                     .environmentObject(appState)
+            } else {
+                // Fallback: Never show blank screen
+                NavigationView {
+                    VStack(spacing: 24) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.blue)
+
+                        Text("Pro Coming Soon")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+
+                        Text("Pro features will be available in a future update.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+
+                        Button("Done") {
+                            showingSubscription = false
+                        }
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.blue)
+                        .padding(.top, 8)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(UIColor.systemGroupedBackground))
+                    .navigationTitle("OperatorKit Pro")
+                    .navigationBarTitleDisplayMode(.inline)
+                }
             }
         }
     }
@@ -1037,19 +1120,33 @@ struct PrivacyControlsView: View {
         }
     }
     
-    // MARK: - Policy Section (Phase 10C)
+    // MARK: - Execution Policy Engine (Phase 10C + Governance)
     private var policySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let governance = GovernanceSettingsStore.shared
+
+        return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "shield.lefthalf.filled")
                     .font(.system(size: 20))
                     .foregroundColor(.indigo)
-                
-                Text("Execution Policy")
+
+                Text("Execution Policy Engine")
                     .font(.headline)
                     .fontWeight(.semibold)
+
+                Spacer()
+
+                // Institutional status — never "All Allowed"
+                Text(governance.policyStatusText)
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.indigo)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.indigo.opacity(0.1))
+                    .cornerRadius(6)
             }
-            
+
             VStack(spacing: 0) {
                 // Current policy status
                 HStack(spacing: 12) {
@@ -1057,26 +1154,81 @@ struct PrivacyControlsView: View {
                         .font(.system(size: 20))
                         .foregroundColor(.indigo)
                         .frame(width: 32)
-                    
+
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Current Policy")
                             .font(.body)
                             .fontWeight(.medium)
-                        
+
                         Text(OperatorPolicyStore.shared.policySummary())
                             .font(.caption)
                             .foregroundColor(.gray)
                             .lineLimit(2)
                     }
-                    
+
                     Spacer()
-                    
+
                     PolicyStatusBadge(policy: OperatorPolicyStore.shared.currentPolicy)
                 }
                 .padding(16)
-                
+
                 Divider().padding(.leading, 56)
-                
+
+                // Execution Tiers
+                ForEach(governance.executionTierSummary, id: \.tier) { item in
+                    HStack(spacing: 12) {
+                        Image(systemName: item.tier.icon)
+                            .font(.system(size: 18))
+                            .foregroundColor(item.tier.tintColor)
+                            .frame(width: 32)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.tier.displayName)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+
+                            Text(item.tier.subtitle)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+
+                        Spacer()
+
+                        if item.locked {
+                            // Tier 2 — HARD LOCKED indicator
+                            HStack(spacing: 4) {
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 10))
+                                Text("LOCKED")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(6)
+                        } else {
+                            Text(item.autoApprove ? "Auto" : "Manual")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundColor(item.autoApprove ? .orange : .green)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background((item.autoApprove ? Color.orange : Color.green).opacity(0.1))
+                                .cornerRadius(6)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+
+                    if item.tier != .irreversible {
+                        Divider().padding(.leading, 56)
+                    }
+                }
+
+                Divider().padding(.leading, 56)
+
                 // Edit policy link
                 Button(action: {
                     showingPolicyEditor = true
@@ -1088,20 +1240,20 @@ struct PrivacyControlsView: View {
                             .frame(width: 44, height: 44)
                             .background(Color.indigo.opacity(0.1))
                             .cornerRadius(10)
-                        
+
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Edit Policy")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                                 .foregroundColor(.primary)
-                            
-                            Text("Configure what OperatorKit can do")
+
+                            Text("Configure capabilities and execution tiers")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                        
+
                         Spacer()
-                        
+
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.gray)
@@ -1307,10 +1459,10 @@ struct PrivacyControlsView: View {
         }
     }
     
-    // MARK: - Subscription Section (Phase 10G)
+    // MARK: - Extended Subscription Section (Phase 10G)
     @State private var showingSubscriptionStatus: Bool = false
     
-    private var subscriptionSection: some View {
+    private var extendedSubscriptionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "creditcard")
@@ -1692,46 +1844,60 @@ struct PrivacyControlsView: View {
     }
     #endif
     
-    // MARK: - Guarantees Section
+    // MARK: - Safety Invariants Section (Runtime-Verified)
     private var guaranteesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let invariants = SafetyInvariant.all
+        let hasViolation = invariants.contains { !$0.isGuaranteed }
+
+        return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Image(systemName: "shield.checkered")
+                Image(systemName: hasViolation ? "exclamationmark.shield" : "shield.checkered")
                     .font(.system(size: 20))
-                    .foregroundColor(.green)
-                
-                Text("What OperatorKit Will Never Do")
+                    .foregroundColor(hasViolation ? .red : .green)
+
+                Text("Safety Invariants")
                     .font(.headline)
                     .fontWeight(.semibold)
+
+                Spacer()
+
+                // Runtime verification badge
+                Text(hasViolation ? "VIOLATION" : "ALL VERIFIED")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(hasViolation ? .red : .green)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background((hasViolation ? Color.red : Color.green).opacity(0.1))
+                    .cornerRadius(6)
             }
-            
+
             VStack(alignment: .leading, spacing: 10) {
-                guaranteeRow("Take action without your explicit approval")
-                guaranteeRow("Access your data in the background")
-                guaranteeRow("Send emails, create events, or write reminders silently")
-                guaranteeRow("Skip showing you what will happen")
-                guaranteeRow("Use context you haven't selected")
-                guaranteeRow("Send your data to the cloud or any server")
-                guaranteeRow("Let Siri execute actions—it only opens OperatorKit")
-                guaranteeRow("Perform write operations without a second confirmation")
+                ForEach(invariants) { invariant in
+                    guaranteeRow(invariant.description, verified: invariant.isGuaranteed)
+                }
             }
             .padding(16)
-            .background(Color.green.opacity(0.05))
+            .background((hasViolation ? Color.red : Color.green).opacity(0.05))
             .cornerRadius(12)
         }
     }
-    
-    private func guaranteeRow(_ text: String) -> some View {
+
+    private func guaranteeRow(_ text: String, verified: Bool = true) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.green)
-            
+            Image(systemName: verified ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(verified ? .green : .red)
+
             Text(text)
                 .font(.subheadline)
                 .foregroundColor(.primary)
-            
+
             Spacer()
+
+            Text(verified ? "Verified" : "Failed")
+                .font(.caption2)
+                .foregroundColor(verified ? .green : .red)
         }
     }
     

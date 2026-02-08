@@ -756,7 +756,7 @@ struct ReleaseReadinessView: View {
     
     private func exportSafetySnapshot() {
         do {
-            let export = SafetyContractExport()
+            let export = SafetyContractSnapshotExport()
             let data = try export.toJSON()
             let tempURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("operatorkit-safety-snapshot-\(dateStamp()).json")

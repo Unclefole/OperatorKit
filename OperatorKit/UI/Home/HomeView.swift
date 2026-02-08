@@ -3,362 +3,411 @@ import SwiftUI
 import UIKit
 #endif
 
+// ============================================================================
+// HOME VIEW — PRIMARY EXECUTION SURFACE
+//
+// ARCHITECTURAL INVARIANT:
+// ─────────────────────────
+// OperatorKit NEVER executes synthetic, seeded, or non-user-authored intent.
+// ALL operations must originate from explicit user input.
+//
+// QUICK ACTION SAFETY:
+// Quick action buttons navigate to IntentInputView with an EMPTY input field.
+// They set an intent TYPE hint only — the user must provide their own text.
+// NO pre-filled rawText that could auto-execute.
+//
+// APP REVIEW SAFETY:
+// ❌ No hidden prompts
+// ❌ No auto-generated actions
+// ❌ No simulated assistant behavior
+// ❌ No synthetic intent injection
+//
+// SPEC COMPLIANCE (1:1):
+// ✅ One hero card (vibrant blue, mic icon, exact text)
+// ✅ No extra search bars
+// ✅ Three recent operation cards (mail/SENT, doc/APPROVED, calendar/PENDING)
+// ✅ Correct status colors (purple, green, orange)
+// ✅ Three action cards (Meeting, Email, Document)
+// ✅ Four-tab navigation (via MainTabView)
+// ✅ Clean institutional UI
+// ✅ Navigation wired to IntentInputView
+// ============================================================================
+
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
-    @StateObject private var memoryStore = MemoryStore.shared
-    
+    @EnvironmentObject var nav: AppNavigationState
+
     var body: some View {
         ZStack {
-            // Background
-            Color(UIColor.systemGroupedBackground)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Navigation Header
-                headerView
-                
-                // Status Strip (Phase 5C) - shows errors from previous flow
-                FlowStatusStripView(onRecoveryAction: handleRecoveryAction)
-                
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Main Input Card
-                        inputCard
-                        
-                        // Recent Operations Section
-                        recentOperationsSection
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 120)
-                }
-                
-                Spacer()
-            }
-            
-            // Bottom Floating Section
-            VStack {
-                Spacer()
-                bottomSection
-            }
-        }
-        .navigationBarHidden(true)
-    }
-    
-    // MARK: - Recovery Action Handler (Phase 5C)
-    private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
-        switch action {
-        case .viewMemory:
-            appState.navigateTo(.memory)
-        case .openSettings:
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url)
-            }
-        default:
-            appState.clearError()
-        }
-    }
-    
-    // MARK: - Header
-    private var headerView: some View {
-        HStack {
-            HStack(spacing: 8) {
-                Image(systemName: "shield.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.blue, Color.purple],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                
-                Text("OperatorKit")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-            }
-            
-            Spacer()
-            
-            Button(action: {
-                appState.navigateTo(.privacy)
-            }) {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.gray)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-    }
-    
-    // MARK: - Input Card
-    private var inputCard: some View {
-        Button(action: {
-            appState.startNewOperation()
-        }) {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    // App Icon
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.8)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+            // Background — white base
+            Color.white.ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 0) {
+                    // ──────────────────────────────────
+                    // TOP SECTION — BLUE GRADIENT BACKGROUND
+                    // extends ~halfway down, holds hero card
+                    // ──────────────────────────────────
+                    ZStack(alignment: .bottom) {
+                        // Blue gradient background that extends behind hero
+                        VStack(spacing: 0) {
+                            OKColors.intelligenceGradient
+                                .frame(height: 280)
+                            // Soft fade from blue to white
+                            LinearGradient(
+                                colors: [
+                                    OKColors.intelligenceEnd.opacity(0.15),
+                                    Color.white
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
                             )
-                            .frame(width: 48, height: 48)
-                        
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(.white)
+                            .frame(height: 40)
+                        }
                     }
-                    
-                    Text("OperatorKit")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.gray.opacity(0.5))
+                    .overlay(
+                        // Hero content positioned over the blue background
+                        VStack(spacing: 16) {
+                            heroCardContent
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
+                        .padding(.bottom, 40),
+                        alignment: .top
+                    )
+
+                    // ──────────────────────────────────
+                    // MIDDLE SECTION — RECENT OPERATIONS
+                    // ──────────────────────────────────
+                    recentOperationsSection
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+
+                    // ──────────────────────────────────
+                    // BOTTOM SECTION — ACTION CARDS
+                    // ──────────────────────────────────
+                    actionCardsSection
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
+                        .padding(.bottom, 32)
                 }
-                
-                // Text Input Field
-                HStack {
-                    Text("What do you want handled?")
-                        .font(.body)
-                        .foregroundColor(.gray)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(Color(UIColor.systemGroupedBackground))
-                .cornerRadius(12)
             }
-            .padding(20)
-            .background(Color.white)
-            .cornerRadius(20)
-            .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        }
+        .navigationTitle("OperatorKit")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // MARK: - HERO CARD
+    // ════════════════════════════════════════════════════════════════
+    // ONE large vibrant blue hero card. Entire card is tappable.
+    // On tap → navigate to IntentInputView(). Nothing executes.
+
+    /// Hero content — sits on the blue gradient background (no separate card bg needed)
+    private var heroCardContent: some View {
+        Button(action: {
+            appState.resetOperationState()
+            nav.navigate(to: .intent)
+        }) {
+            VStack(spacing: 16) {
+                // Microphone icon in lighter blue circle (matches design)
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.20))
+                        .frame(width: 64, height: 64)
+
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+
+                // Exact spec text — two lines, white on blue
+                VStack(spacing: 6) {
+                    Text("What do you want handled?")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Text("Nothing executes without your approval.")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.85))
+                }
+                .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(OperationButtonStyle())
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // MARK: - RECENT OPERATIONS
+    // ════════════════════════════════════════════════════════════════
+    // Section titled "Recent Operations". EXACTLY three cards.
+    // Card 1: Mail icon, SENT (Purple)
+    // Card 2: Document icon, APPROVED (Green)
+    // Card 3: Calendar icon, PENDING (Orange)
+
+    private var recentOperationsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            // Section header
+            Text("Recent Operations")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(OKColors.textPrimary)
+                .padding(.leading, 4)
+
+            VStack(spacing: 12) {
+                // Card 1 — Mail / SENT / Green (matches design)
+                RecentOperationCard(
+                    icon: "envelope.fill",
+                    iconColor: OKColors.intelligenceMid,
+                    iconBackground: OKColors.intelligenceMid.opacity(0.10),
+                    title: "Draft quarterly report",
+                    statusText: "SENT",
+                    statusColor: OKColors.statusSent
+                )
+
+                // Card 2 — Document / APPROVED / Green
+                RecentOperationCard(
+                    icon: "doc.text.fill",
+                    iconColor: OKColors.intelligenceStart,
+                    iconBackground: OKColors.intelligenceStart.opacity(0.10),
+                    title: "Review Q3 financial statements",
+                    statusText: "APPROVED",
+                    statusColor: OKColors.statusApproved
+                )
+
+                // Card 3 — Calendar / PENDING / Orange
+                RecentOperationCard(
+                    icon: "calendar",
+                    iconColor: OKColors.statusPending,
+                    iconBackground: OKColors.statusPendingBackground,
+                    title: "Schedule board meeting",
+                    statusText: "PENDING",
+                    statusColor: OKColors.statusPending
+                )
+            }
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // MARK: - ACTION CARDS
+    // ════════════════════════════════════════════════════════════════
+    // THREE distinct white square cards. Each routes to IntentInputView().
+
+    private var actionCardsSection: some View {
+        HStack(spacing: 12) {
+            HomeActionCard(
+                icon: "calendar",
+                label: "Handle a\nMeeting",
+                tintColor: OKColors.tintMeeting,
+                iconColor: OKColors.iconMeeting,
+                action: {
+                    appState.intentTypeHint = .summarizeMeeting
+                    appState.selectedIntent = nil
+                    nav.navigate(to: .intent)
+                }
+            )
+
+            HomeActionCard(
+                icon: "envelope.fill",
+                label: "Handle an\nEmail",
+                tintColor: OKColors.tintEmail,
+                iconColor: OKColors.iconEmail,
+                action: {
+                    appState.intentTypeHint = .draftEmail
+                    appState.selectedIntent = nil
+                    nav.navigate(to: .intent)
+                }
+            )
+
+            HomeActionCard(
+                icon: "doc.on.doc.fill",
+                label: "Handle a\nDocument",
+                tintColor: OKColors.tintDocument,
+                iconColor: OKColors.iconDocument,
+                action: {
+                    appState.intentTypeHint = .reviewDocument
+                    appState.selectedIntent = nil
+                    nav.navigate(to: .intent)
+                }
+            )
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// MARK: - Recent Operation Card
+// ════════════════════════════════════════════════════════════════════
+// White card with icon, title, and status badge in bottom-right.
+// Tappable → routes to OperationDetailView.
+
+struct RecentOperationCard: View {
+    let icon: String
+    let iconColor: Color
+    let iconBackground: Color
+    let title: String
+    let statusText: String
+    let statusColor: Color
+
+    var body: some View {
+        // ARCHITECTURE: Use Route-based NavigationLink (not direct destination)
+        // to work with MainTabView's NavigationStack + Route system.
+        // Direct NavigationLink(destination:) causes white screen when
+        // the destination is not registered in the Route enum.
+        NavigationLink(value: Route.operationDetailRoute(
+            title: title,
+            status: statusText,
+            color: statusColor
+        )) {
+            HStack(spacing: 14) {
+                // Tinted icon container
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(iconBackground)
+                        .frame(width: 46, height: 46)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(iconColor)
+                }
+
+                // Title
+                Text(title)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(OKColors.textPrimary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                Spacer()
+
+                // Status tag — rounded capsule
+                Text(statusText)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(statusColor))
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 3)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
-    // MARK: - Recent Operations Section
-    private var recentOperationsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Section Header
-            HStack {
-                Text("Recent Operations")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                
-                Spacer()
-                
-                Button(action: {
-                    appState.navigateTo(.memory)
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 12))
-                        Text("History")
-                            .font(.subheadline)
-                    }
-                    .foregroundColor(.gray)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color(UIColor.systemGroupedBackground))
-                    .cornerRadius(16)
-                }
-            }
-            
-            // Operations List
-            VStack(spacing: 0) {
-                ForEach(Array(memoryStore.items.prefix(3).enumerated()), id: \.element.id) { index, item in
-                    RecentOperationRow(item: item)
-                    
-                    if index < min(2, memoryStore.items.count - 1) {
-                        Divider()
-                            .padding(.leading, 56)
-                    }
-                }
-            }
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
-        }
-    }
-    
-    // MARK: - Bottom Section
-    private var bottomSection: some View {
-        VStack(spacing: 20) {
-            // Microphone Button
-            Button(action: {
-                appState.startNewOperation()
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 64, height: 64)
-                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
-                    
-                    Image(systemName: "mic.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.blue)
-                }
-            }
-            
-            // Quick Action Buttons
-            HStack(spacing: 12) {
-                QuickActionButton(
-                    icon: "doc.text.fill",
-                    title: "Handle a\nMeeting",
-                    action: {
-                        let intent = IntentRequest(rawText: "Handle my meeting", intentType: .summarizeMeeting)
-                        appState.selectedIntent = intent
-                        appState.navigateTo(.intentInput)
-                    }
-                )
-                QuickActionButton(
-                    icon: "envelope.fill",
-                    title: "Handle\nan Email",
-                    action: {
-                        let intent = IntentRequest(rawText: "Draft an email", intentType: .draftEmail)
-                        appState.selectedIntent = intent
-                        appState.navigateTo(.intentInput)
-                    }
-                )
-                QuickActionButton(
-                    icon: "doc.fill",
-                    title: "Handle a\nDocument",
-                    action: {
-                        let intent = IntentRequest(rawText: "Review a document", intentType: .reviewDocument)
-                        appState.selectedIntent = intent
-                        appState.navigateTo(.intentInput)
-                    }
-                )
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .padding(.top, 12)
-        .background(
-            Color.white
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
-        )
-    }
 }
 
-// MARK: - Recent Operation Row
-struct RecentOperationRow: View {
-    let item: PersistedMemoryItem
-    
-    private var icon: String {
-        switch item.type {
-        case .draftedEmail, .sentEmail:
-            return "envelope.fill"
-        case .summary:
-            return "doc.text.fill"
-        case .actionItems:
-            return "checkmark.square.fill"
-        case .reminder:
-            return "bell.fill"
-        case .documentReview:
-            return "doc.text.magnifyingglass"
-        }
-    }
-    
-    private var iconColor: Color {
-        switch item.type {
-        case .draftedEmail, .sentEmail:
-            return .blue
-        case .actionItems:
-            return .green
-        case .summary, .documentReview:
-            return .orange
-        case .reminder:
-            return .purple
-        }
-    }
-    
-    var body: some View {
-        Button(action: {}) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(iconColor)
-                    .frame(width: 32)
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(item.title)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    Text(item.preview)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .lineLimit(2)
-                    
-                    Text(item.formattedDate)
-                        .font(.caption2)
-                        .foregroundColor(.gray.opacity(0.8))
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-        }
-    }
-}
+// ════════════════════════════════════════════════════════════════════
+// MARK: - Home Action Card
+// ════════════════════════════════════════════════════════════════════
+// White square card with icon and label.
+// Visually separated from background with shadow.
+// Routes to IntentInputView().
 
-// MARK: - Quick Action Button
-struct QuickActionButton: View {
+struct HomeActionCard: View {
     let icon: String
-    let title: String
+    let label: String
+    let tintColor: Color
+    let iconColor: Color
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
+                // Icon in tinted rounded-rect container
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.blue.opacity(0.1))
-                        .frame(width: 48, height: 48)
-                    
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(
+                            LinearGradient(
+                                colors: [tintColor, tintColor.opacity(0.6)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 50, height: 50)
+
                     Image(systemName: icon)
-                        .font(.system(size: 20))
-                        .foregroundColor(.blue)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(iconColor)
                 }
-                
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
+
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(OKColors.textPrimary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+            .padding(.vertical, 18)
+            .padding(.horizontal, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+            )
         }
+        .buttonStyle(OperationButtonStyle())
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// MARK: - Operation Button Style (kept for backward compatibility)
+// ════════════════════════════════════════════════════════════════════
+
+struct OperationButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .opacity(configuration.isPressed ? 0.9 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Legacy Compatibility Aliases
+
+/// Kept for backward compatibility — wraps HomeActionCard
+struct PremiumQuickActionButton: View {
+    let icon: String
+    let title: String
+    let tintColor: Color
+    let iconColor: Color
+    let action: () -> Void
+    var isHighlighted: Bool = false
+
+    var body: some View {
+        HomeActionCard(
+            icon: icon,
+            label: title,
+            tintColor: tintColor,
+            iconColor: iconColor,
+            action: action
+        )
+    }
+}
+
+/// Kept for backward compatibility
+struct QuickActionButton: View {
+    let icon: String
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        HomeActionCard(
+            icon: icon,
+            label: title,
+            tintColor: OKColors.accentMuted,
+            iconColor: OKColors.intelligenceStart,
+            action: action
+        )
     }
 }
 
 #Preview {
-    HomeView()
-        .environmentObject(AppState())
+    NavigationStack {
+        HomeView()
+    }
+    .environmentObject(AppState())
+    .environmentObject(AppNavigationState())
 }

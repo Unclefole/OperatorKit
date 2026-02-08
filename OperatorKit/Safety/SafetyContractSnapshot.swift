@@ -149,6 +149,11 @@ public struct SafetyContractStatus {
     public let matchStatus: MatchStatus
     public let lastUpdateReason: String
     
+    /// Whether the contract is unchanged (alias for isValid)
+    public var isUnchanged: Bool {
+        isValid
+    }
+    
     public enum MatchStatus: String {
         case matched = "Matched"
         case modified = "Modified"
@@ -168,8 +173,8 @@ public struct SafetyContractStatus {
 
 // MARK: - Export Format
 
-/// Export format for safety contract status
-public struct SafetyContractExport: Codable {
+/// Export format for safety contract status (Safety layer snapshot)
+public struct SafetyContractSnapshotExport: Codable {
     public let schemaVersion: Int
     public let exportedAt: Date
     public let appVersion: String?
@@ -196,5 +201,35 @@ public struct SafetyContractExport: Codable {
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         return try encoder.encode(self)
+    }
+}
+
+// MARK: - Safety Contract Validator
+
+/// Convenience wrapper for safety contract validation
+public final class SafetyContractValidator {
+    
+    public static let shared = SafetyContractValidator()
+    
+    private init() {}
+    
+    /// Whether the safety contract is valid (hash matches expected)
+    public var isValid: Bool {
+        SafetyContractSnapshot.getStatus().isValid
+    }
+    
+    /// Whether the hash matches expected
+    public var hashMatches: Bool {
+        SafetyContractSnapshot.getStatus().matchStatus == .matched
+    }
+    
+    /// Current hash of the safety contract
+    public var currentHash: String? {
+        SafetyContractSnapshot.getStatus().currentHash
+    }
+    
+    /// Expected hash of the safety contract
+    public var expectedHash: String {
+        SafetyContractSnapshot.getStatus().expectedHash
     }
 }

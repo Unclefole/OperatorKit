@@ -1,0 +1,182 @@
+# ============================================================================
+# OPERATORKIT SWIFTLINT CONFIGURATION
+#
+# RELIABILITY INVARIANTS enforced at compile-time
+# ============================================================================
+
+# Paths to include
+included:
+  - OperatorKit
+  - OperatorCore
+
+# Paths to exclude
+excluded:
+  - Pods
+  - DerivedData
+  - .build
+  - OperatorKitTests
+  - OperatorCoreTests
+
+# ============================================================================
+# CUSTOM RULES — RELIABILITY INVARIANTS
+# ============================================================================
+
+custom_rules:
+  # -------------------------------------------------------------------------
+  # RELIABILITY: Empty Button Action
+  #
+  # VIOLATION: Button(action: {}) represents a silent interaction failure.
+  # Every tappable element MUST have deterministic behavior.
+  #
+  # FIX OPTIONS:
+  # 1. Wire navigation: Button(action: { router.navigate(.destination) })
+  # 2. Explicit disable: Button(action: {}).disabled(true)
+  # 3. Remove if placeholder
+  #
+  # EXCEPTION: DeterministicNavigationRow.swift (safeguard implementation)
+  # -------------------------------------------------------------------------
+  empty_button_action:
+    name: "Empty Button Action"
+    regex: 'Button\s*\(\s*action\s*:\s*\{\s*\}\s*\)'
+    capture_group: 0
+    message: "RELIABILITY VIOLATION: Empty button action creates inert UI. Wire navigation, explicitly disable, or remove."
+    severity: error
+    match_kinds:
+      - identifier
+      - keyword
+    excluded: ".*DeterministicNavigationRow\\.swift$"
+
+  # -------------------------------------------------------------------------
+  # RELIABILITY: Empty onTapGesture
+  # -------------------------------------------------------------------------
+  empty_tap_gesture:
+    name: "Empty Tap Gesture"
+    regex: '\.onTapGesture\s*\{\s*\}'
+    capture_group: 0
+    message: "RELIABILITY VIOLATION: Empty tap gesture creates inert UI."
+    severity: error
+
+  # -------------------------------------------------------------------------
+  # RELIABILITY: TODO without structured tag
+  #
+  # All TODOs must use structured format for tracking:
+  # // TODO: [RELIABILITY|SECURITY|PERFORMANCE]: Description
+  # -------------------------------------------------------------------------
+  untagged_todo:
+    name: "Untagged TODO"
+    regex: '//\s*TODO(?!:\s*\[)'
+    capture_group: 0
+    message: "TODOs must use structured tags: // TODO: [RELIABILITY|SECURITY|PERFORMANCE]: Description"
+    severity: warning
+
+# ============================================================================
+# STANDARD RULES CONFIGURATION
+# ============================================================================
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - discouraged_optional_boolean
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - discouraged_object_literal
+  - empty_collection_literal
+  - explicit_init
+  - fatal_error_message
+  - first_where
+  - identical_operands
+  - last_where
+  - legacy_multiple
+  - legacy_random
+  - literal_expression_end_indentation
+  - modifier_order
+  - multiline_arguments
+  - multiline_function_chains
+  - multiline_literal_brackets
+  - multiline_parameters
+  - operator_usage_whitespace
+  - overridden_super_call
+  - pattern_matching_keywords
+  - prefer_self_type_over_type_of_self
+  - prefer_zero_over_explicit_init
+  - private_action
+  - private_outlet
+  - prohibited_super_call
+  - reduce_into
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - single_test_class
+  - sorted_first_last
+  - static_operator
+  - toggle_bool
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - unowned_variable_capture
+  - untyped_error_in_catch
+  - vertical_parameter_alignment_on_call
+  - vertical_whitespace_closing_braces
+  - yoda_condition
+
+disabled_rules:
+  - line_length
+  - type_body_length
+  - file_length
+  - function_body_length
+
+# Rule configurations
+force_cast: error
+force_try: error
+force_unwrapping: error
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - x
+    - y
+    - i
+    - j
+    - to
+    - ok
+
+type_name:
+  min_length:
+    warning: 3
+    error: 2
+  max_length:
+    warning: 50
+    error: 60
+
+nesting:
+  type_level:
+    warning: 3
+    error: 5
+  function_level:
+    warning: 3
+    error: 5
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+  ignores_case_statements: true
+
+function_parameter_count:
+  warning: 6
+  error: 8
+
+large_tuple:
+  warning: 3
+  error: 4
+
+reporter: "xcode"

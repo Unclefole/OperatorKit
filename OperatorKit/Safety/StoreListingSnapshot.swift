@@ -82,7 +82,7 @@ public enum StoreListingSnapshot {
             lastUpdateReason: lastUpdateReason,
             lastUpdatePhase: lastUpdatePhase,
             isValid: verifyHash().isValid,
-            copyLengths: CopyLengths(
+            copyLengths: StoreListingSnapshotData.CopyLengths(
                 title: StoreListingCopy.title.count,
                 subtitle: StoreListingCopy.subtitle.count,
                 description: StoreListingCopy.description.count,

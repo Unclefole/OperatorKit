@@ -16,36 +16,56 @@ import StoreKit
 // See: docs/SAFETY_CONTRACT.md (unchanged)
 // ============================================================================
 
+// MARK: - Paywall Feature Flag (Inlined)
+// Paywall ENABLED for App Store release
+private let _paywallEnabledInRelease = true
+
+private var isPaywallEnabled: Bool {
+    // Paywall enabled in both DEBUG and RELEASE
+    return _paywallEnabledInRelease
+}
+
 struct UpgradeView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
     @StateObject private var purchaseController = PurchaseController.shared
     @StateObject private var entitlementManager = EntitlementManager.shared
-    
+
     @State private var selectedProductId: String?
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
-    
+
+    @ViewBuilder
     var body: some View {
+        // HARD GATE: If paywall is disabled, show nothing and dismiss
+        if !isPaywallEnabled {
+            Color.clear
+                .onAppear { dismiss() }
+        } else {
+            paywallContent
+        }
+    }
+
+    private var paywallContent: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
                     headerSection
-                    
+
                     // Features
                     featuresSection
-                    
+
                     // Products
                     productsSection
-                    
+
                     // Purchase buttons
                     purchaseSection
-                    
+
                     // Privacy note
                     PrivacyNoteView()
                         .padding(.top, 8)
-                    
+
                     // Legal links
                     legalLinksSection
                 }
@@ -146,25 +166,25 @@ struct UpgradeView: View {
     }
     
     // MARK: - Products Section
-    
+
     private var productsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Choose a Plan")
-                .font(.headline)
-            
             if entitlementManager.isLoading {
+                // Loading state - show spinner only
                 HStack {
                     Spacer()
                     ProgressView()
-                        .padding()
+                        .padding(32)
                     Spacer()
                 }
             } else if entitlementManager.products.isEmpty {
-                Text("Unable to load subscription options. Please try again later.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding()
+                // Failed/empty state - clean message, no broken UI
+                subscriptionsUnavailableView
             } else {
+                // Success - show plans
+                Text("Choose a Plan")
+                    .font(.headline)
+
                 ForEach(entitlementManager.products, id: \.id) { product in
                     PriceBadge(
                         product: product,
@@ -177,23 +197,52 @@ struct UpgradeView: View {
             }
         }
     }
-    
-    // MARK: - Purchase Section
-    
-    private var purchaseSection: some View {
-        VStack(spacing: 12) {
-            // Subscribe button
-            PurchaseButton(
-                title: "Subscribe",
-                isLoading: purchaseController.purchaseState == .purchasing,
-                isDisabled: selectedProductId == nil || entitlementManager.products.isEmpty
-            ) {
+
+    /// Clean fallback when products fail to load
+    private var subscriptionsUnavailableView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary)
+
+            Text("Subscriptions temporarily unavailable.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button("Try Again") {
                 Task {
-                    await purchase()
+                    await entitlementManager.fetchProducts()
                 }
             }
-            
-            // Restore button
+            .font(.subheadline)
+            .foregroundColor(.blue)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Subscriptions temporarily unavailable. Tap to try again.")
+    }
+    
+    // MARK: - Purchase Section
+
+    @ViewBuilder
+    private var purchaseSection: some View {
+        VStack(spacing: 12) {
+            // Only show Subscribe button if products loaded successfully
+            if !entitlementManager.products.isEmpty {
+                PurchaseButton(
+                    title: "Subscribe",
+                    isLoading: purchaseController.purchaseState == .purchasing,
+                    isDisabled: selectedProductId == nil
+                ) {
+                    Task {
+                        await purchase()
+                    }
+                }
+            }
+
+            // Restore button always available (might restore even if products fail to load)
             SecondaryButton(
                 title: "Restore Purchases",
                 icon: "arrow.clockwise",

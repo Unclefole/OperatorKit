@@ -80,6 +80,9 @@ public enum AppStoreMetadata {
     /// Keywords (100 characters max total, comma-separated)
     public static let keywords = "productivity,email,draft,reminder,calendar,privacy,on-device,assistant,task,planner"
     
+    /// Alias for fullDescription (for compatibility)
+    public static var description: String { fullDescription }
+    
     // MARK: - What's New
     
     /// Version release notes template

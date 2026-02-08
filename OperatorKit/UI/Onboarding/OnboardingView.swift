@@ -30,9 +30,8 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            Color(.systemBackground)
-                .ignoresSafeArea()
+            // Background - using design system
+            OKBackgroundView()
             
             VStack(spacing: 0) {
                 // Skip button
@@ -127,9 +126,7 @@ struct OnboardingView: View {
 
 private struct WhatItDoesPage: View {
     var body: some View {
-        OnboardingPageTemplate(
-            icon: "app.badge.checkmark",
-            iconColor: .blue,
+        OnboardingPageTemplateWithLogo(
             title: "Welcome to OperatorKit",
             subtitle: "Your on-device productivity assistant"
         ) {
@@ -292,7 +289,8 @@ private struct DataAccessRow: View {
 
 private struct ChoosePlanPage: View {
     @Binding var showPricing: Bool
-    
+    @State private var selectedPlan: SubscriptionTier = .free
+
     var body: some View {
         OnboardingPageTemplate(
             icon: "star.circle",
@@ -301,21 +299,51 @@ private struct ChoosePlanPage: View {
             subtitle: "Start free, upgrade anytime"
         ) {
             VStack(spacing: 16) {
-                PlanSummaryCard(
-                    tier: .free,
-                    highlight: "Start here"
-                )
-                
-                PlanSummaryCard(
-                    tier: .pro,
-                    highlight: "Most popular"
-                )
-                
-                PlanSummaryCard(
-                    tier: .team,
-                    highlight: "For teams"
-                )
-                
+                // Free - always tappable, no StoreKit dependency
+                Button {
+                    selectedPlan = .free
+                    #if DEBUG
+                    print("[Onboarding] ✅ Selected plan: Free")
+                    #endif
+                } label: {
+                    PlanSummaryCard(
+                        tier: .free,
+                        highlight: "Start here",
+                        isSelected: selectedPlan == .free
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Pro
+                Button {
+                    selectedPlan = .pro
+                    #if DEBUG
+                    print("[Onboarding] ✅ Selected plan: Pro")
+                    #endif
+                } label: {
+                    PlanSummaryCard(
+                        tier: .pro,
+                        highlight: "Most popular",
+                        isSelected: selectedPlan == .pro
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // Team
+                Button {
+                    selectedPlan = .team
+                    #if DEBUG
+                    print("[Onboarding] ✅ Selected plan: Team")
+                    #endif
+                } label: {
+                    PlanSummaryCard(
+                        tier: .team,
+                        highlight: "For teams",
+                        isSelected: selectedPlan == .team
+                    )
+                }
+                .buttonStyle(.plain)
+
                 Button {
                     showPricing = true
                     ConversionLedger.shared.recordEvent(.paywallShown)
@@ -325,6 +353,19 @@ private struct ChoosePlanPage: View {
                 }
                 .buttonStyle(.bordered)
                 .padding(.top, 8)
+
+                // Info text
+                if selectedPlan == .free {
+                    Text("Free includes 5 drafted outcomes per week. Upgrade anytime.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("You can complete purchase after onboarding.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
             }
         }
     }
@@ -333,14 +374,29 @@ private struct ChoosePlanPage: View {
 private struct PlanSummaryCard: View {
     let tier: SubscriptionTier
     let highlight: String
-    
+    let isSelected: Bool
+
     var body: some View {
         HStack {
+            // Selection indicator
+            ZStack {
+                Circle()
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 2)
+                    .frame(width: 24, height: 24)
+
+                if isSelected {
+                    Circle()
+                        .fill(Color.blue)
+                        .frame(width: 14, height: 14)
+                }
+            }
+
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(tier.displayName)
                         .font(.headline)
-                    
+                        .foregroundColor(.primary)
+
                     Text(highlight)
                         .font(.caption)
                         .padding(.horizontal, 6)
@@ -349,20 +405,29 @@ private struct PlanSummaryCard: View {
                         .foregroundColor(tier == .pro ? .blue : .secondary)
                         .cornerRadius(4)
                 }
-                
+
                 Text(TierMatrix.shortDescription(for: tier))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
-            
-            Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
+
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.blue)
+            } else {
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+            }
         }
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(isSelected ? Color.blue.opacity(0.05) : Color.gray.opacity(0.05))
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+        )
     }
 }
 
@@ -469,16 +534,53 @@ private struct OnboardingPageTemplate<Content: View>: View {
 private struct BulletPoint: View {
     let icon: String
     let text: String
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundStyle(OKColors.operatorGradient)
                 .frame(width: 24)
-            
+
             Text(text)
-                .font(.subheadline)
+                .font(OKTypography.subheadline())
+                .foregroundColor(OKColors.textPrimary)
         }
+    }
+}
+
+// MARK: - Template with Logo (Welcome Page)
+
+private struct OnboardingPageTemplateWithLogo<Content: View>: View {
+    let title: String
+    let subtitle: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            // OperatorKit Logo
+            OperatorKitLogoView(size: .extraLarge, showText: true)
+
+            // Text
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(OKTypography.title())
+                    .foregroundColor(OKColors.textPrimary)
+
+                Text(subtitle)
+                    .font(OKTypography.subheadline())
+                    .foregroundColor(OKColors.textSecondary)
+            }
+
+            // Content
+            content
+                .padding(.horizontal)
+
+            Spacer()
+            Spacer()
+        }
+        .padding()
     }
 }
 

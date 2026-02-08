@@ -52,7 +52,7 @@ struct ReferralView: View {
             }
             .sheet(isPresented: $showingShare) {
                 if let code = codeStore.currentCode {
-                    ShareSheet(activityItems: [shareMessage(code: code.code)])
+                    ShareSheet(items: [shareMessage(code: code.code)])
                 }
             }
         }

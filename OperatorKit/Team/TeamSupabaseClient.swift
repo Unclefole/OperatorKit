@@ -1,16 +1,28 @@
 import Foundation
 
 // ============================================================================
-// TEAM SUPABASE CLIENT (Phase 10E)
+// ⚠️  AIR-GAP EXCEPTION: TEAM SUPABASE CLIENT (Phase 10E)
+// ============================================================================
 //
-// Extends SupabaseClient for team-specific operations.
-// All network calls are user-initiated only.
+// THIS FILE IS PART OF THE DOCUMENTED SYNC EXCEPTION TO THE AIR-GAP CLAIM.
+//
+// CLAIM-001 states: "OperatorKit Core Verification Mode is fully air-gapped.
+// Sync is an explicit, user-initiated, OFF-by-default exception."
+//
+// This file extends SupabaseClient for team-specific operations.
+// Network calls are permitted because:
+//   1. Team features require Team subscription (opt-in)
+//   2. All operations are user-initiated only
+//   3. Artifacts are metadata-only (validated by TeamArtifactValidator)
+//   4. No execution enforcement — roles are display-only
 //
 // INVARIANT: No background sync
 // INVARIANT: No execution enforcement
 // INVARIANT: Metadata-only artifacts
+// INVARIANT: User-initiated only
 //
 // See: docs/SAFETY_CONTRACT.md (Section 14)
+// See: docs/CLAIM_REGISTRY.md (CLAIM-001, CLAIM-026)
 // ============================================================================
 
 /// Team-specific Supabase operations
@@ -185,11 +197,13 @@ public final class TeamSupabaseClient {
         guard supabase.isSignedIn else { throw TeamError.notSignedIn }
         
         let inviteCode = UUID().uuidString.prefix(8).lowercased()
-        let expiresAt = Calendar.current.date(
+        guard let expiresAt = Calendar.current.date(
             byAdding: .day,
             value: TeamSafetyConfig.inviteExpirationDays,
             to: Date()
-        )!
+        ) else {
+            throw TeamError.invalidDateCalculation
+        }
         
         let inviteData: [String: Any] = [
             "id": UUID().uuidString,
@@ -393,19 +407,24 @@ extension SupabaseClient {
         guard isConfigured else { throw SyncError.notConfigured }
         guard isSignedIn else { throw SyncError.notSignedIn }
         guard let restURL = SupabaseConfig.restURL else { throw SyncError.notConfigured }
-        
-        var components = URLComponents(url: restURL.appendingPathComponent(table), resolvingAgainstBaseURL: false)!
+
+        guard var components = URLComponents(url: restURL.appendingPathComponent(table), resolvingAgainstBaseURL: false) else {
+            throw SyncError.invalidURL(table)
+        }
         components.queryItems = filter.split(separator: "&").map { part in
             let kv = part.split(separator: "=", maxSplits: 1)
             return URLQueryItem(name: String(kv[0]), value: kv.count > 1 ? String(kv[1]) : nil)
         }
         components.queryItems?.append(URLQueryItem(name: "select", value: select))
-        
-        var request = URLRequest(url: components.url!)
+
+        guard let url = components.url else {
+            throw SyncError.invalidURL(table)
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = "GET"
         addAuthHeaders(to: &request)
         
-        let (data, response) = try await performRequest(request)
+        let (data, response) = try await performTeamRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode < 400 else {
             throw SyncError.serverError((response as? HTTPURLResponse)?.statusCode ?? 0, "Query failed")
@@ -428,7 +447,7 @@ extension SupabaseClient {
         addAuthHeaders(to: &request)
         request.httpBody = try JSONSerialization.data(withJSONObject: data)
         
-        let (_, response) = try await performRequest(request)
+        let (_, response) = try await performTeamRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode < 400 else {
             throw SyncError.serverError((response as? HTTPURLResponse)?.statusCode ?? 0, "Insert failed")
@@ -440,20 +459,25 @@ extension SupabaseClient {
         guard isConfigured else { throw SyncError.notConfigured }
         guard isSignedIn else { throw SyncError.notSignedIn }
         guard let restURL = SupabaseConfig.restURL else { throw SyncError.notConfigured }
-        
-        var components = URLComponents(url: restURL.appendingPathComponent(table), resolvingAgainstBaseURL: false)!
+
+        guard var components = URLComponents(url: restURL.appendingPathComponent(table), resolvingAgainstBaseURL: false) else {
+            throw SyncError.invalidURL(table)
+        }
         components.queryItems = filter.split(separator: "&").map { part in
             let kv = part.split(separator: "=", maxSplits: 1)
             return URLQueryItem(name: String(kv[0]), value: kv.count > 1 ? String(kv[1]) : nil)
         }
-        
-        var request = URLRequest(url: components.url!)
+
+        guard let url = components.url else {
+            throw SyncError.invalidURL(table)
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         addAuthHeaders(to: &request)
         request.httpBody = try JSONSerialization.data(withJSONObject: data)
         
-        let (_, response) = try await performRequest(request)
+        let (_, response) = try await performTeamRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode < 400 else {
             throw SyncError.serverError((response as? HTTPURLResponse)?.statusCode ?? 0, "Update failed")
@@ -465,18 +489,23 @@ extension SupabaseClient {
         guard isConfigured else { throw SyncError.notConfigured }
         guard isSignedIn else { throw SyncError.notSignedIn }
         guard let restURL = SupabaseConfig.restURL else { throw SyncError.notConfigured }
-        
-        var components = URLComponents(url: restURL.appendingPathComponent(table), resolvingAgainstBaseURL: false)!
+
+        guard var components = URLComponents(url: restURL.appendingPathComponent(table), resolvingAgainstBaseURL: false) else {
+            throw SyncError.invalidURL(table)
+        }
         components.queryItems = filter.split(separator: "&").map { part in
             let kv = part.split(separator: "=", maxSplits: 1)
             return URLQueryItem(name: String(kv[0]), value: kv.count > 1 ? String(kv[1]) : nil)
         }
-        
-        var request = URLRequest(url: components.url!)
+
+        guard let url = components.url else {
+            throw SyncError.invalidURL(table)
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         addAuthHeaders(to: &request)
         
-        let (_, response) = try await performRequest(request)
+        let (_, response) = try await performTeamRequest(request)
         
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode < 400 else {
             throw SyncError.serverError((response as? HTTPURLResponse)?.statusCode ?? 0, "Delete failed")
@@ -489,8 +518,17 @@ extension SupabaseClient {
         // Token will be added by session
     }
     
-    func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
-        // Delegate to the internal URLSession
-        try await URLSession.shared.data(for: request)
+    private func performTeamRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        // SECURITY: Enforce sync feature flag before ANY network call
+        // This mirrors SupabaseClient.assertSyncEnabled() which is private
+        guard SyncFeatureFlag.isEnabled else {
+            logDebug("TEAM SYNC BLOCKED: SyncFeatureFlag is disabled", category: .flow)
+            throw SyncError.notConfigured
+        }
+        guard UserDefaults.standard.bool(forKey: SyncFeatureFlag.storageKey) else {
+            logDebug("TEAM SYNC BLOCKED: User has not enabled sync", category: .flow)
+            throw SyncError.notConfigured
+        }
+        return try await URLSession.shared.data(for: request)
     }
 }

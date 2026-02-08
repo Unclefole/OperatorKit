@@ -1,42 +1,120 @@
 import SwiftUI
+import Combine
 #if canImport(UIKit)
 import UIKit
 #endif
 
+// MARK: - Paywall Gate (Inlined)
+// Paywall ENABLED for App Store release
+private let _intentPaywallEnabled: Bool = true
+
+// ============================================================================
+// INTENT INPUT VIEW — USER INPUT GATEWAY
+//
+// ARCHITECTURAL INVARIANT:
+// ─────────────────────────
+// OperatorKit NEVER executes synthetic, seeded, or non-user-authored intent.
+// ALL operations must originate from explicit user input.
+//
+// REQUIREMENTS:
+// ✅ User can type freely
+// ✅ Placeholder is NOT executable text
+// ✅ Continue enables ONLY after real non-empty input
+// ✅ Cancel clears state
+// ✅ Voice fills the same buffer (no auto-submit)
+// ✅ No network call triggered on typing
+// ✅ No background task created until explicit Continue tap
+//
+// APP REVIEW SAFETY:
+// ❌ No hidden prompts
+// ❌ No auto-generated actions
+// ❌ No simulated assistant behavior
+// ❌ No synthetic intent injection
+// ============================================================================
+
 struct IntentInputView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var nav: AppNavigationState
+    @StateObject private var speech = SpeechRecognizer()
     @State private var inputText: String = ""
-    @State private var isRecording: Bool = false
-    @State private var showTranscript: Bool = false
     @State private var hasAcknowledgedSiri: Bool = false
-    @State private var isProcessing: Bool = false  // Phase 5B: Loading state
-    @State private var showingUpgrade: Bool = false  // Phase 10A: Paywall sheet
-    @State private var showingPolicyEditor: Bool = false  // Phase 10C: Policy editor
-    
+    @State private var isProcessing: Bool = false
+    @State private var showingUpgrade: Bool = false
+    @State private var showingPolicyEditor: Bool = false
+    @State private var showingPermissionAlert: Bool = false
+
     /// Policy evaluator (Phase 10C)
     private let policyEvaluator = PolicyEvaluator()
-    
+
     /// Whether this view was launched from Siri
     private var isFromSiri: Bool {
         appState.wasLaunchedFromSiri
     }
-    
+
     /// Current execution limit decision (Phase 10A)
     private var executionLimitDecision: LimitDecision {
         appState.checkExecutionLimit()
     }
-    
+
     /// Current policy decision (Phase 10C)
     private var policyDecision: PolicyDecision {
         policyEvaluator.canStartExecution()
     }
-    
+
+    /// Trimmed input text for validation
+    private var trimmedInput: String {
+        inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Whether input is valid (non-empty after trimming)
+    private var hasValidInput: Bool {
+        !trimmedInput.isEmpty
+    }
+
+    // MARK: - Input Validation (Safe, No Crash)
+
+    /// Generic/broad request keywords that require context
+    private static let broadRequestKeywords: Set<String> = [
+        "plan", "organize", "help", "do", "make", "create", "handle",
+        "something", "stuff", "thing", "anything", "everything"
+    ]
+
+    /// Validate request before processing
+    /// INVARIANT: This method NEVER crashes. Returns .invalid with reasons instead.
+    private func validateRequest(text: String, hasContext: Bool) -> InputValidationResult {
+        var reasons: [InputValidationReason] = []
+
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Check 1: Empty request
+        if trimmed.isEmpty {
+            reasons.append(.emptyRequest)
+            return .invalid(reasons)
+        }
+
+        // Check 2: Request too broad (generic words without specificity)
+        let lowercased = trimmed.lowercased()
+        let words = lowercased.components(separatedBy: .whitespacesAndNewlines)
+        let isBroad = words.count < 5 && Self.broadRequestKeywords.contains(where: { lowercased.contains($0) })
+
+        if isBroad && !hasContext {
+            reasons.append(.requestTooBroad)
+            reasons.append(.noContextSelected)
+        }
+
+        if reasons.isEmpty {
+            return .valid
+        }
+
+        return .invalid(reasons)
+    }
+
     /// Why the continue button is disabled (Phase 5B)
     private var disabledReason: String? {
         if isProcessing {
-            return nil // Button shows loading, not disabled
+            return nil
         }
-        if inputText.isEmpty {
+        if !hasValidInput {
             return "Enter a request to continue"
         }
         if isFromSiri && !hasAcknowledgedSiri {
@@ -44,30 +122,25 @@ struct IntentInputView: View {
         }
         return nil
     }
-    
+
     var body: some View {
         ZStack {
-            // Background
-            Color(UIColor.systemGroupedBackground)
+            // Background - Pure white
+            OKColors.backgroundPrimary
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                // Flow Step Header (Phase 5C)
                 FlowStepHeaderView(
                     step: .request,
                     subtitle: "Tell OperatorKit what you need"
                 )
-                
-                // Status Strip (Phase 5C)
+
                 FlowStatusStripView(onRecoveryAction: handleRecoveryAction)
-                
-                // Header
+
                 headerView
-                
-                // Main Content
+
                 ScrollView {
-                    VStack(spacing: 24) {
-                        // Execution Limit Callout (Phase 10A)
+                    VStack(spacing: OKSpacing.xxl) {
                         if !executionLimitDecision.allowed {
                             LimitCalloutView(
                                 decision: executionLimitDecision,
@@ -76,8 +149,7 @@ struct IntentInputView: View {
                                 }
                             )
                         }
-                        
-                        // Policy Callout (Phase 10C)
+
                         if executionLimitDecision.allowed && !policyDecision.allowed {
                             PolicyCalloutView(
                                 decision: policyDecision,
@@ -86,29 +158,21 @@ struct IntentInputView: View {
                                 }
                             )
                         }
-                        
-                        // Siri Banner (when launched from Siri)
+
                         if isFromSiri {
                             siriBanner
                         }
-                        
-                        // Intent Input Card
+
                         intentInputCard
-                        
-                        // Transcript Bar (shows when voice input is used)
-                        if showTranscript {
-                            transcriptBar
-                        }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
+                    .padding(.horizontal, OKSpacing.xl)
+                    .padding(.top, OKSpacing.lg)
                     .padding(.bottom, 200)
                 }
-                
+
                 Spacer()
             }
-            
-            // Bottom Section
+
             VStack {
                 Spacer()
                 bottomInputSection
@@ -116,81 +180,105 @@ struct IntentInputView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            // Prefill from Siri if launched that way
+            // Prefill from Siri if launched that way (user-originated via Siri)
             if let siriText = appState.siriPrefillText, !siriText.isEmpty {
                 inputText = siriText
             }
+            // INVARIANT: inputText starts empty unless Siri-originated
+            // SAFETY: Log violation instead of crashing
+            #if DEBUG
+            if !isFromSiri && !inputText.isEmpty {
+                // Log but do not crash - clear the unexpected input
+                logError("INVARIANT: Input should be empty on fresh launch, clearing unexpected content")
+                inputText = ""
+            }
+            #endif
+        }
+        // LIVE TRANSCRIPT SYNC: Words appear as user speaks
+        .onReceive(speech.$transcript) { newTranscript in
+            if !newTranscript.isEmpty {
+                inputText = newTranscript
+            }
+        }
+        // Handle speech recognition errors
+        .onReceive(speech.$error) { speechError in
+            if speechError != nil {
+                showingPermissionAlert = true
+            }
+        }
+        .alert("Microphone Access Required", isPresented: $showingPermissionAlert) {
+            Button("Open Settings") {
+                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsURL)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(speech.error?.errorDescription ?? "Please enable microphone and speech recognition in Settings to use voice input.")
         }
         .onDisappear {
-            // Clear Siri state when leaving (user has reviewed)
             if isFromSiri && hasAcknowledgedSiri {
                 SiriRoutingBridge.shared.clearRouteState()
             }
         }
         .sheet(isPresented: $showingUpgrade) {
-            UpgradeView()
-                .environmentObject(appState)
+            if _intentPaywallEnabled {
+                UpgradeView()
+                    .environmentObject(appState)
+            } else {
+                // Fallback: Never show blank screen
+                ProComingSoonView(isPresented: $showingUpgrade)
+            }
         }
         .sheet(isPresented: $showingPolicyEditor) {
             PolicyEditorView()
         }
     }
-    
+
     // MARK: - Header
+    /// Simple header with back button, logo, and home button
     private var headerView: some View {
         HStack {
             Button(action: {
-                // Clear Siri state on back
                 if isFromSiri {
                     SiriRoutingBridge.shared.clearRouteState()
                 }
-                appState.navigateBack()
+                nav.goBack()
             }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
-            VStack(spacing: 2) {
-                Text("New Request")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                // Show Siri source indicator
-                if let source = appState.siriRouteSource {
-                    HStack(spacing: 4) {
-                        Image(systemName: source.icon)
-                            .font(.system(size: 10))
-                        Text("via \(source.displayName)")
-                            .font(.caption2)
-                    }
-                    .foregroundColor(.blue)
-                }
-            }
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
+
             Button(action: {
-                // Clear Siri state on close
                 if isFromSiri {
                     SiriRoutingBridge.shared.clearRouteState()
                 }
-                appState.returnHome()
+                nav.goHome()
             }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.gray)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
-    
+
+    /// Header title based on context
+    private var headerTitle: String {
+        "New Request"
+    }
+
     // MARK: - Siri Banner
-    /// Banner shown when launched from Siri
-    /// INVARIANT: User must acknowledge and tap Continue - no auto-advance
+
     private var siriBanner: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
@@ -202,39 +290,37 @@ struct IntentInputView: View {
                             endPoint: .bottomTrailing
                         ))
                         .frame(width: 40, height: 40)
-                    
+
                     Image(systemName: "mic.fill")
                         .font(.system(size: 18))
                         .foregroundColor(.white)
                 }
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Siri Started This Request")
                         .font(.headline)
                         .fontWeight(.semibold)
-                    
+
                     Text("Check that this is what you intended")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
-                
+
                 Spacer()
             }
-            
-            // Invariant explanation
+
             HStack(spacing: 8) {
                 Image(systemName: "shield.checkered")
                     .font(.system(size: 14))
                     .foregroundColor(.green)
-                
+
                 Text("Siri can only open OperatorKit. You decide what happens next.")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Spacer()
             }
-            
-            // Acknowledge checkbox (optional but good UX)
+
             if !hasAcknowledgedSiri {
                 Button(action: {
                     withAnimation(.spring(response: 0.3)) {
@@ -244,7 +330,7 @@ struct IntentInputView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle")
                             .font(.system(size: 16))
-                        
+
                         Text("I've reviewed this request")
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -257,7 +343,7 @@ struct IntentInputView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 16))
                         .foregroundColor(.green)
-                    
+
                     Text("Reviewed — ready to continue")
                         .font(.subheadline)
                         .foregroundColor(.green)
@@ -279,90 +365,81 @@ struct IntentInputView: View {
                 .stroke(Color.blue.opacity(0.2), lineWidth: 1)
         )
     }
-    
+
     // MARK: - Intent Input Card
+
     private var intentInputCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: OKSpacing.lg) {
             HStack {
-                // App Icon
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.8)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                    RoundedRectangle(cornerRadius: OKRadius.md)
+                        .fill(OKColors.operatorGradient)
                         .frame(width: 48, height: 48)
-                    
+
                     Image(systemName: "sparkles")
                         .font(.system(size: 20))
                         .foregroundColor(.white)
                 }
-                
+
                 Text("OperatorKit")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
+                    .font(OKTypography.title())
+                    .foregroundColor(OKColors.textPrimary)
+
                 Spacer()
-                
-                // Siri badge
+
                 if isFromSiri {
                     HStack(spacing: 4) {
                         Image(systemName: "mic.fill")
                             .font(.system(size: 10))
                         Text("Siri")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
+                            .font(OKTypography.caption())
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.blue, Color.purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(10)
+                    .padding(.horizontal, OKSpacing.sm)
+                    .padding(.vertical, OKSpacing.xs)
+                    .background(OKColors.operatorGradient)
+                    .cornerRadius(OKRadius.sm)
                 }
             }
-            
-            // Large Text Input Display
-            VStack(alignment: .leading, spacing: 12) {
-                if inputText.isEmpty {
-                    Text("What do you want me to handle?")
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.primary)
-                } else {
+
+            // Large Text Display with Placeholder
+            VStack(alignment: .leading, spacing: OKSpacing.md) {
+                // Show placeholder when empty, actual text when not
+                if hasValidInput {
                     Text(inputText)
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .font(OKTypography.largeTitle())
+                        .foregroundColor(OKColors.textPrimary)
+                } else {
+                    Text("What do you want me to handle?")
+                        .font(OKTypography.largeTitle())
+                        .foregroundColor(OKColors.textPlaceholder)
                 }
-                
-                // Placeholder subtext (hide when prefilled from Siri)
-                if !isFromSiri || inputText.isEmpty {
+
+                // Hint text (only show when empty and not from Siri)
+                if !hasValidInput && !isFromSiri {
                     Text("Try: \"Send a follow-up email to my last meeting\"")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .font(OKTypography.subheadline())
+                        .foregroundColor(OKColors.textSecondary)
                 }
             }
-            .padding(.vertical, 16)
-            
-            // Waveform (when recording)
-            if isRecording {
+            .padding(.vertical, OKSpacing.lg)
+
+            if speech.isRecording {
                 waveformView
             }
         }
-        .padding(24)
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .padding(OKSpacing.xxl)
+        .background(OKColors.backgroundElevated)
+        .cornerRadius(OKRadius.xl)
+        .shadow(color: OKShadow.card, radius: 8, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: OKRadius.xl)
+                .stroke(OKColors.borderSubtle, lineWidth: 1)
+        )
     }
-    
+
     // MARK: - Waveform View
+
     private var waveformView: some View {
         HStack(spacing: 3) {
             ForEach(0..<30, id: \.self) { index in
@@ -374,105 +451,79 @@ struct IntentInputView: View {
         .frame(height: 50)
         .padding(.vertical, 8)
     }
-    
-    // MARK: - Transcript Bar
-    private var transcriptBar: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "waveform")
-                .font(.system(size: 16))
-                .foregroundColor(.blue)
-            
-            Text("\"Send a follow-up email to my client about the meeting yesterday\"")
-                .font(.subheadline)
-                .foregroundColor(.primary)
-                .lineLimit(2)
-            
-            Spacer()
-            
-            Button(action: {
-                showTranscript = false
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.gray.opacity(0.5))
-            }
-        }
-        .padding(16)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
-    }
-    
+
     // MARK: - Bottom Input Section
+
     private var bottomInputSection: some View {
         VStack(spacing: 16) {
-            // Text Input Field
             HStack {
                 TextField("Type or tap mic to speak...", text: $inputText)
-                    .font(.body)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .background(Color.white)
-                    .cornerRadius(24)
-                    .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
-                
-                // Microphone Button
-                Button(action: {
-                    // Simulate voice input
-                    isRecording.toggle()
-                    if !isRecording {
-                        inputText = "Send a follow-up email to my client about the meeting yesterday"
-                        showTranscript = true
+                    .font(OKTypography.body())
+                    .foregroundColor(OKColors.textPrimary)
+                    .padding(.horizontal, OKSpacing.lg)
+                    .padding(.vertical, OKSpacing.lg)
+                    .background(OKColors.backgroundTertiary)
+                    .cornerRadius(OKRadius.lg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: OKRadius.lg)
+                            .stroke(OKColors.borderDefault, lineWidth: 1)
+                    )
+
+                // Microphone Button - LIVE VOICE TRANSCRIPTION
+                // INVARIANT: Voice input populates inputText binding via speech.transcript
+                // User must explicitly tap Continue after transcription
+                Button {
+                    Task {
+                        await speech.toggle()
                     }
-                }) {
+                } label: {
                     ZStack {
                         Circle()
-                            .fill(isRecording ? Color.red : Color.blue)
+                            .fill(speech.isRecording ? AnyShapeStyle(Color.red.opacity(0.12)) : AnyShapeStyle(OKColors.operatorGradientSoft))
                             .frame(width: 56, height: 56)
-                        
-                        Image(systemName: isRecording ? "stop.fill" : "mic.fill")
-                            .font(.system(size: 22))
-                            .foregroundColor(.white)
+                            .shadow(color: speech.isRecording ? Color.red.opacity(0.2) : OKShadow.glow, radius: 16, x: 0, y: 0)
+
+                        Image(systemName: speech.isRecording ? "stop.circle.fill" : "mic.fill")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(speech.isRecording ? AnyShapeStyle(Color.red) : AnyShapeStyle(OKColors.operatorGradient))
                     }
                 }
             }
-            
-            // Action Buttons
-            HStack(spacing: 12) {
+
+            HStack(spacing: OKSpacing.md) {
                 Button(action: {
-                    // Clear Siri state on cancel
-                    if isFromSiri {
-                        SiriRoutingBridge.shared.clearRouteState()
-                    }
-                    appState.navigateBack()
+                    cancelAndClear()
                 }) {
                     Text("Cancel")
-                        .font(.body)
+                        .font(OKTypography.body())
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColors.textPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                        .padding(.vertical, OKSpacing.lg)
+                        .background(OKColors.backgroundElevated)
+                        .cornerRadius(OKRadius.md)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: OKRadius.md)
+                                .stroke(OKColors.borderDefault, lineWidth: 1)
+                        )
                 }
-                
+
                 Button(action: {
                     processIntent()
                 }) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: OKSpacing.sm) {
                         if isProcessing {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .scaleEffect(0.8)
                             Text("Processing...")
-                                .font(.body)
+                                .font(OKTypography.body())
                                 .fontWeight(.semibold)
                         } else {
                             Text(continueButtonText)
-                                .font(.body)
+                                .font(OKTypography.body())
                                 .fontWeight(.semibold)
-                            
+
                             if isFromSiri && !hasAcknowledgedSiri {
                                 Image(systemName: "exclamationmark.circle.fill")
                                     .font(.system(size: 14))
@@ -481,56 +532,55 @@ struct IntentInputView: View {
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(continueButtonEnabled && !isProcessing ? Color.blue : Color.gray.opacity(0.4))
-                    .cornerRadius(12)
+                    .padding(.vertical, OKSpacing.lg)
+                    .background(continueButtonEnabled && !isProcessing ? OKColors.operatorGradient : LinearGradient(colors: [OKColors.iconMuted], startPoint: .leading, endPoint: .trailing))
+                    .cornerRadius(OKRadius.md)
                 }
                 .disabled(!continueButtonEnabled || isProcessing)
                 .accessibilityLabel(continueButtonAccessibilityLabel)
                 .accessibilityHint(disabledReason ?? "Tap to continue to context selection")
             }
-            
-            // Why blocked explanation (Phase 5B)
+
             if let reason = disabledReason {
                 HStack(spacing: 6) {
                     Image(systemName: "info.circle")
                         .font(.system(size: 12))
                     Text(reason)
-                        .font(.caption)
+                        .font(OKTypography.caption())
                 }
-                .foregroundColor(.blue)
+                .foregroundStyle(OKColors.operatorGradient)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 20)
+        .padding(.horizontal, OKSpacing.xl)
+        .padding(.vertical, OKSpacing.xl)
         .background(
-            Color(UIColor.systemGroupedBackground)
+            OKColors.backgroundPrimary
                 .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var continueButtonText: String {
         if isFromSiri && !hasAcknowledgedSiri {
             return "Review First"
         }
         return "Continue"
     }
-    
+
     private var continueButtonEnabled: Bool {
-        // Must have text
-        guard !inputText.isEmpty else { return false }
-        
+        // SAFETY: Button is disabled ONLY for truly empty input
+        // Broad requests are allowed - they'll be validated and routed to fallback
+        guard hasValidInput else { return false }
+
         // If from Siri, must acknowledge
         if isFromSiri && !hasAcknowledgedSiri {
             return false
         }
-        
+
         return true
     }
-    
-    /// Accessibility label for continue button (Phase 5C)
+
     private var continueButtonAccessibilityLabel: String {
         if isProcessing {
             return "Processing request"
@@ -540,12 +590,24 @@ struct IntentInputView: View {
         }
         return "Continue to context selection"
     }
-    
-    // MARK: - Recovery Action Handler (Phase 5C)
+
+    // MARK: - Actions
+
+    /// Cancel and clear all state
+    private func cancelAndClear() {
+        inputText = ""
+        speech.stop()
+        if isFromSiri {
+            SiriRoutingBridge.shared.clearRouteState()
+        }
+        nav.goBack()
+    }
+
+    /// Recovery action handler (Phase 5C)
     private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
         switch action {
         case .goHome:
-            appState.returnHome()
+            nav.goHome()
         case .retryCurrentStep:
             appState.clearError()
         case .editRequest:
@@ -555,64 +617,80 @@ struct IntentInputView: View {
             appState.clearError()
         }
     }
-    
-    // MARK: - Actions
+
+    /// Process user intent
+    /// INVARIANT: Only executes with valid, user-authored input
+    /// SAFETY: This method NEVER crashes. Invalid input routes to fallback view.
     private func processIntent() {
-        // Prevent double-tap (Phase 5B)
+        // Prevent double-tap
         guard !isProcessing else { return }
-        
-        // Phase 10A: Check execution limit at UI boundary
-        // IMPORTANT: This does NOT affect ExecutionEngine or ApprovalGate
+
+        // SAFE VALIDATION: Validate input without crashing
+        // Context is not yet selected at this stage, so we pass false
+        let validationResult = validateRequest(text: trimmedInput, hasContext: false)
+
+        switch validationResult {
+        case .invalid(let reasons):
+            // Log the blocked intent (local, no network)
+            logIntentBlocked(reasons: reasons)
+
+            // Create a placeholder intent for the fallback view
+            let placeholderIntent = IntentRequest(
+                rawText: trimmedInput.isEmpty ? "(empty request)" : trimmedInput,
+                intentType: .unknown
+            )
+            appState.selectedIntent = placeholderIntent
+
+            // Navigate to fallback view with reasons displayed
+            // The FallbackView will show "More Information Needed" with the reasons
+            nav.navigate(to: .fallback)
+            return
+
+        case .valid:
+            break // Continue with normal processing
+        }
+
+        // Phase 10A: Check execution limit
         let limitCheck = appState.checkExecutionLimit()
         if !limitCheck.allowed {
-            // Limit reached, show upgrade
             showingUpgrade = true
             return
         }
-        
-        // Phase 10C: Check policy at UI boundary
-        // IMPORTANT: This does NOT affect ExecutionEngine or ApprovalGate
+
+        // Phase 10C: Check policy
         let policyCheck = policyEvaluator.canStartExecution()
         if !policyCheck.allowed {
-            // Policy blocks execution, show policy editor
             showingPolicyEditor = true
             return
         }
-        
-        // INVARIANT: User must have acknowledged if from Siri
-        #if DEBUG
-        if isFromSiri {
-            assert(hasAcknowledgedSiri, "INVARIANT VIOLATION: Siri flow continued without user acknowledgment")
+
+        // SAFE CHECK: User must have acknowledged if from Siri
+        // No crash - just log and return if violated
+        if isFromSiri && !hasAcknowledgedSiri {
+            logIntentBlocked(reasons: [.noContextSelected])
+            return
         }
-        #endif
-        
-        // Mark as acknowledged for cleanup
+
         hasAcknowledgedSiri = true
-        
-        // Set loading state (Phase 5B)
         isProcessing = true
         appState.setWorking(.resolvingIntent)
-        
-        // Simulate async processing (in real app, this might be async)
+
         Task {
-            // Small delay to show loading state
-            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-            
+            try? await Task.sleep(nanoseconds: 300_000_000)
+
             await MainActor.run {
-                let resolution = IntentResolver.shared.resolve(rawInput: inputText)
-                
-                // Clear loading state
+                // Use trimmed input for processing
+                let resolution = IntentResolver.shared.resolve(rawInput: trimmedInput)
+
                 isProcessing = false
                 appState.setIdle()
-                
+
                 if resolution.isLowConfidence {
-                    // Route to fallback
                     appState.selectedIntent = resolution.request
-                    appState.navigateTo(.fallback)
+                    nav.navigate(to: .fallback)
                 } else {
-                    // Continue normal flow
                     appState.selectedIntent = resolution.request
-                    appState.navigateTo(.contextPicker)
+                    nav.navigate(to: .context)
                 }
             }
         }

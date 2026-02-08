@@ -84,7 +84,7 @@ struct ExternalReviewReadinessView: View {
             }
             .sheet(isPresented: $showShareSheet) {
                 if let url = exportURL {
-                    ShareSheet(items: [url])
+                    ExternalReviewShareSheet(items: [url])
                 }
             }
             .alert("Export Error", isPresented: $showError) {
@@ -371,7 +371,7 @@ struct ExternalReviewReadinessView: View {
 
 // MARK: - Share Sheet
 
-struct ShareSheet: UIViewControllerRepresentable {
+private struct ExternalReviewShareSheet: UIViewControllerRepresentable {
     let items: [Any]
     
     func makeUIViewController(context: Context) -> UIActivityViewController {

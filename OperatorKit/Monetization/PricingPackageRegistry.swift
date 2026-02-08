@@ -224,8 +224,8 @@ public enum PricingPackageRegistry {
         ],
         excludedFeatures: [],
         storeKitDisclosure: "Subscription auto-renews monthly unless cancelled. Minimum 3 seats required. Manage in Settings > Subscriptions.",
-        pricePerUserPerMonth: teamPricePerUserPerMonth,
-        minimumSeats: teamMinimumSeats
+        minimumSeats: teamMinimumSeats,
+        pricePerUserPerMonth: teamPricePerUserPerMonth
     )
     
     // MARK: - Lifetime Sovereign Option (Phase 11C)

@@ -216,7 +216,7 @@ public final class LocalEvalRunner: ObservableObject {
     /// INVARIANT: No content retrieval - metadata comparison only
     /// INVARIANT: Manual trigger only
     @MainActor
-    public func runGoldenCaseEval(
+    func runGoldenCaseEval(
         goldenCases: [GoldenCase],
         memoryStore: MemoryStore
     ) async -> EvalRun {
@@ -254,6 +254,7 @@ public final class LocalEvalRunner: ObservableObject {
     
     /// Evaluates a single golden case using audit-based drift watch
     /// INVARIANT: No content retrieval - compares metadata only
+    @MainActor
     private func evaluateGoldenCase(
         _ goldenCase: GoldenCase,
         memoryStore: MemoryStore
@@ -334,15 +335,16 @@ public final class LocalEvalRunner: ObservableObject {
     }
     
     /// Gets the current available backend
+    @MainActor
     private func getCurrentBackend() -> String {
         // Check what backend would be used now
-        let router = ModelRouter()
-        let availability = router.checkAvailability()
+        let router = ModelRouter.shared
+        let availability = router.backendAvailability
         
         // Return the name of the first available backend
-        if availability[.appleOnDevice] == true {
+        if availability[ModelBackend.appleOnDevice]?.isAvailable == true {
             return "AppleOnDeviceModelBackend"
-        } else if availability[.coreML] == true {
+        } else if availability[ModelBackend.coreML]?.isAvailable == true {
             return "CoreMLModelBackend"
         } else {
             return "DeterministicTemplateModel"

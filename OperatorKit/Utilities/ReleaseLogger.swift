@@ -22,6 +22,12 @@ public enum LogCategory: String {
     case preflight = "Preflight"
     case error = "Error"
     case monetization = "Monetization"  // Phase 10A
+    case diagnostics = "Diagnostics"    // Phase 10I
+    case policy = "Policy"              // Policy logging
+    case safety = "Safety"              // Safety contract logging
+    case team = "Team"                  // Team-related logging
+    case lifecycle = "Lifecycle"        // App lifecycle events
+    case storageFailure = "StorageFailure" // Critical storage errors
 }
 
 /// Log levels

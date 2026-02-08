@@ -5,6 +5,7 @@ import UIKit
 
 struct PlanPreviewView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var nav: AppNavigationState
     @State private var isGenerating: Bool = false  // Phase 5B: Loading state
     @State private var generationTask: Task<Void, Never>? = nil  // Phase 5B: Cancellable task
     
@@ -67,14 +68,14 @@ struct PlanPreviewView: View {
     private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
         switch action {
         case .goHome:
-            appState.returnHome()
+            nav.goHome()
         case .retryCurrentStep:
             appState.clearError()
             // Re-generate
         case .addMoreContext:
-            appState.navigateTo(.contextPicker)
+            nav.navigate(to: .context)
         case .editRequest:
-            appState.navigateTo(.intentInput)
+            nav.navigate(to: .intent)
         default:
             appState.clearError()
         }
@@ -83,32 +84,27 @@ struct PlanPreviewView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
+            Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
-            Text("Review Plan")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
-            Button(action: {
-                appState.returnHome()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
+
+            Button(action: { nav.goHome() }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.gray)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Plan Steps Card
@@ -211,7 +207,7 @@ struct PlanPreviewView: View {
     private var bottomActions: some View {
         HStack(spacing: 12) {
             Button(action: {
-                appState.navigateBack()
+                nav.goBack()
             }) {
                 HStack(spacing: 6) {
                     Image(systemName: "pencil")
@@ -321,13 +317,13 @@ struct PlanPreviewView: View {
                     // Route based on confidence
                     if draft.isBlocked {
                         // Confidence < 0.35: Block and require revision
-                        appState.navigateTo(.fallback)
+                        nav.navigate(to: .fallback)
                     } else if draft.requiresFallbackConfirmation {
                         // Confidence < 0.65: Show draft but require confirmation
-                        appState.navigateTo(.draftOutput)
+                        nav.navigate(to: .draft)
                     } else {
                         // Confidence >= 0.65: Direct to draft output
-                        appState.navigateTo(.draftOutput)
+                        nav.navigate(to: .draft)
                     }
                 }
             } catch is CancellationError {
@@ -348,9 +344,9 @@ struct PlanPreviewView: View {
                     appState.currentDraft = legacyDraft
                     
                     if legacyDraft.isBlocked {
-                        appState.navigateTo(.fallback)
+                        nav.navigate(to: .fallback)
                     } else {
-                        appState.navigateTo(.draftOutput)
+                        nav.navigate(to: .draft)
                     }
                 }
             }
@@ -426,51 +422,7 @@ struct ContextDisplayChip: View {
     }
 }
 
-// MARK: - Flow Layout
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-    
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(in: proposal.width ?? 0, subviews: subviews, spacing: spacing)
-        return result.size
-    }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
-        for (index, subview) in subviews.enumerated() {
-            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
-                                       y: bounds.minY + result.positions[index].y),
-                          proposal: .unspecified)
-        }
-    }
-    
-    struct FlowResult {
-        var size: CGSize = .zero
-        var positions: [CGPoint] = []
-        
-        init(in width: CGFloat, subviews: Subviews, spacing: CGFloat) {
-            var x: CGFloat = 0
-            var y: CGFloat = 0
-            var lineHeight: CGFloat = 0
-            
-            for subview in subviews {
-                let size = subview.sizeThatFits(.unspecified)
-                
-                if x + size.width > width && x > 0 {
-                    x = 0
-                    y += lineHeight + spacing
-                    lineHeight = 0
-                }
-                
-                positions.append(CGPoint(x: x, y: y))
-                lineHeight = max(lineHeight, size.height)
-                x += size.width + spacing
-            }
-            
-            self.size = CGSize(width: width, height: y + lineHeight)
-        }
-    }
-}
+// MARK: - FlowLayout is now in Components/FlowLayout.swift
 
 #Preview {
     PlanPreviewView()

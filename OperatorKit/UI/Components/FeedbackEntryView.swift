@@ -114,7 +114,7 @@ struct FeedbackEntryView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            FlowLayout(spacing: 8) {
+            FeedbackFlowLayout(spacing: 8) {
                 ForEach(QualityIssueTag.allCases) { tag in
                     Button {
                         if selectedTags.contains(tag) {
@@ -240,7 +240,7 @@ struct FeedbackEntryView: View {
 // MARK: - Flow Layout Helper
 
 /// Simple flow layout for tag chips
-struct FlowLayout: Layout {
+private struct FeedbackFlowLayout: Layout {
     var spacing: CGFloat = 8
     
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {

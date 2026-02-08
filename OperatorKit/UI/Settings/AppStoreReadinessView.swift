@@ -77,17 +77,17 @@ struct AppStoreReadinessView: View {
             }
             .sheet(isPresented: $showingPacketExport) {
                 if let url = exportURL {
-                    ShareSheet(activityItems: [url])
+                    ShareSheet(items: [url])
                 }
             }
             .sheet(isPresented: $showingCopyExport) {
                 if let url = exportURL {
-                    ShareSheet(activityItems: [url])
+                    ShareSheet(items: [url])
                 }
             }
             .sheet(isPresented: $showingRiskExport) {
                 if let url = exportURL {
-                    ShareSheet(activityItems: [url])
+                    ShareSheet(items: [url])
                 }
             }
             .sheet(isPresented: $showingReviewerQuickPath) {

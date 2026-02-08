@@ -47,18 +47,18 @@ public struct AppStoreSubmissionPacket: Codable {
     public let docIntegrity: DocIntegrityExport?
     
     /// Claim registry summary
-    public let claimRegistry: ClaimRegistrySummaryExport?
+    public let claimRegistry: SubmissionClaimRegistrySummaryExport?
     
     // MARK: - Quality
     
     /// Preflight summary
-    public let preflight: PreflightSummaryExport?
+    public let preflight: SubmissionPreflightSummaryExport?
     
     /// Quality gate status
-    public let qualityGate: QualityGateExport?
+    public let qualityGate: SubmissionQualityGateExport?
     
     /// Regression sentinel status
-    public let regressionSentinel: RegressionSentinelExport?
+    public let regressionSentinel: SubmissionRegressionSentinelExport?
     
     /// Coverage summary
     public let coverage: CoverageSummaryExport?
@@ -133,9 +133,9 @@ public struct DocIntegrityExport: Codable {
     public let status: String
 }
 
-// MARK: - Claim Registry Summary Export
+// MARK: - Submission Claim Registry Summary Export
 
-public struct ClaimRegistrySummaryExport: Codable {
+public struct SubmissionClaimRegistrySummaryExport: Codable {
     /// Schema version of claim registry
     public let registrySchemaVersion: Int
     
@@ -149,9 +149,9 @@ public struct ClaimRegistrySummaryExport: Codable {
     public let lastUpdatedPhase: String
 }
 
-// MARK: - Preflight Summary Export
+// MARK: - Submission Preflight Summary Export
 
-public struct PreflightSummaryExport: Codable {
+public struct SubmissionPreflightSummaryExport: Codable {
     /// Overall status
     public let status: String
     
@@ -165,9 +165,9 @@ public struct PreflightSummaryExport: Codable {
     public let categories: [String]
 }
 
-// MARK: - Quality Gate Export
+// MARK: - Submission Quality Gate Export
 
-public struct QualityGateExport: Codable {
+public struct SubmissionQualityGateExport: Codable {
     /// Gate status (passed/failed/not_run)
     public let status: String
     
@@ -181,9 +181,9 @@ public struct QualityGateExport: Codable {
     public let gateVersion: Int?
 }
 
-// MARK: - Regression Sentinel Export
+// MARK: - Submission Regression Sentinel Export
 
-public struct RegressionSentinelExport: Codable {
+public struct SubmissionRegressionSentinelExport: Codable {
     /// Status (clean/regressed/not_run)
     public let status: String
     

@@ -144,16 +144,18 @@ public final class BuyerProofPacketBuilder {
     }
     
     private func buildDiagnosticsSummary() -> DiagnosticsBuyerSummary? {
-        let diagnostics = ExecutionDiagnostics.shared.currentSnapshot()
-        
-        let successRate: Double? = diagnostics.totalExecutions > 0
-            ? Double(diagnostics.successCount) / Double(diagnostics.totalExecutions)
-            : nil
-        
+        let snapshot = ExecutionDiagnostics.shared.currentSnapshot()
+
+        // Derive counts from snapshot data
+        let total = snapshot.executionsLast7Days
+        let successCount = snapshot.lastExecutionOutcome == .success ? total : 0
+        let failureCount = snapshot.lastExecutionOutcome == .failed ? total : 0
+        let successRate: Double? = total > 0 ? Double(successCount) / Double(total) : nil
+
         return DiagnosticsBuyerSummary(
-            totalExecutions: diagnostics.totalExecutions,
-            successCount: diagnostics.successCount,
-            failureCount: diagnostics.failureCount,
+            totalExecutions: total,
+            successCount: successCount,
+            failureCount: failureCount,
             successRate: successRate,
             schemaVersion: 1
         )

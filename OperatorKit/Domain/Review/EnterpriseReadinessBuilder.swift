@@ -99,7 +99,7 @@ public final class EnterpriseReadinessBuilder {
     }
     
     private func buildDocIntegritySummary() -> EnterpriseDocIntegritySummary? {
-        let requiredDocs = DocIntegrity.shared.requiredDocs
+        let requiredDocs = DocIntegrity.requiredDocs
         var presentCount = 0
         
         for doc in requiredDocs {

@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 // ============================================================================
 // SUPPORT PACKET (Phase 10Q)
@@ -184,9 +185,9 @@ public final class SupportPacketBuilder {
             invariantsPassing: invariants,
             auditEventCount: auditStore.events.count,
             auditEventsLast7Days: auditStore.eventsFromLastDays(7).count,
-            totalExecutions: diagnostics.totalExecutions,
-            successCount: diagnostics.successCount,
-            failureCount: diagnostics.failureCount
+            totalExecutions: diagnostics.executionsLast7Days,
+            successCount: diagnostics.lastExecutionOutcome == .success ? diagnostics.executionsLast7Days : 0,
+            failureCount: diagnostics.lastExecutionOutcome == .failed ? diagnostics.executionsLast7Days : 0
         )
     }
     

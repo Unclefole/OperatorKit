@@ -14,7 +14,7 @@ struct EvalCase: Identifiable, Equatable {
     let description: String
     let intentText: String
     let contextItems: [SyntheticContextItem]
-    let expectedOutputType: ModelInput.OutputType
+    let expectedOutputType: DraftOutput.OutputType
     let expectedBehavior: ExpectedBehavior
     
     /// What we expect the model to do
@@ -41,15 +41,38 @@ struct SyntheticContextItem: Identifiable, Equatable {
         case reminder = "reminder"
     }
     
-    /// Convert to ModelInput.ContextItems format
-    var asModelContextItem: ModelInput.ContextItems.Item {
-        ModelInput.ContextItems.Item(
-            id: id,
-            type: type.rawValue,
+    /// Convert to CalendarContextItem for calendar type
+    func asCalendarContextItem() -> CalendarContextItem? {
+        guard type == .calendarEvent else { return nil }
+        let startDate = metadata["startDate"].flatMap { ISO8601DateFormatter().date(from: $0) } ?? Date()
+        let endDate = metadata["endDate"].flatMap { ISO8601DateFormatter().date(from: $0) }
+        return CalendarContextItem(
             title: title,
-            snippet: snippet,
-            startDate: metadata["startDate"].flatMap { ISO8601DateFormatter().date(from: $0) },
-            endDate: metadata["endDate"].flatMap { ISO8601DateFormatter().date(from: $0) }
+            date: startDate,
+            endDate: endDate,
+            attendees: metadata["attendees"]?.split(separator: ",").map(String.init) ?? [],
+            notes: snippet
+        )
+    }
+
+    /// Convert to EmailContextItem for email type
+    func asEmailContextItem() -> EmailContextItem? {
+        guard type == .email else { return nil }
+        return EmailContextItem(
+            subject: title,
+            sender: metadata["from"] ?? "",
+            date: metadata["date"].flatMap { ISO8601DateFormatter().date(from: $0) } ?? Date(),
+            bodyPreview: snippet
+        )
+    }
+
+    /// Convert to FileContextItem for document type
+    func asFileContextItem() -> FileContextItem? {
+        guard type == .document else { return nil }
+        return FileContextItem(
+            name: title,
+            fileType: metadata["fileType"] ?? "text",
+            path: ""
         )
     }
 }

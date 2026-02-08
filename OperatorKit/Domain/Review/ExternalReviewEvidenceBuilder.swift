@@ -99,10 +99,10 @@ public final class ExternalReviewEvidenceBuilder {
     private func buildSafetyContractExport() -> SafetyContractExport {
         let status = SafetyContractSnapshot.getStatus()
         return SafetyContractExport(
-            currentHash: status.currentHash ?? "unavailable",
-            expectedHash: status.expectedHash,
-            isUnchanged: status.isValid,
-            lastUpdateReason: SafetyContractSnapshot.lastUpdateReason
+            contentHash: status.currentHash ?? "unavailable",
+            status: status.isValid ? "valid" : "invalid",
+            guaranteesCount: 12,  // Number of guarantees in SAFETY_CONTRACT.md
+            lastVerified: dayRoundedDate()
         )
     }
     
@@ -261,4 +261,12 @@ extension ExternalReviewEvidenceBuilder {
     
     /// Shared builder instance
     public static let shared = ExternalReviewEvidenceBuilder()
+    
+    /// Returns current date rounded to day (yyyy-MM-dd) in UTC
+    private func dayRoundedDate() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter.string(from: Date())
+    }
 }

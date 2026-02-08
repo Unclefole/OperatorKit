@@ -157,7 +157,14 @@ struct FirstWeekTipsBanner: View {
     @StateObject private var firstWeekStore = FirstWeekStore.shared
     @State private var showingTips = false
     @State private var dismissed = false
-    
+
+    /// DETERMINISM FIX: Select tip based on day of year instead of random
+    private var deterministicTip: String {
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+        let index = (dayOfYear - 1) % FirstWeekTips.shortTips.count
+        return FirstWeekTips.shortTips[index]
+    }
+
     var body: some View {
         if firstWeekStore.isFirstWeek && !dismissed {
             VStack(spacing: 0) {
@@ -165,7 +172,7 @@ struct FirstWeekTipsBanner: View {
                     Image(systemName: "lightbulb")
                         .foregroundColor(.yellow)
                     
-                    Text("First week tip: \(FirstWeekTips.shortTips.randomElement() ?? "")")
+                    Text("First week tip: \(deterministicTip)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     

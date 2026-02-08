@@ -38,7 +38,7 @@ public struct ReproBundleExport: Codable {
     public let qualitySummary: QualitySummaryExport?
     
     /// Policy summary
-    public let policySummary: PolicySummaryExport?
+    public let policySummary: ReproBundlePolicySummary?
     
     /// Pilot share pack summary
     public let pilotSummary: PilotSummaryExport?
@@ -137,7 +137,7 @@ public struct QualitySummaryExport: Codable {
     public let schemaVersion: Int
 }
 
-public struct PolicySummaryExport: Codable {
+public struct ReproBundlePolicySummary: Codable {
     public let policyEnabled: Bool
     public let allowEmailDrafts: Bool
     public let allowCalendarWrites: Bool

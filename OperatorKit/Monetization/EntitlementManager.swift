@@ -54,26 +54,68 @@ public final class EntitlementManager: ObservableObject {
     }
     
     // MARK: - Fetch Products
-    
+
+    /// Tracks the last fetch error for diagnostics
+    @Published public private(set) var lastFetchError: String?
+
+    /// Whether products failed to load (not just empty)
+    @Published public private(set) var productsFetchFailed: Bool = false
+
     /// Fetches products from the App Store
     public func fetchProducts() async {
         isLoading = true
+        lastFetchError = nil
+        productsFetchFailed = false
         defer { isLoading = false }
-        
+
+        let requestedIds = StoreKitProductIDs.allProducts
+        logDebug("StoreKit: Requesting \(requestedIds.count) products: \(requestedIds.joined(separator: ", "))", category: .monetization)
+
         do {
-            let storeProducts = try await Product.products(for: StoreKitProductIDs.allProducts)
-            
+            let storeProducts = try await Product.products(for: requestedIds)
+
             // Sort by display order
             products = storeProducts.sorted { first, second in
                 let firstIndex = StoreKitProductIDs.displayOrder.firstIndex(of: first.id) ?? Int.max
                 let secondIndex = StoreKitProductIDs.displayOrder.firstIndex(of: second.id) ?? Int.max
                 return firstIndex < secondIndex
             }
-            
-            logDebug("Fetched \(products.count) products from App Store", category: .monetization)
+
+            // Structured logging
+            if products.isEmpty {
+                logError("StoreKit: Product.products returned EMPTY array", category: .monetization)
+                logError("StoreKit: Check App Store Connect: 1) Products exist 2) Ready for Sale 3) Bundle ID matches 4) Agreements signed", category: .monetization)
+                lastFetchError = "No products returned from App Store"
+                productsFetchFailed = true
+                // NOTE: No assertion - empty products is expected before App Store Connect setup
+            } else {
+                logDebug("StoreKit: Successfully fetched \(products.count) products:", category: .monetization)
+                for product in products {
+                    logDebug("  - \(product.id): \(product.displayName) @ \(product.displayPrice)", category: .monetization)
+                }
+            }
         } catch {
-            logError("Failed to fetch products: \(error.localizedDescription)", category: .monetization)
-            // Don't crash — products array stays empty, UI handles gracefully
+            products = []
+            productsFetchFailed = true
+            lastFetchError = error.localizedDescription
+
+            logError("StoreKit: Product fetch FAILED: \(error.localizedDescription)", category: .monetization)
+            logError("StoreKit: Error type: \(type(of: error))", category: .monetization)
+
+            // More specific error logging
+            if let storeKitError = error as? StoreKitError {
+                switch storeKitError {
+                case .networkError(let underlying):
+                    logError("StoreKit: Network error - \(underlying.localizedDescription)", category: .monetization)
+                case .systemError(let underlying):
+                    logError("StoreKit: System error - \(underlying.localizedDescription)", category: .monetization)
+                case .notAvailableInStorefront:
+                    logError("StoreKit: Products not available in this storefront", category: .monetization)
+                default:
+                    logError("StoreKit: Other StoreKit error", category: .monetization)
+                }
+            }
+            // NOTE: No assertion - network failures are expected in development
         }
     }
     

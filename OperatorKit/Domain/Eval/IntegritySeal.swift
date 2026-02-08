@@ -158,8 +158,8 @@ public final class IntegritySealFactory {
     /// - Returns: IntegritySeal, or unavailable seal on failure
     public func createSeal(
         signature: QualitySignature?,
-        safetyStatus: SafetyContractExport,
-        gateResult: QualityGateExport,
+        safetyStatus: EvalSafetyContractExport,
+        gateResult: EvalQualityGateExport,
         coverageScore: Int,
         trend: QualityTrendExport
     ) -> IntegritySeal {
@@ -192,8 +192,8 @@ public final class IntegritySealFactory {
     /// Builds deterministically-ordered canonical JSON for hashing
     private func buildCanonicalInput(
         signature: QualitySignature?,
-        safetyStatus: SafetyContractExport,
-        gateResult: QualityGateExport,
+        safetyStatus: EvalSafetyContractExport,
+        gateResult: EvalQualityGateExport,
         coverageScore: Int,
         trend: QualityTrendExport
     ) throws -> Data {
@@ -250,7 +250,7 @@ private struct CanonicalSafetyStatus: Codable {
     let expectedHash: String
     let isUnchanged: Bool
     
-    init(from export: SafetyContractExport) {
+    init(from export: EvalSafetyContractExport) {
         self.currentHash = export.currentHash
         self.expectedHash = export.expectedHash
         self.isUnchanged = export.isUnchanged
@@ -264,7 +264,7 @@ private struct CanonicalGateResult: Codable {
     let latestPassRate: Double?
     let driftLevel: String?
     
-    init(from export: QualityGateExport) {
+    init(from export: EvalQualityGateExport) {
         self.status = export.status
         self.goldenCaseCount = export.goldenCaseCount
         self.latestPassRate = export.latestPassRate
@@ -315,8 +315,8 @@ public final class IntegrityVerifier {
     public func verify(
         seal: IntegritySeal,
         signature: QualitySignature?,
-        safetyStatus: SafetyContractExport,
-        gateResult: QualityGateExport,
+        safetyStatus: EvalSafetyContractExport,
+        gateResult: EvalQualityGateExport,
         coverageScore: Int,
         trend: QualityTrendExport
     ) -> IntegrityStatus {

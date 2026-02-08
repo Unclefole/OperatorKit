@@ -16,7 +16,9 @@ import Foundation
 
 // MARK: - Compile-Time Availability Check
 
-#if canImport(FoundationModels)
+// Note: FoundationModels/LanguageModel API not available in current SDK.
+// Disabled until proper SDK support is available.
+#if false // canImport(FoundationModels)
 import FoundationModels
 
 /// Apple On-Device Model Backend using Foundation Models framework
@@ -140,7 +142,7 @@ final class AppleOnDeviceModelBackendImpl: OnDeviceModel {
             var outputText = ""
             
             for try await chunk in activeSession.streamResponse(to: prompt) {
-                outputText += chunk
+                outputText += String(describing: chunk)
             }
             
             // Calculate latency
@@ -286,85 +288,41 @@ final class AppleOnDeviceModelBackend: OnDeviceModel {
     
     // MARK: - Internal Implementation
     
-    #if canImport(FoundationModels)
-    private var impl: Any?  // Type-erased to avoid @available on stored property
-    
-    @available(iOS 18.1, *)
-    private var typedImpl: AppleOnDeviceModelBackendImpl? {
-        impl as? AppleOnDeviceModelBackendImpl
-    }
-    #endif
-    
-    private var cachedUnavailableReason: String?
+    // Note: FoundationModels/LanguageModel disabled - API not available in current SDK
+    private var cachedUnavailableReason: String? = "Apple On-Device model not available in current build"
     
     // MARK: - Initialization
     
     init() {
-        #if canImport(FoundationModels)
-        if #available(iOS 18.1, *) {
-            impl = AppleOnDeviceModelBackendImpl()
-        } else {
-            cachedUnavailableReason = "Apple On-Device requires iOS 18.1 or later (current: iOS 17.x)"
-        }
-        #else
-        cachedUnavailableReason = "FoundationModels framework not available in current SDK"
-        #endif
+        // FoundationModels/LanguageModel not available
     }
     
     // MARK: - Availability
     
     var isAvailable: Bool {
-        checkAvailability().isAvailable
+        false // FoundationModels disabled
     }
     
     func checkAvailability() -> ModelAvailabilityResult {
-        // COMPILE-TIME GUARD: Check if FoundationModels was imported
-        #if canImport(FoundationModels)
-        
-        // RUNTIME GUARD: Check iOS version
-        if #available(iOS 18.1, *) {
-            // Delegate to actual implementation
-            if let typedImpl = typedImpl {
-                return typedImpl.checkAvailability()
-            } else {
-                return .unavailable(reason: "Apple On-Device implementation not initialized")
-            }
-        } else {
-            return .unavailable(
-                reason: cachedUnavailableReason ?? "Apple On-Device requires iOS 18.1 or later"
-            )
-        }
-        
-        #else
         // FoundationModels not available in SDK
         return .unavailable(
-            reason: cachedUnavailableReason ?? "FoundationModels framework not available in current SDK"
+            reason: cachedUnavailableReason ?? "Apple On-Device model not available"
         )
-        #endif
     }
     
     /// Get the specific unavailable reason for audit trail
     var unavailableReason: String? {
-        let availability = checkAvailability()
-        if case .unavailable(let reason) = availability {
-            return reason
-        }
-        return nil
+        cachedUnavailableReason
     }
     
     // MARK: - Generation
     
     func canHandle(input: ModelInput) -> Bool {
-        #if canImport(FoundationModels)
-        if #available(iOS 18.1, *) {
-            return typedImpl?.canHandle(input: input) ?? false
-        }
-        #endif
-        return false
+        false // FoundationModels disabled
     }
     
     func generate(input: ModelInput) async throws -> DraftOutput {
-        #if canImport(FoundationModels)
+        #if false // canImport(FoundationModels)
         if #available(iOS 18.1, *) {
             if let typedImpl = typedImpl {
                 return try await typedImpl.generate(input: input)

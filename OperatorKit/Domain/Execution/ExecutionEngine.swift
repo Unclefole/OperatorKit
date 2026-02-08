@@ -1,18 +1,49 @@
 import Foundation
+import MessageUI
 
-// ============================================================================
-// SAFETY CONTRACT REFERENCE
-// This file enforces: Guarantee #1 (No Autonomous Actions), #5 (Two-Key Writes)
-// See: docs/SAFETY_CONTRACT.md
-// Changes to execution logic require Safety Contract Change Approval
-// ============================================================================
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// ║                      OPERATORKIT EXECUTION SEAL                          ║
+// ╠═══════════════════════════════════════════════════════════════════════════╣
+// ║  This system is a GOVERNED EXECUTION RUNTIME.                            ║
+// ║                                                                           ║
+// ║  IMMUTABLE INVARIANTS:                                                    ║
+// ║  ━━━━━━━━━━━━━━━━━━━━                                                    ║
+// ║  1. NO side effects without explicit foreground human approval           ║
+// ║  2. NO background execution - all execution is @MainActor                ║
+// ║  3. NO silent automation - Siri only prepares drafts                     ║
+// ║  4. ALL actions are auditable via AuditTrail                             ║
+// ║  5. Permissions are revalidated at EXECUTION TIME, not cached            ║
+// ║  6. Confidence gates prevent low-quality proactive learning (>= 0.65)    ║
+// ║  7. NO concurrent executions - atomicity enforced                        ║
+// ║  8. Write operations require TWO-KEY confirmation                        ║
+// ║                                                                           ║
+// ║  GLOBAL INVARIANT:                                                        ║
+// ║  "No AI-generated side effect may execute without explicit               ║
+// ║   foreground human approval."                                             ║
+// ║                                                                           ║
+// ║  If modifying this engine, preserve ALL invariants or FAIL THE BUILD.    ║
+// ║                                                                           ║
+// ║  See: docs/SAFETY_CONTRACT.md                                             ║
+// ║  Changes to execution logic require Safety Contract Change Approval       ║
+// ╚═══════════════════════════════════════════════════════════════════════════╝
 
-/// Executes approved drafts
-/// Phase 3C: Supports controlled writes (reminders and calendar)
-/// INVARIANT: No automatic sending - user must manually confirm
-/// INVARIANT: Execution requires approval
-/// INVARIANT: Write operations require two-key confirmation
-/// INVARIANT: All executions are auditable
+/// DUMB ACTUATOR — Executes side effects ONLY with a valid KernelAuthorizationToken.
+///
+/// ╔═══════════════════════════════════════════════════════════════════════════╗
+/// ║  CONTROL-PLANE REFACTOR: AUTHORITY INVERSION                            ║
+/// ╠═══════════════════════════════════════════════════════════════════════════╣
+/// ║  ExecutionEngine does NOT decide policy.                                ║
+/// ║  ExecutionEngine does NOT validate approval.                            ║
+/// ║  ExecutionEngine does NOT assess risk.                                  ║
+/// ║                                                                         ║
+/// ║  ExecutionEngine REQUIRES a KernelAuthorizationToken.                   ║
+/// ║  If token is missing or invalid → HARD FAIL.                           ║
+/// ║  ZERO fallback paths.                                                   ║
+/// ║                                                                         ║
+/// ║  Policy authority: CapabilityKernel (sole)                              ║
+/// ║  Approval authority: CapabilityKernel (sole)                            ║
+/// ║  Audit authority: EvidenceEngine (sole)                                 ║
+/// ╚═══════════════════════════════════════════════════════════════════════════╝
 @MainActor
 final class ExecutionEngine: ObservableObject {
     
@@ -22,7 +53,7 @@ final class ExecutionEngine: ObservableObject {
     
     private let mailService = MailComposerService.shared
     private let reminderService = ReminderService.shared
-    private let calendarService = CalendarService.shared  // Phase 3C
+    private let calendarService = CalendarService.shared
     
     // MARK: - Published State
     
@@ -32,34 +63,41 @@ final class ExecutionEngine: ObservableObject {
     
     private init() {}
     
-    // MARK: - Execution
-    
-    /// Executes an approved draft with full audit trail
-    /// INVARIANT: Write operations (.createReminder, .createCalendarEvent, .updateCalendarEvent) require secondConfirmationGranted = true
+    // MARK: - Execution (Token-Gated)
+
+    /// Execute side effects with a valid KernelAuthorizationToken.
+    ///
+    /// INVARIANT: Token MUST be valid or execution HARD FAILs.
+    /// INVARIANT: No concurrent executions allowed.
+    /// INVARIANT: Write operations require two-key confirmation.
+    /// INVARIANT: All evidence logged through EvidenceEngine.
     func execute(
         draft: Draft,
         sideEffects: [SideEffect],
-        approvalGranted: Bool,
+        token: KernelAuthorizationToken,
         intent: IntentRequest? = nil,
         context: ContextPacket? = nil,
         approvalTimestamp: Date = Date()
-    ) -> ExecutionResultModel {
-        // INVARIANT: Verify approval before any execution
-        let validation = ApprovalGate.shared.canExecute(
-            draft: draft,
-            approvalGranted: approvalGranted,
-            sideEffects: sideEffects,
-            permissionState: PermissionManager.shared.currentState
-        )
-        
-        guard validation.canProceed else {
-            logError("Execution blocked: \(validation.reason ?? "Unknown")")
-            
+    ) async -> ExecutionResultModel {
+        log("[EXECUTION_START] Draft: \(draft.title)")
+        let executionStartTime = Date()
+        log("ExecutionEngine.execute() called - Draft: \(draft.title), Type: \(draft.type.rawValue)")
+        log("  → Token planId: \(token.planId.uuidString)")
+        log("  → Token riskTier: \(token.riskTier.rawValue)")
+        log("  → Token valid: \(token.isValid)")
+        log("  → Side effects count: \(sideEffects.count)")
+        log("  → Enabled side effects: \(sideEffects.filter { $0.isEnabled }.map { $0.type.rawValue }.joined(separator: ", "))")
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 1: Token must not be expired and must have a signature.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard token.isValid else {
+            logError("HARD FAIL: Token expired or empty signature. Execution denied.")
             return ExecutionResultModel(
                 draft: draft,
                 executedSideEffects: [],
                 status: .failed,
-                message: "Execution blocked: \(validation.reason ?? "Approval not granted")",
+                message: "Kernel authorization required — token invalid or expired",
                 auditTrail: AuditTrail.build(
                     intent: intent,
                     context: context,
@@ -70,15 +108,74 @@ final class ExecutionEngine: ObservableObject {
                 )
             )
         }
-        
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 2: Cryptographic signature verification.
+        // Recomputes HMAC and compares. Forged signatures FAIL here.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard token.verifySignature() else {
+            logError("HARD FAIL: Token signature verification failed. Possible forgery. Execution denied.")
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Kernel authorization failed — signature verification failed",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 3: One-use enforcement. Replay attacks FAIL here.
+        // A token can only be consumed ONCE. Second use is rejected.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard CapabilityKernel.consumeToken(token) else {
+            logError("HARD FAIL: Token already consumed (replay attempt). Execution denied.")
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Kernel authorization failed — token already used",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
+        // SECURITY: Prevent concurrent execution
+        guard !isExecuting else {
+            logError("SECURITY: Concurrent execution blocked - already executing")
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Execution already in progress",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
         // INVARIANT: Verify two-key confirmation for write operations
         for effect in sideEffects where effect.isEnabled && effect.type.requiresTwoKeyConfirmation {
             guard effect.secondConfirmationGranted else {
                 logError("INVARIANT VIOLATION: Write operation without two-key confirmation")
-                #if DEBUG
-                assertionFailure("INVARIANT VIOLATION: Write operation \(effect.type) requires two-key confirmation")
-                #endif
-                
                 return ExecutionResultModel(
                     draft: draft,
                     executedSideEffects: [],
@@ -114,7 +211,7 @@ final class ExecutionEngine: ObservableObject {
         var requiresUserAction: Bool = false
         
         for effect in sideEffects where effect.isEnabled {
-            let executed = executeSideEffect(effect, draft: draft)
+            let executed = await executeSideEffect(effect, draft: draft)
             executedEffects.append(executed)
             
             // Update audit trail with reminder write info
@@ -138,6 +235,8 @@ final class ExecutionEngine: ObservableObject {
             if effect.type == .presentEmailDraft && executed.wasExecuted {
                 requiresUserAction = true
                 pendingMailComposer = draft
+                log("ExecutionEngine: pendingMailComposer SET - email composer will auto-present")
+                log("  → canPresentMailComposer will be: \(mailService.canSendMail && pendingMailComposer != nil)")
             }
         }
         
@@ -176,8 +275,19 @@ final class ExecutionEngine: ObservableObject {
             message = "Execution failed"
         }
         
-        log("Execution complete: \(status.rawValue) - \(message)")
-        
+        let executionDuration = Date().timeIntervalSince(executionStartTime)
+        log("[EXECUTION_COMPLETE] Status: \(status.rawValue) - \(message) (Duration: \(String(format: "%.2f", executionDuration))s)")
+
+        // DONATION: Only donate successful, high-confidence workflows
+        // INVARIANT: Never donate drafts, failures, or low-confidence results
+        if status == .success, let intentType = intent?.intentType {
+            IntentDonationManager.shared.donateCompletedWorkflow(
+                intentType: intentType,
+                requestText: intent?.rawText ?? "",
+                confidence: draft.confidence
+            )
+        }
+
         return ExecutionResultModel(
             draft: draft,
             executedSideEffects: executedEffects,
@@ -187,25 +297,13 @@ final class ExecutionEngine: ObservableObject {
         )
     }
     
-    /// Simplified execute for backward compatibility
-    func execute(
-        draft: Draft,
-        sideEffects: [SideEffect],
-        approvalGranted: Bool
-    ) -> ExecutionResultModel {
-        execute(
-            draft: draft,
-            sideEffects: sideEffects,
-            approvalGranted: approvalGranted,
-            intent: nil,
-            context: nil,
-            approvalTimestamp: Date()
-        )
-    }
+    // REMOVED: Convenience overload without token.
+    // There is ZERO fallback path. Every call MUST provide a KernelAuthorizationToken.
     
     // MARK: - Side Effect Execution
-    
-    private func executeSideEffect(_ effect: SideEffect, draft: Draft) -> ExecutedSideEffect {
+
+    private func executeSideEffect(_ effect: SideEffect, draft: Draft) async -> ExecutedSideEffect {
+        log("[EXECUTION_STEP] Executing side effect: \(effect.type.rawValue)")
         var resultMessage: String
         var wasExecuted = true
         var reminderIdentifier: String? = nil
@@ -223,12 +321,21 @@ final class ExecutionEngine: ObservableObject {
         case .presentEmailDraft:
             // Prepare for mail composer presentation
             // INVARIANT: User must manually tap Send in the composer
-            if mailService.canSendMail {
+            // SECURITY: Check LIVE mail availability at execution time, not cached value
+            let liveCanSendMail = MFMailComposeViewController.canSendMail()
+
+            log("ExecutionEngine: Handling presentEmailDraft side effect")
+            log("  → LIVE canSendMail check: \(liveCanSendMail)")
+            log("  → Draft recipient: \(draft.content.recipient ?? "none")")
+
+            if liveCanSendMail {
                 resultMessage = "Email composer ready - user must manually send"
                 wasExecuted = true
+                log("  → ✅ Email composer will be presented")
             } else {
                 resultMessage = "Mail not configured on this device"
                 wasExecuted = false
+                logWarning("  → ❌ Mail not configured - cannot present composer")
             }
             
         case .saveDraft:
@@ -254,43 +361,30 @@ final class ExecutionEngine: ObservableObject {
                 break
             }
             
-            // Perform synchronous wrapper around async reminder save
+            // Direct async reminder save (no semaphore deadlock)
             let confirmationTime = effect.secondConfirmationTimestamp ?? Date()
             reminderWriteConfirmedAt = confirmationTime
-            
-            var saveResult: ReminderSaveResult?
-            let semaphore = DispatchSemaphore(value: 0)
-            
-            Task {
-                saveResult = await reminderService.saveReminder(
-                    payload: payload,
-                    secondConfirmationTimestamp: confirmationTime
-                )
-                semaphore.signal()
-            }
-            
-            let waitResult = semaphore.wait(timeout: .now() + 5.0)
-            
-            if waitResult == .timedOut {
-                resultMessage = "Reminder creation timed out"
+
+            let saveResult = await reminderService.saveReminder(
+                payload: payload,
+                secondConfirmationTimestamp: confirmationTime
+            )
+
+            switch saveResult {
+            case .success(let identifier, _, let confirmedAt):
+                reminderIdentifier = identifier
+                reminderWriteConfirmedAt = confirmedAt
+                resultMessage = "Reminder created successfully"
+                wasExecuted = true
+                log("[EXECUTION_STEP] Reminder created: \(identifier)")
+            case .blocked(let reason):
+                resultMessage = reason
                 wasExecuted = false
-            } else if let result = saveResult {
-                switch result {
-                case .success(let identifier, _, let confirmedAt):
-                    reminderIdentifier = identifier
-                    reminderWriteConfirmedAt = confirmedAt
-                    resultMessage = "Reminder created successfully"
-                    wasExecuted = true
-                case .blocked(let reason):
-                    resultMessage = reason
-                    wasExecuted = false
-                case .failed(let reason):
-                    resultMessage = "Failed: \(reason)"
-                    wasExecuted = false
-                }
-            } else {
-                resultMessage = "Reminder creation failed"
+                log("[EXECUTION_STEP] Reminder blocked: \(reason)")
+            case .failed(let reason):
+                resultMessage = "Failed: \(reason)"
                 wasExecuted = false
+                logError("[EXECUTION_STEP] Reminder failed: \(reason)")
             }
             
         case .previewReminder:
@@ -321,44 +415,31 @@ final class ExecutionEngine: ObservableObject {
                 break
             }
             
-            // Perform synchronous wrapper around async calendar save
+            // Direct async calendar save (no semaphore deadlock)
             let confirmationTime = effect.secondConfirmationTimestamp ?? Date()
             calendarWriteConfirmedAt = confirmationTime
-            
-            var writeResult: CalendarWriteResult?
-            let semaphore = DispatchSemaphore(value: 0)
-            
-            Task {
-                writeResult = await calendarService.createEvent(
-                    payload: payload,
-                    secondConfirmationTimestamp: confirmationTime
-                )
-                semaphore.signal()
-            }
-            
-            let waitResult = semaphore.wait(timeout: .now() + 5.0)
-            
-            if waitResult == .timedOut {
-                resultMessage = "Calendar event creation timed out"
+
+            let writeResult = await calendarService.createEvent(
+                payload: payload,
+                secondConfirmationTimestamp: confirmationTime
+            )
+
+            switch writeResult {
+            case .success(let identifier, let operation, _, let confirmedAt):
+                calendarEventIdentifier = identifier
+                calendarWriteConfirmedAt = confirmedAt
+                calendarOperation = operation == .created ? .created : .updated
+                resultMessage = "Calendar event created successfully"
+                wasExecuted = true
+                log("[EXECUTION_STEP] Calendar event created: \(identifier)")
+            case .blocked(let reason):
+                resultMessage = reason
                 wasExecuted = false
-            } else if let result = writeResult {
-                switch result {
-                case .success(let identifier, let operation, _, let confirmedAt):
-                    calendarEventIdentifier = identifier
-                    calendarWriteConfirmedAt = confirmedAt
-                    calendarOperation = operation == .created ? .created : .updated
-                    resultMessage = "Calendar event created successfully"
-                    wasExecuted = true
-                case .blocked(let reason):
-                    resultMessage = reason
-                    wasExecuted = false
-                case .failed(let reason):
-                    resultMessage = "Failed: \(reason)"
-                    wasExecuted = false
-                }
-            } else {
-                resultMessage = "Calendar event creation failed"
+                log("[EXECUTION_STEP] Calendar create blocked: \(reason)")
+            case .failed(let reason):
+                resultMessage = "Failed: \(reason)"
                 wasExecuted = false
+                logError("[EXECUTION_STEP] Calendar create failed: \(reason)")
             }
             
         case .updateCalendarEvent:
@@ -391,44 +472,31 @@ final class ExecutionEngine: ObservableObject {
                 break
             }
             
-            // Perform synchronous wrapper around async calendar update
+            // Direct async calendar update (no semaphore deadlock)
             let confirmationTime = effect.secondConfirmationTimestamp ?? Date()
             calendarWriteConfirmedAt = confirmationTime
-            
-            var writeResult: CalendarWriteResult?
-            let semaphore = DispatchSemaphore(value: 0)
-            
-            Task {
-                writeResult = await calendarService.updateEvent(
-                    payload: payload,
-                    secondConfirmationTimestamp: confirmationTime
-                )
-                semaphore.signal()
-            }
-            
-            let waitResult = semaphore.wait(timeout: .now() + 5.0)
-            
-            if waitResult == .timedOut {
-                resultMessage = "Calendar event update timed out"
+
+            let writeResult = await calendarService.updateEvent(
+                payload: payload,
+                secondConfirmationTimestamp: confirmationTime
+            )
+
+            switch writeResult {
+            case .success(let identifier, let operation, _, let confirmedAt):
+                calendarEventIdentifier = identifier
+                calendarWriteConfirmedAt = confirmedAt
+                calendarOperation = operation == .updated ? .updated : .created
+                resultMessage = "Calendar event updated successfully"
+                wasExecuted = true
+                log("[EXECUTION_STEP] Calendar event updated: \(identifier)")
+            case .blocked(let reason):
+                resultMessage = reason
                 wasExecuted = false
-            } else if let result = writeResult {
-                switch result {
-                case .success(let identifier, let operation, _, let confirmedAt):
-                    calendarEventIdentifier = identifier
-                    calendarWriteConfirmedAt = confirmedAt
-                    calendarOperation = operation == .updated ? .updated : .created
-                    resultMessage = "Calendar event updated successfully"
-                    wasExecuted = true
-                case .blocked(let reason):
-                    resultMessage = reason
-                    wasExecuted = false
-                case .failed(let reason):
-                    resultMessage = "Failed: \(reason)"
-                    wasExecuted = false
-                }
-            } else {
-                resultMessage = "Calendar event update failed"
+                log("[EXECUTION_STEP] Calendar update blocked: \(reason)")
+            case .failed(let reason):
+                resultMessage = "Failed: \(reason)"
                 wasExecuted = false
+                logError("[EXECUTION_STEP] Calendar update failed: \(reason)")
             }
             
         case .saveToMemory:

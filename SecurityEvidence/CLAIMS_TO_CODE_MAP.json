@@ -1,0 +1,349 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-01-29",
+  "description": "Machine-readable mapping of claims to enforcing code, tests, and failure modes",
+  "claims": [
+    {
+      "id": "CLAIM-001",
+      "text": "OperatorKit Core Verification Mode is fully air-gapped",
+      "scope": "Core modules only; Sync is documented exception",
+      "enforcingCode": {
+        "files": [
+          "Safety/ReleaseConfig.swift",
+          "Safety/CompileTimeGuards.swift",
+          "Safety/InvariantCheckRunner.swift",
+          "Sync/NetworkAllowance.swift"
+        ],
+        "functions": [
+          "ReleaseConfig.networkEntitlementsEnabled",
+          "CompileTimeGuards.validateNoNetworkImports()"
+        ],
+        "buildPhases": [
+          "Scripts/check_forbidden_symbols.sh",
+          "Scripts/check_forbidden_entitlements.sh"
+        ]
+      },
+      "tests": [
+        "InvariantTests.testNoNetworkFrameworksLinked",
+        "SyncInvariantTests.testSyncIsOffByDefault",
+        "AirGappedSecurityInterrogationTests.testCoreModulesHaveNoURLSession"
+      ],
+      "failureMode": {
+        "type": "BUILD_FAILURE",
+        "trigger": "Network symbol or entitlement detected",
+        "evidence": "check_forbidden_symbols.sh exit code 1"
+      },
+      "falsification": {
+        "action": "Add 'import Network' to any core module",
+        "expected": "Build fails with forbidden symbol error"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-002",
+      "text": "No background processing",
+      "scope": "Entire app",
+      "enforcingCode": {
+        "files": [
+          "OperatorKit/Resources/Info.plist"
+        ],
+        "functions": [],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testNoBackgroundModes",
+        "InfoPlistRegressionTests.testNoBackgroundModes",
+        "RegressionTests.testNoBackgroundModes"
+      ],
+      "failureMode": {
+        "type": "TEST_FAILURE",
+        "trigger": "UIBackgroundModes key present in Info.plist",
+        "evidence": "Test assertion fails"
+      },
+      "falsification": {
+        "action": "Add UIBackgroundModes to Info.plist",
+        "expected": "Tests fail"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-003",
+      "text": "No autonomous actions",
+      "scope": "All execution paths",
+      "enforcingCode": {
+        "files": [
+          "Domain/Approval/ApprovalGate.swift",
+          "Domain/Execution/ExecutionEngine.swift"
+        ],
+        "functions": [
+          "ApprovalGate.grant()",
+          "ExecutionEngine.execute(draft:approval:)"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testApprovalGateBlocksWithoutApproval",
+        "InvariantTests.testSiriRoutingNeverExecutes",
+        "RegressionTests.testSiriNeverCallsExecutionLogic"
+      ],
+      "failureMode": {
+        "type": "ASSERTION_FAILURE",
+        "trigger": "ExecutionEngine.execute() called without ApprovalGate.grant()",
+        "evidence": "assertionFailure in DEBUG, logged error in RELEASE"
+      },
+      "falsification": {
+        "action": "Call ExecutionEngine.execute() without prior ApprovalGate.grant()",
+        "expected": "Crash in DEBUG, blocked execution in RELEASE"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-004",
+      "text": "Draft-first execution",
+      "scope": "All execution paths",
+      "enforcingCode": {
+        "files": [
+          "Domain/Drafts/DraftGenerator.swift",
+          "Domain/Execution/ExecutionEngine.swift"
+        ],
+        "functions": [
+          "DraftGenerator.generate()",
+          "ExecutionEngine.execute(draft:)"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testDraftRequiredBeforeExecution"
+      ],
+      "failureMode": {
+        "type": "COMPILE_ERROR",
+        "trigger": "ExecutionEngine.execute() called without Draft parameter",
+        "evidence": "Swift compiler error"
+      },
+      "falsification": {
+        "action": "Remove draft parameter from execute() signature",
+        "expected": "Compile error at all call sites"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-005",
+      "text": "User-selected context only",
+      "scope": "Context assembly",
+      "enforcingCode": {
+        "files": [
+          "Domain/Context/ContextAssembler.swift",
+          "Services/Calendar/CalendarService.swift"
+        ],
+        "functions": [
+          "ContextAssembler.assemble(selectedItems:)"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testContextAssemblerOnlyProcessesSelectedItems",
+        "RegressionTests.testCalendarUpdateOnlyAllowedForSelectedEvents"
+      ],
+      "failureMode": {
+        "type": "API_ABSENCE",
+        "trigger": "No bulk access APIs exist",
+        "evidence": "No assembleAll() or fetchAll() methods"
+      },
+      "falsification": {
+        "action": "Add ContextAssembler.assembleAll() method",
+        "expected": "Tests fail due to bulk access"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-006",
+      "text": "No analytics or tracking",
+      "scope": "Entire codebase",
+      "enforcingCode": {
+        "files": [
+          "Safety/CompileTimeGuards.swift",
+          "Safety/ReleaseConfig.swift"
+        ],
+        "functions": [
+          "ReleaseConfig.analyticsEnabled",
+          "ReleaseConfig.telemetryEnabled"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testNoAnalyticsFrameworksLinked",
+        "RegressionTests.testNoAnalyticsOrTelemetryEnabled"
+      ],
+      "failureMode": {
+        "type": "BUILD_FAILURE",
+        "trigger": "Analytics framework imported",
+        "evidence": "Compile-time guard fails"
+      },
+      "falsification": {
+        "action": "Add 'import Firebase' to any file",
+        "expected": "Build fails"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-007",
+      "text": "Two-key write confirmation",
+      "scope": "Calendar and Reminder writes",
+      "enforcingCode": {
+        "files": [
+          "Domain/Approval/SideEffectContract.swift",
+          "Services/Calendar/CalendarService.swift",
+          "Services/Reminders/ReminderService.swift"
+        ],
+        "functions": [
+          "SideEffectContract.secondConfirmationGranted",
+          "CalendarService.createEvent(contract:)",
+          "ReminderService.createReminder(contract:)"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testTwoKeyConfirmationRequired",
+        "RegressionTests.testWritePathsBypassTwoKeyConfirmation"
+      ],
+      "failureMode": {
+        "type": "ASSERTION_FAILURE",
+        "trigger": "Write attempted without secondConfirmationGranted",
+        "evidence": "assertionFailure in DEBUG"
+      },
+      "falsification": {
+        "action": "Call CalendarService.createEvent() with secondConfirmationGranted=false",
+        "expected": "Crash in DEBUG"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-008",
+      "text": "Siri routes only, never executes",
+      "scope": "Siri intent handlers",
+      "enforcingCode": {
+        "files": [
+          "Services/Siri/SiriRoutingBridge.swift",
+          "Services/Siri/OperatorKitIntents.swift"
+        ],
+        "functions": [
+          "SiriRoutingBridge.handleIntent()",
+          "OperatorKitIntents.handle()"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "InvariantTests.testSiriRoutingNeverExecutes",
+        "RegressionTests.testSiriNeverCallsExecutionLogic"
+      ],
+      "failureMode": {
+        "type": "ASSERTION_FAILURE",
+        "trigger": "ExecutionEngine called from Siri handler",
+        "evidence": "assertionFailure in DEBUG"
+      },
+      "falsification": {
+        "action": "Add ExecutionEngine.execute() to Siri handler",
+        "expected": "Tests fail, crash in DEBUG"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-022",
+      "text": "Optional cloud sync is OFF by default",
+      "scope": "Sync module",
+      "enforcingCode": {
+        "files": [
+          "Sync/NetworkAllowance.swift"
+        ],
+        "functions": [
+          "SyncFeatureFlag.defaultToggleState"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "SyncInvariantTests.testSyncIsOffByDefault",
+        "SyncInvariantTests.testSyncQueueDoesNotUploadOnInit"
+      ],
+      "failureMode": {
+        "type": "TEST_FAILURE",
+        "trigger": "defaultToggleState changed to true",
+        "evidence": "Test assertion fails"
+      },
+      "falsification": {
+        "action": "Set SyncFeatureFlag.defaultToggleState = true",
+        "expected": "Tests fail"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-047",
+      "text": "Clipboard access is user-initiated only",
+      "scope": "All UIPasteboard usage",
+      "enforcingCode": {
+        "files": [
+          "UI/Growth/ReferralView.swift",
+          "UI/Settings/AppStoreReadinessView.swift",
+          "UI/Growth/OutboundKitView.swift"
+        ],
+        "functions": [
+          "copyCode()",
+          "copyTemplate()"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "ClipboardInvariantTests.testNoBackgroundClipboardReads",
+        "ClipboardInvariantTests.testClipboardWritesAreUserInitiated"
+      ],
+      "failureMode": {
+        "type": "CODE_REVIEW",
+        "trigger": "UIPasteboard.general.string read (not write)",
+        "evidence": "Code review detects read pattern"
+      },
+      "falsification": {
+        "action": "Add 'let _ = UIPasteboard.general.string' (read)",
+        "expected": "Code review fails"
+      },
+      "valid": true
+    },
+    {
+      "id": "CLAIM-048",
+      "text": "Proof exports are deterministic",
+      "scope": "All export packets",
+      "enforcingCode": {
+        "files": [
+          "Domain/Eval/ExportQualityPacket.swift",
+          "Diagnostics/DiagnosticsExportPacket.swift"
+        ],
+        "functions": [
+          "generatedAtDayRounded",
+          "sorted()"
+        ],
+        "buildPhases": []
+      },
+      "tests": [
+        "DeterminismInvariantTests.testProofHashIsStableWithinDay",
+        "DeterminismInvariantTests.testArrayOrderingIsStable",
+        "DeterminismInvariantTests.testNoUUIDInProofHashInputs"
+      ],
+      "failureMode": {
+        "type": "TEST_FAILURE",
+        "trigger": "Hash differs across runs with same input",
+        "evidence": "Hash comparison fails"
+      },
+      "falsification": {
+        "action": "Add UUID() to hash input",
+        "expected": "Tests fail due to non-deterministic hash"
+      },
+      "valid": true
+    }
+  ],
+  "summary": {
+    "totalClaims": 11,
+    "validClaims": 11,
+    "invalidClaims": 0,
+    "claimsWithTests": 11,
+    "claimsWithFailureModes": 11,
+    "claimsWithFalsification": 11
+  }
+}

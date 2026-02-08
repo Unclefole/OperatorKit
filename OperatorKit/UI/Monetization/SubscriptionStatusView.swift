@@ -15,6 +15,10 @@ import SwiftUI
 // See: docs/SAFETY_CONTRACT.md, docs/APP_REVIEW_PACKET.md
 // ============================================================================
 
+// MARK: - Paywall Gate (Inlined)
+// Paywall ENABLED for App Store release
+private let _subscriptionPaywallEnabled: Bool = true
+
 struct SubscriptionStatusView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
@@ -102,8 +106,10 @@ struct SubscriptionStatusView: View {
             await refresh()
         }
         .sheet(isPresented: $showUpgrade) {
-            UpgradeView()
-                .environmentObject(appState)
+            if _subscriptionPaywallEnabled {
+                UpgradeView()
+                    .environmentObject(appState)
+            }
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
@@ -216,22 +222,26 @@ struct SubscriptionStatusView: View {
     
     // MARK: - Action Buttons
     
+    @ViewBuilder
     private var upgradeButton: some View {
-        Button {
-            showUpgrade = true
-        } label: {
-            HStack {
-                Image(systemName: "star.fill")
-                    .foregroundColor(.blue)
-                Text("Upgrade to Pro")
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        if _subscriptionPaywallEnabled {
+            Button {
+                showUpgrade = true
+            } label: {
+                HStack {
+                    Image(systemName: "star.fill")
+                        .foregroundColor(.blue)
+                    Text("Upgrade to Pro")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
+            .accessibilityLabel("Upgrade to Pro")
+            .accessibilityHint("Opens subscription options")
         }
-        .accessibilityLabel("Upgrade to Pro")
-        .accessibilityHint("Opens subscription options")
+        // If _subscriptionPaywallEnabled == false, button is hidden entirely
     }
     
     private var restoreButton: some View {

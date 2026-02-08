@@ -1,6 +1,22 @@
 import Foundation
 import SwiftData
 
+// ============================================================================
+// SECURITY INVARIANT — LOCAL-ONLY STORAGE
+//
+// PersistedMemoryItem intentionally stores user draft content (body, subject,
+// recipient) for on-device memory/history features.
+//
+// GUARANTEES:
+// 1. Content NEVER leaves the device (air-gap enforced)
+// 2. Content is NEVER included in exports (forbiddenKeys validation)
+// 3. Sync module uploads metadata only (content blocked)
+// 4. User may delete memory at any time
+//
+// This does NOT violate "no draft persistence" rules, which apply to
+// in-progress drafts, not completed operations.
+// ============================================================================
+
 /// Persisted memory item stored in SwiftData
 /// This is the durable, on-device storage for all operations
 @Model

@@ -195,7 +195,7 @@ extension GoldenCaseStore {
     
     /// Creates a golden case from a memory item
     /// INVARIANT: Extracts metadata only, never raw content
-    public func createGoldenCase(
+    func createGoldenCase(
         from memoryItem: PersistedMemoryItem,
         title: String? = nil
     ) -> GoldenCase {

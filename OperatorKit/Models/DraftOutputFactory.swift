@@ -79,7 +79,8 @@ final class DraftOutputFactory {
             actionItems: actionItems,
             confidence: confidence,
             citations: citations,
-            safetyNotes: safetyNotes
+            safetyNotes: safetyNotes,
+            outputType: input.outputType
         )
         
         return DraftOutputResult(
@@ -112,7 +113,8 @@ final class DraftOutputFactory {
             actionItems: actionItems,
             confidence: confidence,
             citations: citations,
-            safetyNotes: safetyNotes
+            safetyNotes: safetyNotes,
+            outputType: input.outputType
         )
     }
     
@@ -126,7 +128,7 @@ final class DraftOutputFactory {
     
     private static func processCitations(
         rawOutput: RawModelOutput,
-        context: ContextItems,
+        context: ModelInput.ContextItems,
         outputText: String
     ) -> CitationProcessingResult {
         
@@ -320,7 +322,7 @@ final class DraftOutputFactory {
     
     private static func validateOutputFormat(
         text: String,
-        outputType: ModelInput.OutputType,
+        outputType: DraftOutput.OutputType,
         backend: ModelBackend
     ) -> ValidationResult {
         var issues: [String] = []

@@ -115,10 +115,10 @@ public enum ProofPackAssembler {
         let report = RegressionFirewallRunner.shared.runAllRules()
         
         return RegressionFirewallSummary(
-            ruleCount: report.totalRules,
+            ruleCount: report.ruleCount,
             passed: report.passedCount,
             failed: report.failedCount,
-            overallStatus: report.overallStatus.rawValue
+            overallStatus: report.status.rawValue
         )
     }
     

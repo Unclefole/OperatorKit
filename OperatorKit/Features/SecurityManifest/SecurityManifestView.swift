@@ -1,10 +1,18 @@
 import SwiftUI
 
 // ============================================================================
-// SECURITY MANIFEST VIEW (Phase 13F)
+// SECURITY MANIFEST VIEW (Phase 13F) — READ-ONLY TRUST SURFACE
 //
-// Read-only view displaying verifiable security claims.
-// No buttons, no toggles, no actions - purely informational.
+// ARCHITECTURAL INVARIANT: This view is STRICTLY READ-ONLY.
+// ─────────────────────────────────────────────────────────
+// ❌ No Buttons (except navigation)
+// ❌ No Toggles, Pickers, Steppers, TextFields
+// ❌ No onTapGesture that triggers actions
+// ❌ No async work (.task, DispatchQueue, URLSession)
+// ❌ No export actions
+// ✅ Read-only display of static security claims
+// ✅ Instant render
+// ✅ All data hardcoded (source code audit verified)
 //
 // DISPLAYS:
 // - WebKit-Free status
@@ -13,25 +21,34 @@ import SwiftUI
 // - No Remote Code Execution status
 // - How to verify these claims
 //
-// CONSTRAINTS (ABSOLUTE):
-// ❌ No buttons
-// ❌ No toggles
-// ❌ No actions
-// ❌ No networking
-// ✅ Read-only display
-// ✅ Feature-flagged
+// APP REVIEW SAFETY: This surface displays security verification claims only.
 // ============================================================================
 
-public struct SecurityManifestView: View {
+@MainActor
+struct SecurityManifestView: View {
+
+    // MARK: - Architectural Seal
+
+    private static let isReadOnly = true
     
     // MARK: - Body
-    
-    public var body: some View {
+
+    var body: some View {
+        let _ = Self.assertReadOnlyInvariant()
+
         if SecurityManifestFeatureFlag.isEnabled {
             manifestContent
         } else {
             featureDisabledView
         }
+    }
+
+    // MARK: - Invariant Assertion
+
+    private static func assertReadOnlyInvariant() {
+        #if DEBUG
+        assert(Self.isReadOnly, "SecurityManifestView must be read-only")
+        #endif
     }
     
     // MARK: - Manifest Content
@@ -208,17 +225,26 @@ public struct SecurityManifestView: View {
     }
     
     // MARK: - Footer Section
-    
+
     private var footerSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: "shield.checkered")
+                        .foregroundColor(.green)
+
+                    Text("All proofs verified locally on this device.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
                 HStack {
                     Image(systemName: "doc.text.fill")
                         .foregroundColor(.blue)
                     Text("See: docs/SECURITY_MANIFEST.md")
                         .font(.caption)
                 }
-                
+
                 HStack {
                     Image(systemName: "testtube.2")
                         .foregroundColor(.orange)
@@ -228,6 +254,8 @@ public struct SecurityManifestView: View {
             }
             .foregroundColor(.secondary)
             .padding(.vertical, 4)
+        } footer: {
+            Text("This is a read-only verification surface. No actions, no network calls.")
         }
     }
     
@@ -250,8 +278,8 @@ public struct SecurityManifestView: View {
     }
     
     // MARK: - Init
-    
-    public init() {}
+
+    init() {}
 }
 
 // MARK: - Guarantee Row

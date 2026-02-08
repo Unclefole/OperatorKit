@@ -47,7 +47,7 @@ final class DraftGenerator: ObservableObject {
             
             // Store for reference
             lastDraftOutput = output
-            lastModelMetadata = modelRouter.currentModelMetadata
+            lastModelMetadata = modelRouter.currentModelMetadata()
             
             // Determine recipient from context if not provided
             let finalRecipient = recipient ?? extractRecipient(from: context, intent: intent)

@@ -149,25 +149,37 @@ public struct OperatorPolicy: Codable, Equatable {
         return parts.isEmpty ? "All capabilities allowed" : parts.joined(separator: " • ")
     }
     
-    /// Short status text
+    /// Short status text — INSTITUTIONAL LANGUAGE ONLY
+    /// INVARIANT: Never returns "All Allowed". This is decision infrastructure.
     public var statusText: String {
         if !enabled {
-            return "Disabled"
+            return "Policy Disabled"
         }
-        
+
         let blockedCount = [
             !allowEmailDrafts,
             !allowCalendarWrites,
             !allowTaskCreation,
             !allowMemoryWrites
         ].filter { $0 }.count
-        
+
+        if requireExplicitConfirmation {
+            if blockedCount == 0 {
+                return "Explicit Confirmation Required"
+            } else if blockedCount == 4 {
+                return "All Capabilities Restricted"
+            } else {
+                return "\(blockedCount) Restricted · Confirmation Required"
+            }
+        }
+
+        // Even without explicit confirmation, never say "All Allowed"
         if blockedCount == 0 {
-            return "All Allowed"
+            return "Active — All Capabilities Enabled"
         } else if blockedCount == 4 {
-            return "All Blocked"
+            return "All Capabilities Restricted"
         } else {
-            return "\(blockedCount) Blocked"
+            return "\(blockedCount) Capabilities Restricted"
         }
     }
 }

@@ -67,7 +67,7 @@ struct DiagnosticsView: View {
             }
             .sheet(isPresented: $showingShareSheet) {
                 if let url = exportURL {
-                    ShareSheet(activityItems: [url])
+                    DiagnosticsShareSheet(activityItems: [url])
                 }
             }
             .alert("Export Error", isPresented: $showingExportError) {
@@ -495,7 +495,7 @@ private struct GuaranteeRow: View {
 
 // MARK: - Share Sheet
 
-private struct ShareSheet: UIViewControllerRepresentable {
+private struct DiagnosticsShareSheet: UIViewControllerRepresentable {
     let activityItems: [Any]
     
     func makeUIViewController(context: Context) -> UIActivityViewController {

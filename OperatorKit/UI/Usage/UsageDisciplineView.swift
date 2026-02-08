@@ -17,6 +17,10 @@ import SwiftUI
 // See: docs/SAFETY_CONTRACT.md (Section 15)
 // ============================================================================
 
+// MARK: - Paywall Gate (Inlined)
+// Paywall ENABLED for App Store release
+private let _usagePaywallEnabled: Bool = true
+
 struct UsageDisciplineView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var rateShaper = RateShaper.shared
@@ -54,7 +58,12 @@ struct UsageDisciplineView: View {
                 }
             }
             .sheet(isPresented: $showingUpgrade) {
-                UpgradeView()
+                if _usagePaywallEnabled {
+                    UpgradeView()
+                } else {
+                    // Fallback: Never show blank screen
+                    ProComingSoonView(isPresented: $showingUpgrade)
+                }
             }
         }
     }

@@ -17,6 +17,21 @@ import Foundation
 // See: docs/APP_REVIEW_PACKET.md
 // ============================================================================
 
+// MARK: - Claim Registry (Singleton for claim ID lookup)
+
+public enum ClaimRegistry {
+    public static let shared = ClaimRegistryAccessor()
+}
+
+public struct ClaimRegistryAccessor {
+    /// All claim IDs from CLAIM_REGISTRY.md
+    public let allClaimIds: [String] = [
+        "CLAIM-001", "CLAIM-002", "CLAIM-003", "CLAIM-004",
+        "CLAIM-005", "CLAIM-006", "CLAIM-007", "CLAIM-008",
+        "CLAIM-009", "CLAIM-010", "CLAIM-011", "CLAIM-012"
+    ]
+}
+
 // MARK: - Buyer Proof Packet
 
 public struct BuyerProofPacket: Codable {

@@ -9,12 +9,12 @@ import CryptoKit
 // INVARIANT: Scaffold hash is stored for audit traceability.
 
 /// Structured prompt scaffold for model backends
-struct PromptScaffold: Equatable {
+struct PromptScaffold {
     
     // MARK: - Properties
     
     let intentText: String
-    let outputType: ModelInput.OutputType
+    let outputType: DraftOutput.OutputType
     let contextSummary: String
     let constraints: [String]
     let generatedAt: Date
@@ -44,9 +44,9 @@ struct PromptScaffold: Equatable {
     
     init(
         intentText: String,
-        outputType: ModelInput.OutputType,
+        outputType: DraftOutput.OutputType,
         contextSummary: String,
-        constraints: [String] = ModelInput.standardConstraints
+        constraints: [String] = ModelInput.defaultConstraints
     ) {
         self.intentText = intentText
         self.outputType = outputType

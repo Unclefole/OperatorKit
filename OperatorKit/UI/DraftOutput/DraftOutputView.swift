@@ -5,6 +5,7 @@ import UIKit
 
 struct DraftOutputView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var nav: AppNavigationState
     @State private var selectedTab: Int = 0
     @State private var isEditing: Bool = false
     @State private var editedBody: String = ""
@@ -88,13 +89,13 @@ struct DraftOutputView: View {
     private func handleRecoveryAction(_ action: OperatorKitUserFacingError.RecoveryAction) {
         switch action {
         case .goHome:
-            appState.returnHome()
+            nav.goHome()
         case .retryCurrentStep:
             appState.clearError()
         case .addMoreContext:
-            appState.navigateTo(.contextPicker)
+            nav.navigate(to: .context)
         case .editRequest:
-            appState.navigateTo(.intentInput)
+            nav.navigate(to: .intent)
         default:
             appState.clearError()
         }
@@ -103,32 +104,27 @@ struct DraftOutputView: View {
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            Button(action: {
-                appState.navigateBack()
-            }) {
+            Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            
+
             Spacer()
-            
-            Text("Review Draft")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
+
+            OperatorKitLogoView(size: .small, showText: false)
+
             Spacer()
-            
-            Button(action: {
-                appState.returnHome()
-            }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
+
+            Button(action: { nav.goHome() }) {
+                Image(systemName: "house")
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.gray)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .background(Color.white)
     }
     
     // MARK: - Confidence Badge
@@ -162,7 +158,7 @@ struct DraftOutputView: View {
             }
             
             // Fallback indicator (non-alarmist)
-            if let metadata = draft.modelMetadata, metadata.backend == .deterministic, draft.usedFallback {
+            if let metadata = draft.modelMetadata, metadata.backend == .deterministic, metadata.fallbackReason != nil {
                 fallbackIndicator
             }
         }
@@ -529,7 +525,7 @@ struct DraftOutputView: View {
             // Action buttons
             HStack(spacing: 12) {
                 Button(action: {
-                    appState.navigateBack()
+                    nav.goBack()
                 }) {
                     Text("Back")
                         .font(.body)
@@ -617,7 +613,7 @@ struct DraftOutputView: View {
             
             // Recovery options
             HStack(spacing: 12) {
-                Button(action: { appState.navigateTo(.intentInput) }) {
+                Button(action: { nav.navigate(to: .intent) }) {
                     Text("Edit request")
                         .font(.caption)
                         .fontWeight(.medium)
@@ -628,7 +624,7 @@ struct DraftOutputView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                 
-                Button(action: { appState.navigateTo(.contextPicker) }) {
+                Button(action: { nav.navigate(to: .context) }) {
                     Text("Add more context")
                         .font(.caption)
                         .fontWeight(.medium)
@@ -667,10 +663,10 @@ struct DraftOutputView: View {
         // Check if routing to fallback
         if draft.requiresFallbackConfirmation {
             // Route to fallback for confirmation
-            appState.navigateTo(.fallback)
+            nav.navigate(to: .fallback)
         } else {
             // Direct to approval
-            appState.navigateTo(.approval)
+            nav.navigate(to: .approval)
         }
     }
 }

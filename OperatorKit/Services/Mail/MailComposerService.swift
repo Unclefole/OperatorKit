@@ -206,8 +206,8 @@ enum MailComposeResult: Equatable {
 
 // MARK: - SwiftUI View Representable
 
-/// SwiftUI wrapper for presenting mail composer
-struct MailComposerView: UIViewControllerRepresentable {
+/// SwiftUI wrapper for presenting mail composer with Draft
+private struct DraftMailComposerView: UIViewControllerRepresentable {
     let draft: Draft
     let onDismiss: (MailComposeResult) -> Void
     
@@ -240,9 +240,9 @@ struct MailComposerView: UIViewControllerRepresentable {
     }
     
     class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
-        let parent: MailComposerView
+        let parent: DraftMailComposerView
         
-        init(_ parent: MailComposerView) {
+        init(_ parent: DraftMailComposerView) {
             self.parent = parent
         }
         
@@ -282,7 +282,7 @@ struct MailComposerSheetModifier: ViewModifier {
         content
             .sheet(isPresented: $isPresented) {
                 if let draft = draft, MFMailComposeViewController.canSendMail() {
-                    MailComposerView(draft: draft) { result in
+                    DraftMailComposerView(draft: draft) { result in
                         isPresented = false
                         onResult(result)
                     }

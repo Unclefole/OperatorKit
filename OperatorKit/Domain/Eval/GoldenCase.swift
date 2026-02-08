@@ -147,7 +147,7 @@ extension GoldenCaseSnapshot {
     
     /// Creates a snapshot from a PersistedMemoryItem
     /// INVARIANT: Extracts metadata only, never raw content
-    public static func from(memoryItem: PersistedMemoryItem) -> GoldenCaseSnapshot {
+    static func from(memoryItem: PersistedMemoryItem) -> GoldenCaseSnapshot {
         // Determine confidence band
         let confidenceBand: String
         if let confidence = memoryItem.confidenceAtDraft {
@@ -175,8 +175,8 @@ extension GoldenCaseSnapshot {
             timeoutOccurred: memoryItem.timeoutOccurred,
             validationPass: memoryItem.validationPass,
             citationValidityPass: memoryItem.citationValidityPass,
-            citationsCount: memoryItem.citationsCount,
-            latencyMs: memoryItem.latencyMs,
+            citationsCount: memoryItem.citationsCount ?? 0,
+            latencyMs: memoryItem.generationLatencyMs,
             promptScaffoldHash: memoryItem.promptScaffoldHash
         )
     }

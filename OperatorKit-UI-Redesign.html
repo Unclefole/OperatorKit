@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OperatorKit — Trust-First Interface</title>
+    <style>
+        /* ================================================================
+           OPERATORKIT DESIGN SYSTEM v2.0
+           Trust-First Interface — Apple × Palantir × Linear
+           ================================================================ */
+
+        :root {
+            /* Backgrounds */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F8FA;
+            --bg-tertiary: #F1F5F9;
+            --bg-elevated: #FFFFFF;
+
+            /* Text */
+            --text-primary: #0B0B0C;
+            --text-secondary: #6B7280;
+            --text-tertiary: #94A3B8;
+            --text-placeholder: #94A3B8;
+
+            /* Borders & Dividers */
+            --border-subtle: #E6E8EC;
+            --border-default: #E2E8F0;
+            --border-focus: #5B8CFF;
+
+            /* Accent Gradient */
+            --accent-start: #5B8CFF;
+            --accent-end: #7C5CFF;
+            --accent-muted: rgba(91, 140, 255, 0.08);
+            --accent-glow: rgba(91, 140, 255, 0.15);
+
+            /* Icons */
+            --icon-primary: #6B7280;
+            --icon-secondary: #9AA0A6;
+            --icon-muted: #B8BCC4;
+
+            /* Shadows */
+            --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --shadow-glow: 0 0 24px rgba(91, 140, 255, 0.12);
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-xxl: 24px;
+            --space-xxxl: 32px;
+
+            /* Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        /* iPhone Frame */
+        .device {
+            width: 390px;
+            height: 844px;
+            background: linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%);
+            border-radius: 55px;
+            padding: 12px;
+            box-shadow:
+                0 50px 100px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .device::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 28px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            border-radius: 44px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 54px 28px 8px;
+            background: var(--bg-primary);
+        }
+
+        .time {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .status-icons svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-lg) var(--space-xl);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .settings-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .settings-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--icon-secondary);
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 0 var(--space-xl);
+            overflow-y: auto;
+        }
+
+        /* Input Field */
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-default);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-xxl);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-muted);
+        }
+
+        .input-mic {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: var(--accent-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-primary);
+            outline: none;
+            line-height: 22px;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-placeholder);
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+
+        .history-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
+        }
+
+        .history-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .history-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--icon-secondary);
+        }
+
+        .history-btn span {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--icon-secondary);
+        }
+
+        /* Cards */
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            padding-bottom: 140px;
+        }
+
+        .card {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            background: var(--bg-elevated);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--icon-primary);
+        }
+
+        .card-icon.success {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-sm);
+            background: #10B981;
+            margin: 6px;
+        }
+
+        .card-icon.success svg {
+            width: 14px;
+            height: 14px;
+            stroke: white;
+            stroke-width: 2.5;
+        }
+
+        .card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-text {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--text-primary);
+            line-height: 20px;
+            margin-bottom: var(--space-xs);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+        }
+
+        /* Floating Mic Button */
+        .floating-mic-container {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .floating-mic-glow {
+            position: absolute;
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .floating-mic {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(91, 140, 255, 0.12) 0%, rgba(124, 92, 255, 0.12) 100%);
+            box-shadow: var(--shadow-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .floating-mic:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 32px rgba(91, 140, 255, 0.2);
+        }
+
+        .floating-mic:active {
+            transform: scale(0.98);
+        }
+
+        .floating-mic svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* Home Indicator */
+        .home-indicator {
+            width: 134px;
+            height: 5px;
+            background: var(--text-primary);
+            border-radius: 3px;
+            margin: 8px auto;
+            opacity: 0.2;
+        }
+
+        /* Gradient Definition */
+        .gradient-fill {
+            fill: url(#operatorGradient);
+        }
+
+        .gradient-stroke {
+            stroke: url(#operatorGradient);
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG Gradient Definitions -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="operatorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#5B8CFF" />
+                <stop offset="100%" stop-color="#7C5CFF" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="device">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span class="time">2:30</span>
+                <div class="status-icons">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="1" y="10" width="4" height="10" rx="1" fill="#0B0B0C"/>
+                        <rect x="7" y="7" width="4" height="13" rx="1" fill="#0B0B0C"/>
+                        <rect x="13" y="4" width="4" height="16" rx="1" fill="#0B0B0C"/>
+                        <rect x="19" y="1" width="4" height="19" rx="1" fill="#D1D5DB"/>
+                    </svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M1 9l11 11 11-11c-5-5-8-8-11-8s-6 3-11 8z" fill="#0B0B0C"/>
+                    </svg>
+                    <svg viewBox="0 0 28 14" fill="currentColor">
+                        <rect x="0" y="1" width="24" height="12" rx="3" stroke="#0B0B0C" stroke-width="1" fill="none"/>
+                        <rect x="25" y="4" width="2" height="6" rx="1" fill="#0B0B0C" opacity="0.4"/>
+                        <rect x="2" y="3" width="18" height="8" rx="1.5" fill="#0B0B0C"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="5" fill="white"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text">OperatorKit</span>
+                </div>
+                <button class="settings-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Input Field -->
+                <div class="input-container">
+                    <div class="input-mic">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="url(#operatorGradient)"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="url(#operatorGradient)" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <input type="text" class="input-field" placeholder="What do you want handled?">
+                </div>
+
+                <!-- Section Header -->
+                <div class="section-header">
+                    <span class="section-title">Recent Operations</span>
+                    <button class="history-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12,6 12,12 16,14"/>
+                        </svg>
+                        <span>History</span>
+                    </button>
+                </div>
+
+                <!-- Cards -->
+                <div class="card-list">
+                    <!-- Email Card -->
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                <path d="M22 6l-10 7L2 6"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-text">I hope you're doing well. I wanted to follow up taap, our meeting yesterday regarding the Q...</p>
+                            <span class="card-meta">2.2 hours ago</span>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Card -->
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-text">Key decisions: Approved new timeline, advocatey additional resources for Phase 2...</p>
+                            <span class="card-meta">1 hour ago</span>
+                        </div>
+                    </div>
+
+                    <!-- Task Card -->
+                    <div class="card">
+                        <div class="card-icon success">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <polyline points="20,6 9,17 4,12"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-text">1. Update project roadmap - Due Friday. 2. stats ag'lus update to stakeholders...</p>
+                            <span class="card-meta">2 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Mic Button -->
+            <div class="floating-mic-container">
+                <div class="floating-mic-glow"></div>
+                <button class="floating-mic">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="url(#operatorGradient)"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="url(#operatorGradient)" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Home Indicator -->
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+</body>
+</html>

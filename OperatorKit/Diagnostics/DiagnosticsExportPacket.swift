@@ -143,7 +143,7 @@ public final class DiagnosticsExportBuilder {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         executionCollector: ExecutionDiagnosticsCollector = ExecutionDiagnosticsCollector(),
         usageCollector: UsageDiagnosticsCollector = UsageDiagnosticsCollector()
     ) {
@@ -195,8 +195,8 @@ public final class DiagnosticsExportBuilder {
     /// Checks if invariants are passing
     private func checkInvariantsPassing() -> Bool {
         // Use InvariantCheckRunner if available
-        let result = InvariantCheckRunner.shared.runAllChecks()
-        return result.overallStatus == .allPassing
+        let results = InvariantCheckRunner.shared.runAllChecks()
+        return results.allSatisfy { $0.passed }
     }
     
     /// Computes hash of safety contract (simplified)

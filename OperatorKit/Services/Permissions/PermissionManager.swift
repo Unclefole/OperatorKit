@@ -123,34 +123,44 @@ final class PermissionManager: ObservableObject {
     /// Request calendar access (ONLY when user explicitly triggers)
     /// INVARIANT: Never called automatically
     func requestCalendarAccess() async -> Bool {
-        log("PermissionManager: User-initiated calendar permission request")
-        
+        log("[Permission] REQUEST START — Calendar")
+
         let newState = await calendarAdapter.requestEventsWriteAccess()
-        
-        await MainActor.run {
-            calendarState = newState
-            lastRefresh = Date()
-        }
-        
-        let granted = newState.canRead || newState.canWrite
-        log("PermissionManager: Calendar permission \(granted ? "granted" : "denied"), state: \(newState.rawValue)")
+        log("[Permission] iOS RESPONSE — Calendar: \(newState.rawValue)")
+
+        // Force recheck from system (iOS dialog response can lag)
+        let verifiedState = calendarAdapter.eventsAuthorizationStatus()
+        let finalState = verifiedState.canWrite ? verifiedState : newState
+        log("[Permission] VERIFIED STATE — Calendar: \(finalState.rawValue)")
+
+        calendarState = finalState
+        lastRefresh = Date()
+        objectWillChange.send()
+
+        let granted = finalState.canRead || finalState.canWrite
+        log("[Permission] FINAL — Calendar: \(granted ? "GRANTED ✅" : "DENIED ❌")")
         return granted
     }
-    
+
     /// Request reminders access (ONLY when user explicitly triggers)
     /// INVARIANT: Never called automatically
     func requestRemindersAccess() async -> Bool {
-        log("PermissionManager: User-initiated reminders permission request")
-        
+        log("[Permission] REQUEST START — Reminders")
+
         let newState = await remindersAdapter.requestRemindersWriteAccess()
-        
-        await MainActor.run {
-            remindersState = newState
-            lastRefresh = Date()
-        }
-        
-        let granted = newState.canRead || newState.canWrite
-        log("PermissionManager: Reminders permission \(granted ? "granted" : "denied"), state: \(newState.rawValue)")
+        log("[Permission] iOS RESPONSE — Reminders: \(newState.rawValue)")
+
+        // Force recheck from system (iOS dialog response can lag)
+        let verifiedState = remindersAdapter.remindersAuthorizationStatus()
+        let finalState = verifiedState.canWrite ? verifiedState : newState
+        log("[Permission] VERIFIED STATE — Reminders: \(finalState.rawValue)")
+
+        remindersState = finalState
+        lastRefresh = Date()
+        objectWillChange.send()
+
+        let granted = finalState.canRead || finalState.canWrite
+        log("[Permission] FINAL — Reminders: \(granted ? "GRANTED ✅" : "DENIED ❌")")
         return granted
     }
     
@@ -194,9 +204,24 @@ final class PermissionManager: ObservableObject {
     
     /// Open system settings for OperatorKit
     /// Use when user needs to manually grant permissions
+    @MainActor
     func openSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+            #if DEBUG
+            print("[PermissionManager] ❌ Failed to create settings URL")
+            #endif
+            return
+        }
+
+        Task { @MainActor in
+            let success = await UIApplication.shared.open(url)
+            #if DEBUG
+            if success {
+                print("[PermissionManager] ✅ Opened Settings successfully")
+            } else {
+                print("[PermissionManager] ❌ Failed to open Settings URL")
+            }
+            #endif
         }
     }
     

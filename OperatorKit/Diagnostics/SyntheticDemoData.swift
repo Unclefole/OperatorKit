@@ -224,41 +224,36 @@ struct SyntheticFile: Identifiable {
 // MARK: - Conversion to Context Items
 
 extension SyntheticDemoData {
-    
+
     /// Convert synthetic calendar event to CalendarContextItem
     static func toCalendarContextItem(_ event: SyntheticCalendarEvent) -> CalendarContextItem {
         CalendarContextItem(
-            eventIdentifier: event.id,
             title: event.title,
-            startDate: event.startDate,
+            date: event.startDate,
             endDate: event.endDate,
-            participants: event.participants.map { $0 },
+            attendees: event.participants,
             location: event.location,
-            wasExplicitlySelected: false  // Will be set to true when user selects
+            eventIdentifier: event.id
         )
     }
-    
+
     /// Convert synthetic email to EmailContextItem
     static func toEmailContextItem(_ email: SyntheticEmailThread) -> EmailContextItem {
         EmailContextItem(
-            threadId: email.id,
             subject: email.subject,
-            senderName: email.sender,
-            snippet: email.snippet,
-            receivedDate: email.date,
-            wasExplicitlySelected: false
+            sender: email.sender,
+            date: email.date,
+            bodyPreview: email.snippet,
+            messageIdentifier: email.id
         )
     }
-    
+
     /// Convert synthetic file to FileContextItem
     static func toFileContextItem(_ file: SyntheticFile) -> FileContextItem {
         FileContextItem(
-            fileId: file.id,
-            fileName: file.name,
-            filePath: "/synthetic/\(file.name)",
+            name: file.name,
             fileType: file.type,
-            lastModified: Date(),
-            wasExplicitlySelected: false
+            path: "/synthetic/\(file.name)"
         )
     }
 }

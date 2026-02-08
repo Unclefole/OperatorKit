@@ -256,20 +256,26 @@ final class EvalRunner: ObservableObject {
     // MARK: - Input Building
     
     private func buildModelInput(from evalCase: EvalCase) -> ModelInput {
-        // Build context items from synthetic data
+        // Build context items from synthetic data, separated by type
+        let calendarItems = evalCase.contextItems.compactMap { $0.asCalendarContextItem() }
+        let emailItems = evalCase.contextItems.compactMap { $0.asEmailContextItem() }
+        let fileItems = evalCase.contextItems.compactMap { $0.asFileContextItem() }
+
         let contextItems = ModelInput.ContextItems(
-            items: evalCase.contextItems.map { $0.asModelContextItem }
+            calendarItems: calendarItems,
+            emailItems: emailItems,
+            fileItems: fileItems
         )
-        
+
         // Build context summary from synthetic items
         let contextSummary = buildContextSummary(from: evalCase.contextItems)
-        
+
         return ModelInput(
             intentText: evalCase.intentText,
             contextSummary: contextSummary,
-            contextItems: contextItems,
-            constraints: ModelInput.standardConstraints,
-            outputType: evalCase.expectedOutputType
+            constraints: ModelInput.defaultConstraints,
+            outputType: evalCase.expectedOutputType,
+            contextItems: contextItems
         )
     }
     

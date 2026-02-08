@@ -237,13 +237,13 @@ public struct TeamQualitySummary: Codable, Equatable {
             id: UUID(),
             capturedAt: Date(),
             capturedBy: capturedBy,
-            qualityGatePassRate: packet.qualityGateResult.passed ? 1.0 : 0.0,
+            qualityGatePassRate: packet.qualityGateResult.status == "pass" ? 1.0 : 0.0,
             qualityScore: packet.coverageScore,
             coverageScore: packet.coverageScore,
-            driftLevel: packet.trend.driftLevel.rawValue,
-            goldenCaseCount: packet.trend.goldenCaseCount,
-            feedbackCount: packet.trend.feedbackCount,
-            trendDirection: packet.trend.direction.rawValue,
+            driftLevel: packet.qualityGateResult.driftLevel ?? "unknown",
+            goldenCaseCount: packet.qualityGateResult.goldenCaseCount,
+            feedbackCount: packet.trend.dataPoints,
+            trendDirection: packet.trend.passRateDirection,
             appVersion: packet.appVersion,
             schemaVersion: Self.currentSchemaVersion
         )

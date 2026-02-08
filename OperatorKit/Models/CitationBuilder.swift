@@ -7,11 +7,11 @@ final class CitationBuilder {
     
     /// Build citations from context packet
     /// Creates one citation per selected context item that's relevant to the output
-    static func buildFromContext(_ context: ContextItems, relevantToText text: String) -> [Citation] {
+    static func buildFromContext(_ context: ModelInput.ContextItems, relevantToText text: String) -> [Citation] {
         var citations: [Citation] = []
         
         // Calendar items
-        for (index, item) in context.calendarItems.enumerated() {
+        for item in context.calendarItems {
             let snippet = buildCalendarSnippet(item)
             let isRelevant = textContainsRelevantContent(text, for: snippet, itemTitle: item.title)
             
@@ -21,14 +21,13 @@ final class CitationBuilder {
                     sourceId: item.eventIdentifier ?? item.id.uuidString,
                     snippet: snippet,
                     label: "Meeting: \(item.title)",
-                    relevanceScore: calculateRelevance(text: text, snippet: snippet),
-                    index: index
+                    timestamp: item.date
                 ))
             }
         }
         
         // Email items
-        for (index, item) in context.emailItems.enumerated() {
+        for item in context.emailItems {
             let snippet = buildEmailSnippet(item)
             let isRelevant = textContainsRelevantContent(text, for: snippet, itemTitle: item.subject)
             
@@ -38,14 +37,13 @@ final class CitationBuilder {
                     sourceId: item.messageIdentifier ?? item.id.uuidString,
                     snippet: snippet,
                     label: "Email: \(item.subject)",
-                    relevanceScore: calculateRelevance(text: text, snippet: snippet),
-                    index: index
+                    timestamp: item.date
                 ))
             }
         }
         
         // File items
-        for (index, item) in context.fileItems.enumerated() {
+        for item in context.fileItems {
             let snippet = buildFileSnippet(item)
             let isRelevant = textContainsRelevantContent(text, for: snippet, itemTitle: item.name)
             
@@ -55,8 +53,7 @@ final class CitationBuilder {
                     sourceId: item.fileURL?.absoluteString ?? item.id.uuidString,
                     snippet: snippet,
                     label: "File: \(item.name)",
-                    relevanceScore: calculateRelevance(text: text, snippet: snippet),
-                    index: index
+                    timestamp: item.modifiedDate
                 ))
             }
         }
@@ -68,7 +65,7 @@ final class CitationBuilder {
     /// Returns (mappedCitations, unmappedMarkers, shouldDowngradeConfidence)
     static func mapInlineCitations(
         markers: [String],
-        context: ContextItems,
+        context: ModelInput.ContextItems,
         outputText: String
     ) -> (citations: [Citation], unmappedCount: Int, shouldDowngrade: Bool) {
         var mappedCitations: [Citation] = []
@@ -148,7 +145,8 @@ final class CitationBuilder {
         parts.append("From: \(item.sender)")
         parts.append(item.subject)
         
-        if let preview = item.preview {
+        let preview = item.bodyPreview
+        if !preview.isEmpty {
             parts.append(preview.prefix(100).description)
         }
         
@@ -158,13 +156,11 @@ final class CitationBuilder {
     private static func buildFileSnippet(_ item: FileContextItem) -> String {
         var parts: [String] = []
         parts.append(item.name)
-        parts.append(item.type)
+        parts.append(item.fileType)
         
-        if let modified = item.lastModified {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
-            parts.append("Modified: \(formatter.string(from: modified))")
-        }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        parts.append("Modified: \(formatter.string(from: item.modifiedDate))")
         
         return parts.joined(separator: " • ").prefix(200).description
     }
@@ -201,7 +197,7 @@ final class CitationBuilder {
         return Double(matchCount) / Double(significantWords.count)
     }
     
-    private static func tryMapMarkerToContext(_ marker: String, context: ContextItems) -> Citation? {
+    private static func tryMapMarkerToContext(_ marker: String, context: ModelInput.ContextItems) -> Citation? {
         // Try to extract index from marker like "[1]"
         if let indexMatch = marker.firstMatch(of: /\[(\d+)\]/) {
             let index = Int(indexMatch.1) ?? 0
@@ -219,8 +215,7 @@ final class CitationBuilder {
                     sourceId: item.eventIdentifier ?? item.id.uuidString,
                     snippet: buildCalendarSnippet(item),
                     label: "Meeting: \(item.title)",
-                    relevanceScore: 0.8,
-                    index: adjustedIndex
+                    timestamp: item.date
                 )
             }
             
@@ -232,8 +227,7 @@ final class CitationBuilder {
                     sourceId: item.messageIdentifier ?? item.id.uuidString,
                     snippet: buildEmailSnippet(item),
                     label: "Email: \(item.subject)",
-                    relevanceScore: 0.8,
-                    index: emailIndex
+                    timestamp: item.date
                 )
             }
             
@@ -245,8 +239,7 @@ final class CitationBuilder {
                     sourceId: item.fileURL?.absoluteString ?? item.id.uuidString,
                     snippet: buildFileSnippet(item),
                     label: "File: \(item.name)",
-                    relevanceScore: 0.8,
-                    index: fileIndex
+                    timestamp: item.modifiedDate
                 )
             }
         }

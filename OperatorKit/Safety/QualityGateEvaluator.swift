@@ -139,6 +139,69 @@ public struct QualityGateThresholds: Codable {
     }
 }
 
+// MARK: - Quality Gate Singleton
+
+/// Main singleton for quality gate access
+/// Provides a cached result and convenient interface
+@MainActor
+public final class QualityGate: ObservableObject {
+
+    // MARK: - Singleton
+
+    public static let shared = QualityGate()
+
+    // MARK: - Published State
+
+    @Published public private(set) var currentResult: QualityGateResultInfo?
+
+    // MARK: - Dependencies
+
+    private let evaluator: QualityGateEvaluator
+
+    // MARK: - Initialization
+
+    private init() {
+        self.evaluator = QualityGateEvaluator()
+    }
+
+    // MARK: - Public Methods
+
+    /// Evaluate the quality gate and cache the result
+    public func evaluate() -> QualityGateResultInfo {
+        let result = evaluator.evaluate()
+        let info = QualityGateResultInfo(from: result)
+        currentResult = info
+        return info
+    }
+}
+
+/// Simplified quality gate result info for UI
+public struct QualityGateResultInfo {
+    public let status: GateStatus
+    public let coverageScore: Int?
+    public let invariantsPassing: Bool
+    public let evaluatedAtDayRounded: String?
+    public let trend: SafetyQualityTrend?
+
+    public init(from result: QualityGateResult) {
+        self.status = result.status
+        self.coverageScore = result.metrics.latestPassRate.map { Int($0 * 100) }
+        self.invariantsPassing = result.status == .pass || result.status == .warn
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        self.evaluatedAtDayRounded = formatter.string(from: result.evaluatedAt)
+        self.trend = nil // Could derive from drift level
+    }
+}
+
+/// Trend direction for quality metrics (Safety layer)
+public enum SafetyQualityTrend: String, Codable {
+    case improving = "improving"
+    case stable = "stable"
+    case degrading = "degrading"
+}
+
 /// Evaluates quality gates for release readiness
 ///
 /// IMPORTANT: This evaluator is ADVISORY ONLY.

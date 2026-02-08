@@ -13,30 +13,47 @@
 
 ## Claims Inventory
 
-### CLAIM-001: No Data Leaves Your Device
+### CLAIM-001: Core Verification Mode Is Air-Gapped
 
-**Claim Text**: "No data leaves your device"
+**Claim Text**: "OperatorKit Core Verification Mode is fully air-gapped. Sync is an explicit, user-initiated, OFF-by-default exception."
 
 **Variations**:
-- "All processing happens on your device"
-- "Your data stays on your device"
-- "Local-only processing"
+- "All core processing happens on your device"
+- "Your data stays on your device unless you explicitly enable Sync"
+- "Local-only processing for verification, drafts, and execution"
+
+**Scoped Claim Boundary**:
+- **Air-Gapped (ALWAYS)**: ExecutionEngine, ApprovalGate, ModelRouter, DraftGenerator, ContextAssembler, MemoryStore, QualityFeedback, GoldenCases, Diagnostics, Policies
+- **Exception (OPT-IN ONLY)**: Sync module (`/Sync/`) — OFF by default, user-initiated, metadata-only
+
+**Why This Scoping**:
+The Sync module is a documented exception because:
+1. It is OFF by default (`SyncFeatureFlag.defaultToggleState = false`)
+2. It requires explicit user action to enable AND sign in
+3. It uploads metadata-only packets (content blocked by validator)
+4. It is isolated to the `/Sync/` directory
+5. Core execution paths have ZERO network code
 
 **Enforcing Code**:
-- `Safety/CompileTimeGuards.swift` — prevents network framework imports
+- `Safety/CompileTimeGuards.swift` — prevents network imports OUTSIDE Sync module
 - `Safety/InvariantCheckRunner.swift` — runtime check for network symbols
 - `Safety/ReleaseConfig.swift` — `networkEntitlementsEnabled = false`
+- `Sync/NetworkAllowance.swift` — documents the sole exception
+- `Sync/SupabaseClient.swift` — AIR-GAP EXCEPTION marker
+- `Sync/TeamSupabaseClient.swift` — AIR-GAP EXCEPTION marker
 
 **Tests**:
-- `InvariantTests.testNoNetworkFrameworksLinked`
-- `InvariantTests.testNoURLSessionUsage`
-- `RegressionTests.testNoNetworkFrameworksLinked`
+- `InvariantTests.testNoNetworkFrameworksLinked` (outside Sync)
+- `SyncInvariantTests.testSyncIsOffByDefault`
+- `SyncInvariantTests.testSyncUnreachableWhenDisabled`
+- `AirGappedSecurityInterrogationTests.testCoreModulesHaveNoURLSession`
 
 **Docs**:
 - `PrivacyStrings.swift` — `General.onDeviceStatement`
 - `DataUseDisclosureView.swift` — "Processed Locally" section
 - `EXECUTION_GUARANTEES.md` — "On-Device Definition"
 - `APP_REVIEW_PACKET.md` — Data access table
+- `SAFETY_CONTRACT.md` — Section 13 (Sync Exception)
 
 ---
 
@@ -1250,6 +1267,116 @@
 
 **Docs**:
 - `APP_STORE_SUBMISSION_CHECKLIST.md` — Copy section
+
+---
+
+### CLAIM-047: Clipboard Access Is User-Initiated Only
+
+**Claim Text**: "Clipboard access is used only for user-initiated copy actions; no automatic reads occur."
+
+**Variations**:
+- "Copy to clipboard requires button tap"
+- "No background clipboard access"
+- "No clipboard snooping"
+
+**Important Clarifications**:
+- UIPasteboard.general.string is ONLY set (write), never read
+- All clipboard writes are triggered by explicit user button taps
+- Copy actions are in: ReferralView (copy code), AppStoreReadinessView (copy content), OutboundKitView (copy template)
+- No background or automatic clipboard operations
+
+**Enforcing Code**:
+- `UI/Growth/ReferralView.swift` — `copyCode()` triggered by button
+- `UI/Settings/AppStoreReadinessView.swift` — toolbar copy button
+- `UI/Growth/OutboundKitView.swift` — `copyTemplate()` triggered by button
+
+**Tests**:
+- `ClipboardInvariantTests.testNoBackgroundClipboardReads`
+- `ClipboardInvariantTests.testClipboardWritesAreUserInitiated`
+
+**Docs**:
+- This registry
+
+---
+
+### CLAIM-048: Proof Exports Are Deterministic
+
+**Claim Text**: "Proof exports are deterministic given identical inputs on the same day."
+
+**Variations**:
+- "Same inputs produce same proofs"
+- "Reproducible verification"
+
+**Important Clarifications**:
+- Timestamps are day-rounded (`generatedAtDayRounded`)
+- Array ordering is stable (sorted before hashing)
+- No random seeds in proof hash inputs
+- UUID() used for IDs only, not in hash computation
+- Locale-independent formatting for all proof fields
+
+**Conditional Scope**:
+- DETERMINISTIC: Within same calendar day, same inputs → same hash
+- NOT DETERMINISTIC: Across days (timestamp changes), or if underlying data changes
+
+**Enforcing Code**:
+- All export packets use `generatedAtDayRounded`
+- `ExportQualityPacket.swift`, `DiagnosticsExportPacket.swift`, etc.
+
+**Tests**:
+- `DeterminismInvariantTests.testProofHashIsStableWithinDay`
+- `DeterminismInvariantTests.testArrayOrderingIsStable`
+- `DeterminismInvariantTests.testNoUUIDInProofHashInputs`
+- `DeterminismInvariantTests.testLocaleIndependentFormatting`
+
+**Docs**:
+- `PROOF_PACK_SPEC.md` — Determinism section
+
+---
+
+---
+
+## Conditional Claims Documentation
+
+The following claims have a CONDITIONAL status in the security interrogation, with documented scoping:
+
+### Air-Gap Conditional Claims
+
+| Claim | Status | Why Conditional | Falsification Check |
+|-------|--------|-----------------|---------------------|
+| App does not open sockets (4) | CONDITIONAL | URLSession internally uses sockets in Sync module | `SyncIsolationTests.testCoreModulesHaveNoURLSessionImports` |
+| App functional with network disabled (7) | CONDITIONAL | Core features: TRUE. Sync features: graceful failure | Airplane mode test in Runbook |
+| Binary does not link CFNetwork (17) | CONDITIONAL | URLSession may implicitly link it; build guardrails check | Build phase guardrail script |
+| Identical behavior in airplane mode (18) | CONDITIONAL | Core features: TRUE. Sync features: graceful failure | Airplane mode test in Runbook |
+
+### Data Handling Conditional Claims
+
+| Claim | Status | Why Conditional | Falsification Check |
+|-------|--------|-----------------|---------------------|
+| No filenames or emails in exports (24) | CONDITIONAL | Email blocked; some paths may leak usernames | `MetadataLeakageCaseStudy` |
+| No iCloud backup of user data (34) | CONDITIONAL | AuditVaultStore mentions iCloud; needs verification | Manual audit of backup settings |
+
+### Determinism Conditional Claims
+
+| Claim | Status | Why Conditional | Falsification Check |
+|-------|--------|-----------------|---------------------|
+| Identical sessions produce identical ProofPacks (45) | CONDITIONAL | True if timestamps are same day | `DeterminismInvariantTests.testProofGenerationIsIdempotent` |
+| No uncontrolled random seeds (46) | CONDITIONAL | 57 UUID() calls; used for IDs, not proof content | Code review of hash inputs |
+| Simulator vs device identical proofs (52) | CONDITIONAL | Day-rounded timestamps help; device-specific data may differ | Cross-platform test |
+| Async operations sequenced deterministically (59) | CONDITIONAL | @MainActor used but not universally | Async ordering tests |
+
+### User Control Conditional Claims
+
+| Claim | Status | Why Conditional | Falsification Check |
+|-------|--------|-----------------|---------------------|
+| User can inspect before sharing (64) | CONDITIONAL | Export previews exist in some views | UI audit |
+| Calibration cannot be skipped (72) | CONDITIONAL | DEBUG builds may have bypasses | `#if DEBUG` audit |
+| No hidden developer overrides (77) | CONDITIONAL | DEBUG-only features exist but are properly gated | `ReleaseConfig` inspection |
+
+### Architecture Conditional Claims
+
+| Claim | Status | Why Conditional | Falsification Check |
+|-------|--------|-----------------|---------------------|
+| ApprovalGate cannot be invoked indirectly (82) | CONDITIONAL | 34 references; most are proper invocations | Code review of call sites |
 
 ---
 

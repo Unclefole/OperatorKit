@@ -13,7 +13,7 @@ import Foundation
 // ============================================================================
 
 /// Comparison between two release channels
-public struct ReleaseComparison: Codable {
+public struct ReleaseComparison {
     
     /// Channel being compared
     public let channelA: ReleaseChannelSummary

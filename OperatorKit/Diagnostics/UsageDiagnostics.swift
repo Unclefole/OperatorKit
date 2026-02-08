@@ -147,7 +147,7 @@ public final class UsageDiagnosticsCollector {
     
     // MARK: - Initialization
     
-    public init(
+    init(
         usageLedger: UsageLedger = .shared,
         entitlementManager: EntitlementManager = .shared,
         memoryStore: MemoryStore = .shared

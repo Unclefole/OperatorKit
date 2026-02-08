@@ -170,6 +170,11 @@ public final class UsageLedger: ObservableObject {
     
     // MARK: - Display Helpers
     
+    /// Number of executions this week (for quota checking)
+    public var executionsThisWeek: Int {
+        data.executionsThisWindow
+    }
+    
     /// Remaining executions this week (for Free tier display)
     public var remainingExecutions: Int {
         max(0, UsageQuota.freeExecutionsPerWeek - data.executionsThisWindow)

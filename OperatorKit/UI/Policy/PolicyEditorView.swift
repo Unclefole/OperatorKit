@@ -26,6 +26,7 @@ struct PolicyEditorView: View {
     @State private var showingDiscardConfirmation: Bool = false
     @State private var exportURL: URL?
     @State private var showingShareSheet: Bool = false
+    @State private var isBiometricPending: Bool = false
     
     var body: some View {
         NavigationView {
@@ -87,7 +88,7 @@ struct PolicyEditorView: View {
             }
             .sheet(isPresented: $showingShareSheet) {
                 if let url = exportURL {
-                    ShareSheet(activityItems: [url])
+                    PolicyEditorShareSheet(activityItems: [url])
                 }
             }
         }
@@ -97,18 +98,47 @@ struct PolicyEditorView: View {
     
     private var policyStatusSection: some View {
         Section {
-            Toggle(isOn: $editedPolicy.enabled) {
+            Toggle(isOn: Binding(
+                get: { editedPolicy.enabled },
+                set: { newValue in
+                    if !newValue {
+                        // SECURITY GATE: Disabling policy is a security downgrade
+                        isBiometricPending = true
+                        Task {
+                            let authenticated = await BiometricGate.authenticate(
+                                reason: "Confirm: disable execution policy"
+                            )
+                            await MainActor.run {
+                                isBiometricPending = false
+                                if authenticated {
+                                    editedPolicy.enabled = false
+                                    hasUnsavedChanges = true
+                                }
+                            }
+                        }
+                    } else {
+                        // Enabling policy is safety-positive — no gate needed
+                        editedPolicy.enabled = true
+                        hasUnsavedChanges = true
+                    }
+                }
+            )) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Policy Enabled")
-                        .font(.body)
+                    HStack(spacing: 6) {
+                        Text("Policy Enabled")
+                            .font(.body)
+                        if BiometricGate.isAvailable {
+                            Image(systemName: "faceid")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     Text("When disabled, all capabilities are allowed")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
-            .onChange(of: editedPolicy.enabled) { _ in
-                hasUnsavedChanges = true
-            }
+            .disabled(isBiometricPending)
             
             if editedPolicy.enabled {
                 HStack {
@@ -236,18 +266,47 @@ struct PolicyEditorView: View {
     
     private var safetyModeSection: some View {
         Section {
-            Toggle(isOn: $editedPolicy.requireExplicitConfirmation) {
+            Toggle(isOn: Binding(
+                get: { editedPolicy.requireExplicitConfirmation },
+                set: { newValue in
+                    if !newValue {
+                        // SECURITY GATE: Disabling explicit confirmation is CRITICAL
+                        isBiometricPending = true
+                        Task {
+                            let authenticated = await BiometricGate.authenticate(
+                                reason: "Confirm: disable explicit confirmation requirement"
+                            )
+                            await MainActor.run {
+                                isBiometricPending = false
+                                if authenticated {
+                                    editedPolicy.requireExplicitConfirmation = false
+                                    hasUnsavedChanges = true
+                                }
+                            }
+                        }
+                    } else {
+                        // Re-enabling confirmation is safety-positive — no gate
+                        editedPolicy.requireExplicitConfirmation = true
+                        hasUnsavedChanges = true
+                    }
+                }
+            )) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Require Explicit Confirmation")
-                        .font(.body)
+                    HStack(spacing: 6) {
+                        Text("Require Explicit Confirmation")
+                            .font(.body)
+                        if BiometricGate.isAvailable {
+                            Image(systemName: "faceid")
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     Text("Always show confirmation before executing actions")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
-            .onChange(of: editedPolicy.requireExplicitConfirmation) { _ in
-                hasUnsavedChanges = true
-            }
+            .disabled(isBiometricPending)
         } header: {
             Text("Safety")
         } footer: {
@@ -322,7 +381,7 @@ struct PolicyEditorView: View {
 
 // MARK: - Share Sheet
 
-private struct ShareSheet: UIViewControllerRepresentable {
+private struct PolicyEditorShareSheet: UIViewControllerRepresentable {
     let activityItems: [Any]
     
     func makeUIViewController(context: Context) -> UIActivityViewController {

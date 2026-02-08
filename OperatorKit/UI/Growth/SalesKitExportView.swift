@@ -51,7 +51,7 @@ struct SalesKitExportView: View {
             }
             .sheet(isPresented: $showingExport) {
                 if let url = exportURL {
-                    ShareSheet(activityItems: [url])
+                    ShareSheet(items: [url])
                 }
             }
             .alert("Export Error", isPresented: .constant(exportError != nil)) {

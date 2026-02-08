@@ -184,8 +184,7 @@ public final class LaunchChecklistValidator {
         var items: [LaunchCheckItem] = []
         
         // Check required docs exist
-        let docIntegrity = DocIntegrity.shared
-        let missingDocs = docIntegrity.requiredDocs.filter { !docIntegrity.docExists($0) }
+        let missingDocs = DocIntegrity.requiredDocs.filter { !DocIntegrity.docExists($0) }
         
         items.append(LaunchCheckItem(
             id: "docs-present",
@@ -193,7 +192,7 @@ public final class LaunchChecklistValidator {
             displayName: "Required Docs Present",
             checkDescription: "All required documentation files exist",
             status: missingDocs.isEmpty ? .passing : .failing,
-            details: missingDocs.isEmpty ? nil : "Missing: \(missingDocs.joined(separator: ", "))"
+            details: missingDocs.isEmpty ? nil : "Missing: \(missingDocs.map { $0.name }.joined(separator: ", "))"
         ))
         
         return items
@@ -250,8 +249,8 @@ public final class LaunchChecklistValidator {
         if let gate = QualityGate.shared.currentResult {
             let status: LaunchCheckStatus
             switch gate.status {
-            case .passing: status = .passing
-            case .warning: status = .warning
+            case .pass: status = .passing
+            case .warn: status = .warning
             default: status = .failing
             }
             
@@ -283,14 +282,14 @@ public final class LaunchChecklistValidator {
         var items: [LaunchCheckItem] = []
         
         // Store listing hash
-        let hashMatch = StoreListingSnapshot.hashMatches()
+        let hashResult = StoreListingSnapshot.verifyHash()
         items.append(LaunchCheckItem(
             id: "store-listing-locked",
             category: .storeListing,
             displayName: "Store Listing Locked",
             checkDescription: "Store listing copy matches expected hash",
-            status: hashMatch ? .passing : .warning,
-            details: hashMatch ? nil : "Copy may have changed"
+            status: hashResult.isValid ? .passing : .warning,
+            details: hashResult.isValid ? nil : "Copy may have changed"
         ))
         
         return items
@@ -302,8 +301,7 @@ public final class LaunchChecklistValidator {
         var items: [LaunchCheckItem] = []
         
         // Risk scanner
-        let scanner = AppReviewRiskScanner()
-        let report = scanner.scan()
+        let report = AppReviewRiskScanner.scanSubmissionCopy()
         
         let riskStatus: LaunchCheckStatus
         switch report.status {

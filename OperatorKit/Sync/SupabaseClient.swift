@@ -1,10 +1,24 @@
 import Foundation
 
 // ============================================================================
-// SUPABASE CLIENT (Phase 10D)
+// ⚠️  AIR-GAP EXCEPTION: SUPABASE CLIENT (Phase 10D)
+// ============================================================================
 //
-// Isolated networking client for opt-in cloud sync.
-// This is the ONLY file in OperatorKit that makes network requests.
+// THIS FILE IS THE DOCUMENTED EXCEPTION TO OPERATORKIT'S AIR-GAP CLAIM.
+//
+// CLAIM-001 states: "OperatorKit Core Verification Mode is fully air-gapped.
+// Sync is an explicit, user-initiated, OFF-by-default exception."
+//
+// This file contains the ONLY URLSession usage in OperatorKit.
+// It is permitted because:
+//   1. Sync is OFF by default (SyncFeatureFlag.defaultToggleState = false)
+//   2. Requires explicit user action to enable AND sign in
+//   3. Uploads metadata-only packets (content blocked by SyncPacketValidator)
+//   4. Isolated to /Sync/ directory — no imports from execution modules
+//   5. No background networking (waitsForConnectivity = false)
+//
+// CORE MODULES (ExecutionEngine, ApprovalGate, ModelRouter, DraftGenerator,
+// ContextAssembler, MemoryStore) have ZERO network code.
 //
 // CONSTRAINTS (ABSOLUTE):
 // ✅ Credentials via build settings / xcconfig (no hardcoded secrets)
@@ -13,8 +27,10 @@ import Foundation
 // ✅ Error mapping to user-friendly messages
 // ❌ NO logging of payload content
 // ❌ NO background requests
+// ❌ NO execution module imports
 //
 // See: docs/SAFETY_CONTRACT.md (Section 13)
+// See: docs/CLAIM_REGISTRY.md (CLAIM-001)
 // ============================================================================
 
 // MARK: - Supabase Configuration
@@ -99,7 +115,8 @@ public enum SyncError: Error, LocalizedError {
     case missingRequiredField(String)
     case timeout
     case unknown
-    
+    case invalidURL(String)
+
     public var errorDescription: String? {
         switch self {
         case .notConfigured:
@@ -124,6 +141,8 @@ public enum SyncError: Error, LocalizedError {
             return "Request timed out."
         case .unknown:
             return "An unknown error occurred."
+        case .invalidURL(let table):
+            return "Could not construct URL for table: \(table)"
         }
     }
 }
@@ -175,10 +194,33 @@ public final class SupabaseClient: ObservableObject {
         SupabaseConfig.isConfigured
     }
     
+    /// Whether sync operations are permitted
+    /// INVARIANT: Returns false unless feature flag is enabled
+    public var isSyncEnabled: Bool {
+        SyncFeatureFlag.isEnabled
+    }
+    
+    // MARK: - Sync Isolation Guard
+    
+    /// Verifies sync is explicitly enabled before any network operation.
+    /// This is a runtime assertion that Sync cannot run unless:
+    /// 1. Feature flag is explicitly enabled
+    /// 2. User action triggered the flow (implied by guard placement)
+    ///
+    /// - Throws: SyncError.notConfigured if sync is disabled
+    private func assertSyncEnabled() throws {
+        guard SyncFeatureFlag.isEnabled else {
+            logDebug("SYNC BLOCKED: Feature flag is disabled", category: .flow)
+            throw SyncError.notConfigured
+        }
+    }
+    
     // MARK: - Authentication
     
     /// Request OTP via email
+    /// REQUIRES: SyncFeatureFlag.isEnabled == true (user must have enabled sync)
     public func requestOTP(email: String) async throws {
+        try assertSyncEnabled()
         guard isConfigured else { throw SyncError.notConfigured }
         guard let authURL = SupabaseConfig.authURL else { throw SyncError.notConfigured }
         
@@ -211,7 +253,9 @@ public final class SupabaseClient: ObservableObject {
     }
     
     /// Verify OTP and sign in
+    /// REQUIRES: SyncFeatureFlag.isEnabled == true
     public func verifyOTP(email: String, token: String) async throws {
+        try assertSyncEnabled()
         guard isConfigured else { throw SyncError.notConfigured }
         guard let authURL = SupabaseConfig.authURL else { throw SyncError.notConfigured }
         
@@ -254,7 +298,9 @@ public final class SupabaseClient: ObservableObject {
     }
     
     /// Sign out
+    /// REQUIRES: SyncFeatureFlag.isEnabled == true
     public func signOut() async throws {
+        try assertSyncEnabled()
         guard isConfigured else { throw SyncError.notConfigured }
         guard let authURL = SupabaseConfig.authURL else { throw SyncError.notConfigured }
         guard let session = session else { return }
@@ -284,7 +330,9 @@ public final class SupabaseClient: ObservableObject {
     
     /// Upload a validated packet
     /// INVARIANT: Payload must be pre-validated by SyncPacketValidator
+    /// REQUIRES: SyncFeatureFlag.isEnabled == true
     public func uploadPacket(type: SyncSafetyConfig.SyncablePacketType, jsonData: Data) async throws -> String {
+        try assertSyncEnabled()
         guard isConfigured else { throw SyncError.notConfigured }
         guard let session = session else { throw SyncError.notSignedIn }
         guard let restURL = SupabaseConfig.restURL else { throw SyncError.notConfigured }
@@ -330,7 +378,9 @@ public final class SupabaseClient: ObservableObject {
     }
     
     /// List user's uploaded packets
+    /// REQUIRES: SyncFeatureFlag.isEnabled == true
     public func listPackets() async throws -> [SyncPacketMetadata] {
+        try assertSyncEnabled()
         guard isConfigured else { throw SyncError.notConfigured }
         guard let session = session else { throw SyncError.notSignedIn }
         guard let restURL = SupabaseConfig.restURL else { throw SyncError.notConfigured }
@@ -369,7 +419,9 @@ public final class SupabaseClient: ObservableObject {
     }
     
     /// Delete a packet
+    /// REQUIRES: SyncFeatureFlag.isEnabled == true
     public func deletePacket(id: String) async throws {
+        try assertSyncEnabled()
         guard isConfigured else { throw SyncError.notConfigured }
         guard let session = session else { throw SyncError.notSignedIn }
         guard let restURL = SupabaseConfig.restURL else { throw SyncError.notConfigured }
