@@ -86,6 +86,8 @@ struct PaywallSheet: View {
             }
             .navigationTitle("Upgrade Required")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Close") { dismiss() }
@@ -105,7 +107,7 @@ struct PaywallSheet: View {
         VStack(spacing: 12) {
             Image(systemName: quotaIcon)
                 .font(.system(size: 48))
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
             
             Text("Limit Reached")
                 .font(.title2)
@@ -114,7 +116,7 @@ struct PaywallSheet: View {
             if let message = quotaCheck.message {
                 Text(message)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .multilineTextAlignment(.center)
             }
         }
@@ -136,7 +138,7 @@ struct PaywallSheet: View {
             HStack {
                 Text("Current Usage")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Spacer()
                 Text("\(quotaCheck.currentUsage) / \(quotaCheck.limit ?? 0) \(quotaType.unitName)")
                     .font(.subheadline)
@@ -147,12 +149,12 @@ struct PaywallSheet: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.2))
+                        .fill(OKColor.textMuted.opacity(0.2))
                         .frame(height: 8)
                         .cornerRadius(4)
                     
                     Rectangle()
-                        .fill(Color.red)
+                        .fill(OKColor.riskCritical)
                         .frame(width: geometry.size.width * usagePercentage, height: 8)
                         .cornerRadius(4)
                 }
@@ -161,10 +163,10 @@ struct PaywallSheet: View {
             
             Text("Resets weekly")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(12)
     }
     
@@ -187,8 +189,8 @@ struct PaywallSheet: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
+                .background(OKColor.actionPrimary)
+                .foregroundColor(OKColor.textPrimary)
                 .cornerRadius(12)
             }
             
@@ -205,8 +207,8 @@ struct PaywallSheet: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.1))
-                .foregroundColor(.blue)
+                .background(OKColor.textMuted.opacity(0.1))
+                .foregroundColor(OKColor.actionPrimary)
                 .cornerRadius(12)
             }
             .disabled(isRestoring)
@@ -219,7 +221,7 @@ struct PaywallSheet: View {
                     Text("Continue with Free (Read Only)")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -249,11 +251,11 @@ struct PaywallSheet: View {
             
             Text(WhyWeChargeText.shortExplanation)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(12)
     }
     

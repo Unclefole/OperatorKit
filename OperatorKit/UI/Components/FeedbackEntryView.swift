@@ -40,7 +40,7 @@ struct FeedbackEntryView: View {
             // Header
             HStack {
                 Image(systemName: "star.bubble")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text("Rate This Draft")
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -49,7 +49,7 @@ struct FeedbackEntryView: View {
                 if existingFeedback != nil || feedbackSubmitted {
                     Text("Feedback saved")
                         .font(.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
             }
             
@@ -96,7 +96,7 @@ struct FeedbackEntryView: View {
                     .padding(.vertical, 8)
                     .background(
                         selectedRating == rating 
-                            ? Color.blue.opacity(0.2) 
+                            ? OKColor.actionPrimary.opacity(0.2) 
                             : Color(UIColor.tertiarySystemGroupedBackground)
                     )
                     .cornerRadius(8)
@@ -112,7 +112,7 @@ struct FeedbackEntryView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("What could be better?")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             FeedbackFlowLayout(spacing: 8) {
                 ForEach(QualityIssueTag.allCases) { tag in
@@ -129,7 +129,7 @@ struct FeedbackEntryView: View {
                             .padding(.vertical, 6)
                             .background(
                                 selectedTags.contains(tag)
-                                    ? Color.blue.opacity(0.2)
+                                    ? OKColor.actionPrimary.opacity(0.2)
                                     : Color(UIColor.tertiarySystemGroupedBackground)
                             )
                             .cornerRadius(16)
@@ -146,7 +146,7 @@ struct FeedbackEntryView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Additional notes (optional)")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             TextField("Brief feedback...", text: $noteText)
                 .textFieldStyle(.roundedBorder)
@@ -159,7 +159,7 @@ struct FeedbackEntryView: View {
             
             Text("\(noteText.count)/\(QualityFeedbackEntry.maxNoteLength)")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -174,8 +174,8 @@ struct FeedbackEntryView: View {
                 .fontWeight(.medium)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
-                .background(Color.blue)
-                .foregroundColor(.white)
+                .background(OKColor.actionPrimary)
+                .foregroundColor(OKColor.textPrimary)
                 .cornerRadius(8)
         }
         .disabled(selectedRating == nil)
@@ -192,16 +192,16 @@ struct FeedbackEntryView: View {
         HStack {
             if let feedback = existingFeedback {
                 Image(systemName: feedback.rating.systemImage)
-                    .foregroundColor(feedback.rating == .helpful ? .green : .orange)
+                    .foregroundColor(feedback.rating == .helpful ? OKColor.riskNominal : OKColor.riskWarning)
                 Text("You rated this: \(feedback.rating.displayName)")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else if feedbackSubmitted {
                 Image(systemName: "checkmark.circle")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 Text("Thank you for your feedback")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }

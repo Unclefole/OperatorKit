@@ -14,7 +14,7 @@ struct DraftOutputView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -107,7 +107,7 @@ struct DraftOutputView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -119,12 +119,12 @@ struct DraftOutputView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Confidence Badge
@@ -150,7 +150,7 @@ struct DraftOutputView: View {
                     
                     Text(confidenceDescription(draft.confidenceLevel))
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 
@@ -176,31 +176,31 @@ struct DraftOutputView: View {
         HStack(spacing: 8) {
             Image(systemName: "cpu")
                 .font(.system(size: 12))
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Deterministic fallback used")
                 .font(.caption2)
                 .fontWeight(.medium)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
             Text("A simpler on-device method was used to ensure reliability.")
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
                 .lineLimit(1)
         }
         .padding(10)
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(8)
     }
     
     private func confidenceColor(_ level: DraftOutput.ConfidenceLevel) -> Color {
         switch level {
-        case .high: return .green
-        case .medium: return .blue
-        case .low: return .orange
-        case .veryLow: return .red
+        case .high: return OKColor.riskNominal
+        case .medium: return OKColor.actionPrimary
+        case .low: return OKColor.riskWarning
+        case .veryLow: return OKColor.riskCritical
         }
     }
     
@@ -228,7 +228,7 @@ struct DraftOutputView: View {
             HStack(spacing: 8) {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: 16))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Before You Continue")
                     .font(.subheadline)
@@ -240,18 +240,18 @@ struct DraftOutputView: View {
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "checkmark.circle")
                             .font(.system(size: 12))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .padding(.top, 2)
                         
                         Text(note)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(12)
     }
     
@@ -275,17 +275,17 @@ struct DraftOutputView: View {
                                 Text("\(draft.citations.count)")
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(OKColor.textPrimary)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(selectedTab == index ? Color.blue : Color.gray)
+                                    .background(selectedTab == index ? OKColor.actionPrimary : OKColor.textMuted)
                                     .cornerRadius(8)
                             }
                         }
-                        .foregroundColor(selectedTab == index ? .primary : .gray)
+                        .foregroundColor(selectedTab == index ? .primary : OKColor.textMuted)
                         
                         Rectangle()
-                            .fill(selectedTab == index ? Color.blue : Color.clear)
+                            .fill(selectedTab == index ? OKColor.actionPrimary : Color.clear)
                             .frame(height: 2)
                     }
                 }
@@ -302,7 +302,7 @@ struct DraftOutputView: View {
             HStack {
                 Image(systemName: draft.type.icon)
                     .font(.system(size: 18))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text(draft.type.rawValue)
                     .font(.headline)
@@ -315,7 +315,7 @@ struct DraftOutputView: View {
                 }) {
                     Text(isEditing ? "Done" : "Edit")
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
             
@@ -327,7 +327,7 @@ struct DraftOutputView: View {
                     HStack {
                         Text("To:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .frame(width: 60, alignment: .leading)
                         Text(draft.content.recipient ?? "[Add recipient]")
                             .font(.subheadline)
@@ -336,7 +336,7 @@ struct DraftOutputView: View {
                     HStack {
                         Text("Subject:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .frame(width: 60, alignment: .leading)
                         Text(draft.content.subject ?? "[Add subject]")
                             .font(.subheadline)
@@ -354,18 +354,18 @@ struct DraftOutputView: View {
                     .font(.body)
                     .frame(minHeight: 200)
                     .scrollContentBackground(.hidden)
-                    .background(Color.gray.opacity(0.05))
+                    .background(OKColor.textMuted.opacity(0.05))
                     .cornerRadius(8)
             } else {
                 Text(draft.content.body)
                     .font(.body)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
             }
         }
         .padding(20)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     // MARK: - Action Items Card
@@ -374,7 +374,7 @@ struct DraftOutputView: View {
             HStack {
                 Image(systemName: "checklist")
                     .font(.system(size: 18))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 
                 Text("Action Items")
                     .font(.headline)
@@ -384,7 +384,7 @@ struct DraftOutputView: View {
                 
                 Text("\(draft.actionItems.count) items")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             Divider()
@@ -392,10 +392,10 @@ struct DraftOutputView: View {
             if draft.actionItems.isEmpty {
                 HStack {
                     Image(systemName: "checkmark.circle")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text("No action items extracted")
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 .padding(.vertical, 20)
             } else {
@@ -404,7 +404,7 @@ struct DraftOutputView: View {
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: "circle")
                                 .font(.system(size: 18))
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                             
                             Text(item)
                                 .font(.body)
@@ -416,9 +416,9 @@ struct DraftOutputView: View {
             }
         }
         .padding(20)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     // MARK: - Citations Card
@@ -427,7 +427,7 @@ struct DraftOutputView: View {
             HStack {
                 Image(systemName: "link")
                     .font(.system(size: 18))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("Sources Used")
                     .font(.headline)
@@ -438,7 +438,7 @@ struct DraftOutputView: View {
                 if !draft.citations.isEmpty {
                     Text(draft.citations.summary)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
             
@@ -448,13 +448,13 @@ struct DraftOutputView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 32))
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text("No sources cited")
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text("Add context to improve draft quality")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
@@ -467,9 +467,9 @@ struct DraftOutputView: View {
             }
         }
         .padding(20)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     private func citationRow(_ citation: Citation) -> some View {
@@ -486,27 +486,27 @@ struct DraftOutputView: View {
                 
                 Text(citation.truncatedSnippet)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                     .lineLimit(2)
                 
                 Text(citation.formattedTimestamp)
                     .font(.caption2)
-                    .foregroundColor(.gray.opacity(0.8))
+                    .foregroundColor(OKColor.textMuted.opacity(0.8))
             }
             
             Spacer()
         }
         .padding(12)
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(8)
     }
     
     private func citationColor(_ type: Citation.SourceType) -> Color {
         switch type {
-        case .calendarEvent: return .red
-        case .emailThread: return .blue
-        case .file: return .orange
-        case .note: return .yellow
+        case .calendarEvent: return OKColor.riskCritical
+        case .emailThread: return OKColor.actionPrimary
+        case .file: return OKColor.riskWarning
+        case .note: return OKColor.riskWarning
         }
     }
     
@@ -530,12 +530,12 @@ struct DraftOutputView: View {
                     Text("Back")
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.white)
+                        .background(OKColor.backgroundPrimary)
                         .cornerRadius(12)
-                        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                        .shadow(color: OKColor.shadow.opacity(0.04), radius: 4, x: 0, y: 2)
                 }
                 
                 Button(action: {
@@ -544,10 +544,10 @@ struct DraftOutputView: View {
                     Text(proceedButtonText)
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(proceedButtonEnabled ? Color.blue : Color.gray.opacity(0.4))
+                        .background(proceedButtonEnabled ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.4))
                         .cornerRadius(12)
                 }
                 .disabled(!proceedButtonEnabled)
@@ -556,8 +556,8 @@ struct DraftOutputView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color.white
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.textPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
@@ -565,7 +565,7 @@ struct DraftOutputView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
                 Image(systemName: "info.circle.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Needs review")
@@ -574,7 +574,7 @@ struct DraftOutputView: View {
                     
                     Text("The request is clear, but some details may require your judgment.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 
                 Spacer()
@@ -583,11 +583,11 @@ struct DraftOutputView: View {
             // Helper text for Proceed Anyway
             Text("You are choosing to continue with a draft that may need adjustment.")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .padding(.leading, 36)
         }
         .padding(12)
-        .background(Color.orange.opacity(0.1))
+        .background(OKColor.riskWarning.opacity(0.1))
         .cornerRadius(8)
     }
     
@@ -595,17 +595,17 @@ struct DraftOutputView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "info.circle.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Insufficient confidence")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                     
                     Text("OperatorKit could not generate a reliable draft from the provided context.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 
                 Spacer()
@@ -617,18 +617,18 @@ struct DraftOutputView: View {
                     Text("Edit request")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
                 
                 Text("or")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 Button(action: { nav.navigate(to: .context) }) {
                     Text("Add more context")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
                 
                 Spacer()
@@ -636,7 +636,7 @@ struct DraftOutputView: View {
             .padding(.leading, 36)
         }
         .padding(12)
-        .background(Color.orange.opacity(0.1))
+        .background(OKColor.riskWarning.opacity(0.1))
         .cornerRadius(8)
     }
     

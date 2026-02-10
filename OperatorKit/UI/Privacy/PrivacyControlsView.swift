@@ -112,6 +112,9 @@ struct PrivacyControlsView: View {
                         teamSalesKitSection
                         #endif
                         
+                        // Enterprise Controls (Phase 21)
+                        enterpriseSection
+
                         // Invariant Guarantees
                         guaranteesSection
                         
@@ -124,9 +127,9 @@ struct PrivacyControlsView: View {
                             VStack(spacing: 0) {
                                 reviewerHelpLink
                             }
-                            .background(Color.white)
+                            .background(OKColor.backgroundPrimary)
                             .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
                         }
                         
                         #if DEBUG
@@ -174,7 +177,7 @@ struct PrivacyControlsView: View {
                 Button(action: { nav.goBack() }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
 
@@ -193,12 +196,12 @@ struct PrivacyControlsView: View {
             }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Privacy Summary Card
@@ -207,7 +210,7 @@ struct PrivacyControlsView: View {
             HStack(spacing: 12) {
                 Image(systemName: "shield.checkered")
                     .font(.system(size: 28))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Your Data Stays on Your Device")
@@ -216,7 +219,7 @@ struct PrivacyControlsView: View {
                     
                     Text("OperatorKit works entirely on-device. Nothing leaves your phone.")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
             
@@ -244,9 +247,9 @@ struct PrivacyControlsView: View {
             }
         }
         .padding(20)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     private func authStateBadge(title: String, state: AuthorizationState, icon: String) -> some View {
@@ -263,7 +266,7 @@ struct PrivacyControlsView: View {
             
             Text(title)
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             Text(stateShortLabel(state))
                 .font(.caption2)
@@ -288,12 +291,12 @@ struct PrivacyControlsView: View {
         HStack(spacing: 12) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("Last Refreshed")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 Text(formattedRefreshTime)
                     .font(.caption)
@@ -306,14 +309,14 @@ struct PrivacyControlsView: View {
                 Text("Refresh Now")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
             .disabled(isRefreshing)
         }
         .padding(12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.02), radius: 4, x: 0, y: 2)
     }
     
     private var formattedRefreshTime: String {
@@ -334,7 +337,7 @@ struct PrivacyControlsView: View {
                 // Calendar
                 permissionRowNew(
                     icon: "calendar",
-                    iconColor: .red,
+                    iconColor: OKColor.riskCritical,
                     title: "Calendar",
                     subtitle: calendarSubtitle,
                     state: permissionManager.calendarState,
@@ -347,7 +350,7 @@ struct PrivacyControlsView: View {
                 // Reminders
                 permissionRowNew(
                     icon: "bell.fill",
-                    iconColor: .orange,
+                    iconColor: OKColor.riskWarning,
                     title: "Reminders",
                     subtitle: remindersSubtitle,
                     state: permissionManager.remindersState,
@@ -360,7 +363,7 @@ struct PrivacyControlsView: View {
                 // Mail
                 permissionRowNew(
                     icon: "envelope.fill",
-                    iconColor: .blue,
+                    iconColor: OKColor.actionPrimary,
                     title: "Mail",
                     subtitle: "Open email composer with drafts",
                     state: permissionManager.canSendMail ? .authorized : .denied,
@@ -369,18 +372,18 @@ struct PrivacyControlsView: View {
                     isMailPermission: true
                 )
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
             
             // Data access helper text
             HStack(spacing: 8) {
                 Image(systemName: "info.circle")
                     .font(.system(size: 12))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("OperatorKit only accesses data when you explicitly select it.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.horizontal, 4)
         }
@@ -443,7 +446,7 @@ struct PrivacyControlsView: View {
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                     .lineLimit(2)
             }
             
@@ -479,7 +482,7 @@ struct PrivacyControlsView: View {
                 Text("Granted")
                     .font(.caption)
             }
-            .foregroundColor(.green)
+            .foregroundColor(OKColor.riskNominal)
             
         case .writeOnly:
             // Blue pencil
@@ -489,7 +492,7 @@ struct PrivacyControlsView: View {
                 Text("Write Only")
                     .font(.caption)
             }
-            .foregroundColor(.blue)
+            .foregroundColor(OKColor.actionPrimary)
             
         case .denied:
             // Red X with Open Settings action
@@ -511,7 +514,7 @@ struct PrivacyControlsView: View {
                     Text("Open Settings")
                         .font(.caption)
                 }
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
             }
             
         case .restricted:
@@ -522,7 +525,7 @@ struct PrivacyControlsView: View {
                 Text("Restricted")
                     .font(.caption)
             }
-            .foregroundColor(.orange)
+            .foregroundColor(OKColor.riskWarning)
             
         case .notDetermined:
             // Blue Allow access button
@@ -531,16 +534,16 @@ struct PrivacyControlsView: View {
                     Text("Allow access")
                         .font(.caption)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(Color.blue)
+                        .background(OKColor.actionPrimary)
                         .cornerRadius(16)
                 }
             } else {
                 Text("Not enabled")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
         case .unknown:
@@ -551,7 +554,7 @@ struct PrivacyControlsView: View {
                 Text("Unknown")
                     .font(.caption)
             }
-            .foregroundColor(.gray)
+            .foregroundColor(OKColor.textMuted)
         }
     }
     
@@ -572,10 +575,10 @@ struct PrivacyControlsView: View {
                     Text("ALL SAFE")
                         .font(.caption2)
                         .fontWeight(.bold)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.green.opacity(0.1))
+                        .background(OKColor.riskNominal.opacity(0.1))
                         .cornerRadius(6)
                 }
             }
@@ -583,7 +586,7 @@ struct PrivacyControlsView: View {
             VStack(spacing: 0) {
                 dataRow(
                     icon: guarantees.cloudUpload ? "icloud.fill" : "icloud.slash",
-                    iconColor: guarantees.cloudUpload ? .orange : .purple,
+                    iconColor: guarantees.cloudUpload ? OKColor.riskWarning : OKColor.riskExtreme,
                     title: guarantees.cloudUpload ? "Cloud Upload Active" : "No Cloud Upload",
                     subtitle: guarantees.cloudUpload
                         ? "Metadata-only packets via Sync module"
@@ -594,7 +597,7 @@ struct PrivacyControlsView: View {
 
                 dataRow(
                     icon: guarantees.tracking ? "eye" : "eye.slash",
-                    iconColor: guarantees.tracking ? .red : .blue,
+                    iconColor: guarantees.tracking ? OKColor.riskCritical : OKColor.actionPrimary,
                     title: guarantees.tracking ? "Tracking Active" : "No Tracking",
                     subtitle: guarantees.tracking
                         ? "Analytics or telemetry detected"
@@ -605,7 +608,7 @@ struct PrivacyControlsView: View {
 
                 dataRow(
                     icon: guarantees.encryptedStorage ? "lock.shield" : "lock.open",
-                    iconColor: guarantees.encryptedStorage ? .green : .red,
+                    iconColor: guarantees.encryptedStorage ? OKColor.riskNominal : OKColor.riskCritical,
                     title: guarantees.encryptedStorage ? "Encrypted Storage" : "Storage Not Encrypted",
                     subtitle: guarantees.encryptedStorage
                         ? "iOS Data Protection encrypts app sandbox"
@@ -621,27 +624,27 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "doc.text")
                             .font(.system(size: 18))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue.opacity(0.1))
+                            .background(OKColor.actionPrimary.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Full Data Use Disclosure")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Detailed explanation of how your data is used")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
@@ -655,34 +658,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "star.bubble")
                             .font(.system(size: 18))
-                            .foregroundColor(.purple)
+                            .foregroundColor(OKColor.riskExtreme)
                             .frame(width: 44, height: 44)
-                            .background(Color.purple.opacity(0.1))
+                            .background(OKColor.riskExtreme.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Quality & Trust")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("View your local feedback and calibration data")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingDataUseDisclosure) {
             DataUseDisclosureView()
@@ -703,27 +706,27 @@ struct PrivacyControlsView: View {
             HStack(spacing: 12) {
                 Image(systemName: "person.badge.shield.checkmark")
                     .font(.system(size: 18))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                     .frame(width: 44, height: 44)
-                    .background(Color.purple.opacity(0.1))
+                    .background(OKColor.riskExtreme.opacity(0.1))
                     .cornerRadius(10)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Reviewer Help")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                     
                     Text("Test plan and guarantees overview")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             .padding(12)
         }
@@ -743,14 +746,14 @@ struct PrivacyControlsView: View {
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             Spacer()
             
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 18))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
         }
         .padding(16)
     }
@@ -805,9 +808,9 @@ struct PrivacyControlsView: View {
                         : "All AI runs locally on your device"
                 )
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
     
@@ -818,7 +821,7 @@ struct PrivacyControlsView: View {
         return HStack(spacing: 12) {
             Image(systemName: modelBackendIcon(currentBackend))
                 .font(.system(size: 20))
-                .foregroundColor(.indigo)
+                .foregroundColor(OKColor.riskExtreme)
                 .frame(width: 32)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -828,7 +831,7 @@ struct PrivacyControlsView: View {
                 
                 Text(currentBackend.displayName)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             Spacer()
@@ -836,15 +839,15 @@ struct PrivacyControlsView: View {
             // Backend status badge
             HStack(spacing: 4) {
                 Circle()
-                    .fill(Color.green)
+                    .fill(OKColor.riskNominal)
                     .frame(width: 8, height: 8)
                 Text("On-Device")
                     .font(.caption2)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(Color.green.opacity(0.1))
+            .background(OKColor.riskNominal.opacity(0.1))
             .cornerRadius(12)
         }
         .padding(16)
@@ -854,7 +857,7 @@ struct PrivacyControlsView: View {
         HStack(spacing: 12) {
             Image(systemName: "apple.logo")
                 .font(.system(size: 20))
-                .foregroundColor(isAvailable ? .green : .gray)
+                .foregroundColor(isAvailable ? OKColor.riskNominal : OKColor.textMuted)
                 .frame(width: 32)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -864,7 +867,7 @@ struct PrivacyControlsView: View {
                 
                 Text(isAvailable ? "Available (iOS 18.1+ with Apple Intelligence)" : "Not available on this device/OS")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             Spacer()
@@ -876,7 +879,7 @@ struct PrivacyControlsView: View {
                 Text(isAvailable ? "Available" : "Unavailable")
                     .font(.caption2)
             }
-            .foregroundColor(isAvailable ? .green : .gray)
+            .foregroundColor(isAvailable ? OKColor.riskNominal : OKColor.textMuted)
         }
         .padding(16)
     }
@@ -887,6 +890,8 @@ struct PrivacyControlsView: View {
             return "apple.logo"
         case .coreML:
             return "brain"
+        case .structuredOnDevice:
+            return "doc.text.magnifyingglass"
         case .deterministic:
             return "text.badge.checkmark"
         }
@@ -898,7 +903,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "creditcard")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Subscription")
                     .font(.headline)
@@ -910,7 +915,7 @@ struct PrivacyControlsView: View {
                 HStack(spacing: 12) {
                     Image(systemName: appState.isPro ? "star.fill" : "person.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(appState.isPro ? .blue : .gray)
+                        .foregroundColor(appState.isPro ? OKColor.actionPrimary : OKColor.textMuted)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -920,7 +925,7 @@ struct PrivacyControlsView: View {
                         
                         Text(appState.currentTier.displayName)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     
                     Spacer()
@@ -938,34 +943,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "gear")
                             .font(.system(size: 18))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue.opacity(0.1))
+                            .background(OKColor.actionPrimary.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text(appState.isPro ? "Manage Subscription" : "Upgrade to Pro")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text(appState.isPro ? "View plan details and renewal date" : "Remove limits and get more done")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingSubscription) {
             if appState.isPro {
@@ -982,7 +987,7 @@ struct PrivacyControlsView: View {
                     VStack(spacing: 24) {
                         Image(systemName: "star.fill")
                             .font(.system(size: 48))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
 
                         Text("Pro Coming Soon")
                             .font(.title2)
@@ -990,7 +995,7 @@ struct PrivacyControlsView: View {
 
                         Text("Pro features will be available in a future update.")
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
 
@@ -999,25 +1004,101 @@ struct PrivacyControlsView: View {
                         }
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                         .padding(.top, 8)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(UIColor.systemGroupedBackground))
+                    .background(OKColor.backgroundPrimary)
                     .navigationTitle("OperatorKit Pro")
                     .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
                 }
             }
         }
     }
     
+    // MARK: - Enterprise Section (Phase 21)
+    private var enterpriseSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("ENTERPRISE")
+                .font(.system(size: 13, weight: .semibold))
+                .tracking(1.0)
+                .foregroundStyle(OKColor.textMuted)
+
+            VStack(spacing: 0) {
+                NavigationLink(destination: ScoutDashboardView()) {
+                    enterpriseRow(icon: "binoculars.fill", title: "Scout Mode", detail: EnterpriseFeatureFlags.scoutModeEnabled ? "Active" : "Off")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: EnterpriseOnboardingView()) {
+                    enterpriseRow(icon: "building.2", title: "Onboarding Wizard", detail: OrgProvisioningService.shared.isProvisioned ? "Provisioned" : "Not configured")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: TrustRegistryView()) {
+                    enterpriseRow(icon: "shield.checkered", title: "Trust Registry", detail: "\(TrustedDeviceRegistry.shared.devices.count) device(s)")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: IntegrityIncidentView()) {
+                    enterpriseRow(icon: "exclamationmark.shield", title: "System Integrity", detail: KernelIntegrityGuard.shared.systemPosture.rawValue.uppercased())
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: AuditStatusView()) {
+                    enterpriseRow(icon: "doc.badge.clock", title: "Audit Status", detail: EvidenceMirrorClient.shared.syncStatus.rawValue)
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: EnterpriseKillSwitchesView()) {
+                    enterpriseRow(icon: "bolt.shield", title: "Kill Switches", detail: EnterpriseFeatureFlags.executionKillSwitch ? "ACTIVE" : "Nominal")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: PilotRunnerView()) {
+                    enterpriseRow(icon: "play.circle", title: "Pilot Runner", detail: PilotRunner.shared.allPassed ? "Passed" : "Not run")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(destination: EnterpriseReviewPackView()) {
+                    enterpriseRow(icon: "doc.text.magnifyingglass", title: "Export Review Pack", detail: EnterpriseReviewPackBuilder.shared.lastExportAt != nil ? "Exported" : "Not exported")
+                }
+            }
+            .background(OKColor.backgroundSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(OKColor.borderSubtle, lineWidth: 1))
+        }
+    }
+
+    private func enterpriseRow(icon: String, title: String, detail: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(OKColor.actionPrimary)
+                .frame(width: 20)
+            Text(title)
+                .font(.system(size: 15))
+                .foregroundStyle(OKColor.textPrimary)
+            Spacer()
+            Text(detail)
+                .font(.system(size: 13))
+                .foregroundStyle(OKColor.textMuted)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(OKColor.textMuted)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
     // MARK: - Diagnostics Section (Phase 10B)
     private var diagnosticsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "waveform.path.ecg")
                     .font(.system(size: 20))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("Diagnostics")
                     .font(.headline)
@@ -1031,34 +1112,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "chart.bar.doc.horizontal")
                             .font(.system(size: 18))
-                            .foregroundColor(.purple)
+                            .foregroundColor(OKColor.riskExtreme)
                             .frame(width: 44, height: 44)
-                            .background(Color.purple.opacity(0.1))
+                            .background(OKColor.riskExtreme.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("View Diagnostics")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Execution stats, limits, and system status")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingDiagnostics) {
             DiagnosticsView()
@@ -1072,7 +1153,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "checkmark.shield")
                     .font(.system(size: 20))
-                    .foregroundColor(.teal)
+                    .foregroundColor(OKColor.riskOperational)
                 
                 Text("Proof & Trust")
                     .font(.headline)
@@ -1086,34 +1167,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "doc.badge.checkmark")
                             .font(.system(size: 18))
-                            .foregroundColor(.teal)
+                            .foregroundColor(OKColor.riskOperational)
                             .frame(width: 44, height: 44)
-                            .background(Color.teal.opacity(0.1))
+                            .background(OKColor.riskOperational.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Customer Proof Dashboard")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Safety verification, audit trail, exports")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingCustomerProof) {
             CustomerProofView()
@@ -1128,7 +1209,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "shield.lefthalf.filled")
                     .font(.system(size: 20))
-                    .foregroundColor(.indigo)
+                    .foregroundColor(OKColor.riskExtreme)
 
                 Text("Execution Policy Engine")
                     .font(.headline)
@@ -1140,10 +1221,10 @@ struct PrivacyControlsView: View {
                 Text(governance.policyStatusText)
                     .font(.caption2)
                     .fontWeight(.bold)
-                    .foregroundColor(.indigo)
+                    .foregroundColor(OKColor.riskExtreme)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.indigo.opacity(0.1))
+                    .background(OKColor.riskExtreme.opacity(0.1))
                     .cornerRadius(6)
             }
 
@@ -1152,7 +1233,7 @@ struct PrivacyControlsView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "hand.raised")
                         .font(.system(size: 20))
-                        .foregroundColor(.indigo)
+                        .foregroundColor(OKColor.riskExtreme)
                         .frame(width: 32)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -1162,7 +1243,7 @@ struct PrivacyControlsView: View {
 
                         Text(OperatorPolicyStore.shared.policySummary())
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .lineLimit(2)
                     }
 
@@ -1189,7 +1270,7 @@ struct PrivacyControlsView: View {
 
                             Text(item.tier.subtitle)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                         }
 
                         Spacer()
@@ -1203,19 +1284,19 @@ struct PrivacyControlsView: View {
                                     .font(.caption2)
                                     .fontWeight(.bold)
                             }
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.red.opacity(0.1))
+                            .background(OKColor.riskCritical.opacity(0.1))
                             .cornerRadius(6)
                         } else {
                             Text(item.autoApprove ? "Auto" : "Manual")
                                 .font(.caption2)
                                 .fontWeight(.medium)
-                                .foregroundColor(item.autoApprove ? .orange : .green)
+                                .foregroundColor(item.autoApprove ? OKColor.riskWarning : OKColor.riskNominal)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background((item.autoApprove ? Color.orange : Color.green).opacity(0.1))
+                                .background((item.autoApprove ? OKColor.riskWarning : OKColor.riskNominal).opacity(0.1))
                                 .cornerRadius(6)
                         }
                     }
@@ -1236,34 +1317,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "slider.horizontal.3")
                             .font(.system(size: 18))
-                            .foregroundColor(.indigo)
+                            .foregroundColor(OKColor.riskExtreme)
                             .frame(width: 44, height: 44)
-                            .background(Color.indigo.opacity(0.1))
+                            .background(OKColor.riskExtreme.opacity(0.1))
                             .cornerRadius(10)
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Edit Policy")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
 
                             Text("Configure capabilities and execution tiers")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
 
                         Spacer()
 
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingPolicyEditor) {
             PolicyEditorView()
@@ -1276,7 +1357,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "icloud")
                     .font(.system(size: 20))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(OKColor.riskOperational)
                 
                 Text("Cloud Sync (Optional)")
                     .font(.headline)
@@ -1288,7 +1369,7 @@ struct PrivacyControlsView: View {
                 HStack(spacing: 12) {
                     Image(systemName: syncEnabled ? "icloud.fill" : "icloud.slash")
                         .font(.system(size: 20))
-                        .foregroundColor(syncEnabled ? .cyan : .gray)
+                        .foregroundColor(syncEnabled ? OKColor.riskOperational : OKColor.textMuted)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -1298,7 +1379,7 @@ struct PrivacyControlsView: View {
                         
                         Text(syncEnabled ? "Metadata-only packets can be uploaded" : "All data stays on your device")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     
                     Spacer()
@@ -1306,10 +1387,10 @@ struct PrivacyControlsView: View {
                     Text(syncEnabled ? "ON" : "OFF")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(syncEnabled ? .cyan : .gray)
+                        .foregroundColor(syncEnabled ? OKColor.riskOperational : OKColor.textMuted)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background((syncEnabled ? Color.cyan : Color.gray).opacity(0.1))
+                        .background((syncEnabled ? OKColor.riskOperational : OKColor.textMuted).opacity(0.1))
                         .cornerRadius(6)
                 }
                 .padding(16)
@@ -1323,34 +1404,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "gearshape")
                             .font(.system(size: 18))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(OKColor.riskOperational)
                             .frame(width: 44, height: 44)
-                            .background(Color.cyan.opacity(0.1))
+                            .background(OKColor.riskOperational.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Sync Settings")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Sign in, view staged packets, upload")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingSyncSettings) {
             SyncSettingsView()
@@ -1368,7 +1449,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "person.3")
                     .font(.system(size: 20))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("Team")
                     .font(.headline)
@@ -1380,7 +1461,7 @@ struct PrivacyControlsView: View {
                 HStack(spacing: 12) {
                     Image(systemName: TeamStore.shared.hasTeam ? "person.3.fill" : "person.3")
                         .font(.system(size: 20))
-                        .foregroundColor(TeamStore.shared.hasTeam ? .orange : .gray)
+                        .foregroundColor(TeamStore.shared.hasTeam ? OKColor.riskWarning : OKColor.textMuted)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -1390,14 +1471,14 @@ struct PrivacyControlsView: View {
                                 .fontWeight(.medium)
                             Text("Role: \(team.memberRole.displayName)")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                         } else {
                             Text("No Team")
                                 .font(.body)
                                 .fontWeight(.medium)
                             Text("Share governance artifacts with your team")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                         }
                     }
                     
@@ -1407,10 +1488,10 @@ struct PrivacyControlsView: View {
                         Text("Team Tier")
                             .font(.caption)
                             .fontWeight(.medium)
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.orange.opacity(0.1))
+                            .background(OKColor.riskWarning.opacity(0.1))
                             .cornerRadius(6)
                     }
                 }
@@ -1425,34 +1506,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "gearshape.2")
                             .font(.system(size: 18))
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .frame(width: 44, height: 44)
-                            .background(Color.orange.opacity(0.1))
+                            .background(OKColor.riskWarning.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Team Settings")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Manage team, members, and shared artifacts")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingTeamSettings) {
             TeamSettingsView()
@@ -1467,7 +1548,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "creditcard")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Subscription")
                     .font(.headline)
@@ -1488,7 +1569,7 @@ struct PrivacyControlsView: View {
                             .fontWeight(.medium)
                         Text(currentTierDescription)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     
                     Spacer()
@@ -1504,34 +1585,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "gearshape")
                             .font(.system(size: 18))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue.opacity(0.1))
+                            .background(OKColor.actionPrimary.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Manage Subscription")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("View plans, usage, and billing")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingSubscriptionStatus) {
             NavigationView {
@@ -1550,9 +1631,9 @@ struct PrivacyControlsView: View {
     
     private var currentTierColor: Color {
         switch EntitlementManager.shared.currentTier {
-        case .free: return .gray
-        case .pro: return .blue
-        case .team: return .orange
+        case .free: return OKColor.textMuted
+        case .pro: return OKColor.actionPrimary
+        case .team: return OKColor.riskWarning
         }
     }
     
@@ -1571,7 +1652,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "questionmark.circle")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Help & Support")
                     .font(.headline)
@@ -1585,34 +1666,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "book.closed")
                             .font(.system(size: 18))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue.opacity(0.1))
+                            .background(OKColor.actionPrimary.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Help Center")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("FAQ, troubleshooting, contact support")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingHelpCenter) {
             HelpCenterView()
@@ -1626,7 +1707,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "graduationcap")
                     .font(.system(size: 20))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("Getting Started")
                     .font(.headline)
@@ -1641,34 +1722,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "play.circle")
                             .font(.system(size: 18))
-                            .foregroundColor(.purple)
+                            .foregroundColor(OKColor.riskExtreme)
                             .frame(width: 44, height: 44)
-                            .background(Color.purple.opacity(0.1))
+                            .background(OKColor.riskExtreme.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Re-run Onboarding")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Review safety model and features")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView(onComplete: {
@@ -1685,7 +1766,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "app.badge.checkmark")
                     .font(.system(size: 20))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("App Store Readiness")
                     .font(.headline)
@@ -1699,34 +1780,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "checklist")
                             .font(.system(size: 18))
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .frame(width: 44, height: 44)
-                            .background(Color.orange.opacity(0.1))
+                            .background(OKColor.riskWarning.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Submission Readiness")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Review notes, screenshots, exports")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingAppStoreReadiness) {
             AppStoreReadinessView()
@@ -1740,7 +1821,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "chart.bar.xaxis")
                     .font(.system(size: 20))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("Conversion Analytics")
                     .font(.headline)
@@ -1754,34 +1835,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "chart.pie")
                             .font(.system(size: 18))
-                            .foregroundColor(.purple)
+                            .foregroundColor(OKColor.riskExtreme)
                             .frame(width: 44, height: 44)
-                            .background(Color.purple.opacity(0.1))
+                            .background(OKColor.riskExtreme.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Conversion Summary")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Funnel counts and rates (local-only)")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingConversionSummary) {
             ConversionSummaryView()
@@ -1795,7 +1876,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "building.2")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Enterprise & Team")
                     .font(.headline)
@@ -1809,34 +1890,34 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "person.3")
                             .font(.system(size: 18))
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.blue.opacity(0.1))
+                            .background(OKColor.actionPrimary.opacity(0.1))
                             .cornerRadius(10)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Team Sales Kit")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text("Procurement, trials, and rollout")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(12)
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .sheet(isPresented: $showingTeamSalesKit) {
             TeamSalesKitView()
@@ -1853,7 +1934,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: hasViolation ? "exclamationmark.shield" : "shield.checkered")
                     .font(.system(size: 20))
-                    .foregroundColor(hasViolation ? .red : .green)
+                    .foregroundColor(hasViolation ? OKColor.riskCritical : OKColor.riskNominal)
 
                 Text("Safety Invariants")
                     .font(.headline)
@@ -1865,10 +1946,10 @@ struct PrivacyControlsView: View {
                 Text(hasViolation ? "VIOLATION" : "ALL VERIFIED")
                     .font(.caption2)
                     .fontWeight(.bold)
-                    .foregroundColor(hasViolation ? .red : .green)
+                    .foregroundColor(hasViolation ? OKColor.riskCritical : OKColor.riskNominal)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background((hasViolation ? Color.red : Color.green).opacity(0.1))
+                    .background((hasViolation ? OKColor.riskCritical : OKColor.riskNominal).opacity(0.1))
                     .cornerRadius(6)
             }
 
@@ -1878,7 +1959,7 @@ struct PrivacyControlsView: View {
                 }
             }
             .padding(16)
-            .background((hasViolation ? Color.red : Color.green).opacity(0.05))
+            .background((hasViolation ? OKColor.riskCritical : OKColor.riskNominal).opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -1887,17 +1968,17 @@ struct PrivacyControlsView: View {
         HStack(spacing: 10) {
             Image(systemName: verified ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(verified ? .green : .red)
+                .foregroundColor(verified ? OKColor.riskNominal : OKColor.riskCritical)
 
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
 
             Spacer()
 
             Text(verified ? "Verified" : "Failed")
                 .font(.caption2)
-                .foregroundColor(verified ? .green : .red)
+                .foregroundColor(verified ? OKColor.riskNominal : OKColor.riskCritical)
         }
     }
     
@@ -1913,10 +1994,10 @@ struct PrivacyControlsView: View {
                 Text("DEBUG")
                     .font(.caption2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color.orange)
+                    .background(OKColor.riskWarning)
                     .cornerRadius(4)
             }
             
@@ -1930,7 +2011,7 @@ struct PrivacyControlsView: View {
                         
                         Text("Show synthetic calendar/reminder items for testing")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
@@ -1946,24 +2027,24 @@ struct PrivacyControlsView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "info.circle.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                         
                         Text("Synthetic data active. Context Picker will show demo items. No real EventKit access in demo mode.")
                             .font(.caption)
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(12)
-                    .background(Color.orange.opacity(0.1))
+                    .background(OKColor.riskWarning.opacity(0.1))
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
             
             Text("Demo mode uses synthetic data for QA and TestFlight testing. It does not access real user data and audit trails are marked as synthetic.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     #endif
@@ -1977,7 +2058,7 @@ struct PrivacyControlsView: View {
                 HStack {
                     Image(systemName: "ant.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(.purple)
+                        .foregroundColor(OKColor.riskExtreme)
                     
                     Text("DEBUG: Permission Diagnostics")
                         .font(.headline)
@@ -1991,7 +2072,7 @@ struct PrivacyControlsView: View {
                         HStack {
                             Text(key)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                                 .frame(width: 120, alignment: .leading)
                             
                             if let value = diagnostics[key] {
@@ -2010,14 +2091,14 @@ struct PrivacyControlsView: View {
                     // Confirmation of invariants
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         Text("No prompts without user tap")
                             .font(.caption)
                             .fontWeight(.medium)
                     }
                 }
                 .padding(16)
-                .background(Color.purple.opacity(0.05))
+                .background(OKColor.riskExtreme.opacity(0.05))
                 .cornerRadius(12)
             }
             
@@ -2034,7 +2115,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "brain")
                     .font(.system(size: 16))
-                    .foregroundColor(.indigo)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("DEBUG: Model Diagnostics")
                     .font(.headline)
@@ -2046,7 +2127,7 @@ struct PrivacyControlsView: View {
                 Text("Apple On-Device Status")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 HStack {
                     Image(systemName: "apple.logo")
@@ -2054,14 +2135,14 @@ struct PrivacyControlsView: View {
                     Text(appleAvailability.isAvailable ? "Available" : "Unavailable")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(appleAvailability.isAvailable ? .green : .red)
+                        .foregroundColor(appleAvailability.isAvailable ? OKColor.riskNominal : OKColor.riskCritical)
                     Spacer()
                 }
                 
                 if let reason = appleAvailability.reason, !appleAvailability.isAvailable {
                     Text("Reason: \(reason)")
                         .font(.caption2)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 
@@ -2071,7 +2152,7 @@ struct PrivacyControlsView: View {
                 Text("All Backend Availability")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 ForEach(Array(modelRouter.backendAvailability.keys), id: \.self) { backend in
                     let availability = modelRouter.backendAvailability[backend]
@@ -2084,7 +2165,7 @@ struct PrivacyControlsView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 10))
-                                    .foregroundColor(.green)
+                                    .foregroundColor(OKColor.riskNominal)
                                 Text("Available")
                                     .font(.caption2)
                             }
@@ -2092,7 +2173,7 @@ struct PrivacyControlsView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 10))
-                                    .foregroundColor(.red)
+                                    .foregroundColor(OKColor.riskCritical)
                                 Text("Unavailable")
                                     .font(.caption2)
                             }
@@ -2108,12 +2189,12 @@ struct PrivacyControlsView: View {
                 Text("Last Generation")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 HStack {
                     Text("Backend")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .frame(width: 100, alignment: .leading)
                     Text(modelRouter.currentBackend.displayName)
                         .font(.caption)
@@ -2124,7 +2205,7 @@ struct PrivacyControlsView: View {
                 HStack {
                     Text("Latency")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .frame(width: 100, alignment: .leading)
                     Text("\(modelRouter.lastGenerationTimeMs)ms")
                         .font(.caption)
@@ -2136,10 +2217,10 @@ struct PrivacyControlsView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Fallback Reason:")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text(fallbackReason)
                             .font(.caption2)
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -2150,28 +2231,28 @@ struct PrivacyControlsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         Text("All generation is on-device")
                             .font(.caption)
                             .fontWeight(.medium)
                     }
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         Text("No network calls in model pipeline")
                             .font(.caption)
                             .fontWeight(.medium)
                     }
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         Text("Citations from selected context only")
                             .font(.caption)
                             .fontWeight(.medium)
                     }
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         Text("Fallback to Deterministic if Apple unavailable")
                             .font(.caption)
                             .fontWeight(.medium)
@@ -2179,7 +2260,7 @@ struct PrivacyControlsView: View {
                 }
             }
             .padding(16)
-            .background(Color.indigo.opacity(0.05))
+            .background(OKColor.riskExtreme.opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -2190,7 +2271,7 @@ struct PrivacyControlsView: View {
             HStack {
                 Image(systemName: "testtube.2")
                     .font(.system(size: 16))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("DEBUG: Model Evaluation")
                     .font(.headline)
@@ -2214,8 +2295,8 @@ struct PrivacyControlsView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(evalRunner.isRunning ? Color.gray.opacity(0.2) : Color.purple.opacity(0.1))
-                    .foregroundColor(evalRunner.isRunning ? .gray : .purple)
+                    .background(evalRunner.isRunning ? OKColor.textMuted.opacity(0.2) : OKColor.riskExtreme.opacity(0.1))
+                    .foregroundColor(evalRunner.isRunning ? OKColor.textMuted : OKColor.riskExtreme)
                     .cornerRadius(10)
                 }
                 .disabled(evalRunner.isRunning)
@@ -2225,10 +2306,10 @@ struct PrivacyControlsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Testing: \(currentCase.name)")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         ProgressView(value: evalRunner.progress)
-                            .tint(.purple)
+                            .tint(OKColor.riskExtreme)
                     }
                 }
                 
@@ -2241,7 +2322,7 @@ struct PrivacyControlsView: View {
                             Text("Latest Results")
                                 .font(.caption)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                             
                             Spacer()
                             
@@ -2253,7 +2334,7 @@ struct PrivacyControlsView: View {
                                     .font(.caption2)
                                     .fontWeight(.semibold)
                             }
-                            .foregroundColor(result.passed == result.totalCases ? .green : .orange)
+                            .foregroundColor(result.passed == result.totalCases ? OKColor.riskNominal : OKColor.riskWarning)
                         }
                         
                         // Metrics
@@ -2271,7 +2352,7 @@ struct PrivacyControlsView: View {
                                 Image(systemName: showingEvalResults ? "chevron.up" : "chevron.down")
                                     .font(.system(size: 10))
                             }
-                            .foregroundColor(.purple)
+                            .foregroundColor(OKColor.riskExtreme)
                         }
                         
                         // Detailed results list
@@ -2288,7 +2369,7 @@ struct PrivacyControlsView: View {
                 // Invariants reminder
                 Text("Uses synthetic context only — no user data")
                     .font(.caption2)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                     .italic()
                 
                 Divider()
@@ -2298,7 +2379,7 @@ struct PrivacyControlsView: View {
                     Text("Fault Injection Testing")
                         .font(.caption)
                         .fontWeight(.semibold)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     
                     Toggle(isOn: $faultInjectionEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -2306,10 +2387,10 @@ struct PrivacyControlsView: View {
                                 .font(.subheadline)
                             Text("Routes to test backend for eval only")
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                         }
                     }
-                    .tint(.orange)
+                    .tint(OKColor.riskWarning)
                     .onChange(of: faultInjectionEnabled) { _, newValue in
                         ModelRouter.shared.enableFaultInjection = newValue
                     }
@@ -2330,8 +2411,8 @@ struct PrivacyControlsView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .background(Color.orange.opacity(0.1))
-                        .foregroundColor(.orange)
+                        .background(OKColor.riskWarning.opacity(0.1))
+                        .foregroundColor(OKColor.riskWarning)
                         .cornerRadius(8)
                     }
                     .disabled(evalRunner.isRunning)
@@ -2347,7 +2428,7 @@ struct PrivacyControlsView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: caseReport.result.isPassing ? "checkmark.circle.fill" : "xmark.circle.fill")
                                         .font(.system(size: 10))
-                                        .foregroundColor(caseReport.result.isPassing ? .green : .red)
+                                        .foregroundColor(caseReport.result.isPassing ? OKColor.riskNominal : OKColor.riskCritical)
                                     Text(caseReport.caseName)
                                         .font(.caption2)
                                     Spacer()
@@ -2361,13 +2442,13 @@ struct PrivacyControlsView: View {
                             }
                         }
                         .padding(8)
-                        .background(Color.orange.opacity(0.05))
+                        .background(OKColor.riskWarning.opacity(0.05))
                         .cornerRadius(6)
                     }
                 }
             }
             .padding(16)
-            .background(Color.purple.opacity(0.05))
+            .background(OKColor.riskExtreme.opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -2385,7 +2466,7 @@ struct PrivacyControlsView: View {
                 .fontWeight(.semibold)
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
         }
     }
     
@@ -2394,7 +2475,7 @@ struct PrivacyControlsView: View {
             // Result icon
             Image(systemName: report.result.isPassing ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 12))
-                .foregroundColor(report.result.isPassing ? .green : .red)
+                .foregroundColor(report.result.isPassing ? OKColor.riskNominal : OKColor.riskCritical)
             
             // Case name
             VStack(alignment: .leading, spacing: 1) {
@@ -2404,7 +2485,7 @@ struct PrivacyControlsView: View {
                 
                 Text("\(report.confidencePercentage)% conf • \(report.formattedLatency)")
                     .font(.caption2)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             Spacer()
@@ -2414,7 +2495,7 @@ struct PrivacyControlsView: View {
                 .font(.caption2)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
-                .background(Color.gray.opacity(0.1))
+                .background(OKColor.textMuted.opacity(0.1))
                 .cornerRadius(4)
         }
         .padding(.vertical, 4)
@@ -2471,12 +2552,12 @@ struct PrivacyControlsView: View {
 extension Color {
     init(_ colorName: String) {
         switch colorName {
-        case "green": self = .green
-        case "red": self = .red
-        case "orange": self = .orange
-        case "blue": self = .blue
-        case "gray": self = .gray
-        default: self = .gray
+        case "green": self = OKColor.riskNominal
+        case "red": self = OKColor.riskCritical
+        case "orange": self = OKColor.riskWarning
+        case "blue": self = OKColor.actionPrimary
+        case "gray": self = OKColor.textMuted
+        default: self = OKColor.textMuted
         }
     }
 }

@@ -14,7 +14,7 @@ struct ManageTemplatesView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -72,7 +72,7 @@ struct ManageTemplatesView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -84,12 +84,12 @@ struct ManageTemplatesView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
 
     // MARK: - Hero Section
@@ -97,24 +97,24 @@ struct ManageTemplatesView: View {
         VStack(spacing: 16) {
             Image(systemName: "gearshape.2.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.gray.opacity(0.4))
+                .foregroundColor(OKColor.textMuted.opacity(0.4))
 
             Text("Template Management")
                 .font(.title3)
                 .fontWeight(.semibold)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
 
             Text("Create custom templates, edit existing ones, and organize your workflow library.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
         }
         .padding(24)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Actions List
@@ -126,7 +126,7 @@ struct ManageTemplatesView: View {
             } label: {
                 actionRow(
                     icon: "plus.circle.fill",
-                    iconColor: .blue,
+                    iconColor: OKColor.actionPrimary,
                     text: "Create custom templates",
                     showChevron: true
                 )
@@ -137,7 +137,7 @@ struct ManageTemplatesView: View {
             // Edit template details - DISABLED
             actionRow(
                 icon: "pencil.circle.fill",
-                iconColor: .gray,
+                iconColor: OKColor.textMuted,
                 text: "Edit template details",
                 showChevron: true
             )
@@ -148,7 +148,7 @@ struct ManageTemplatesView: View {
             // Organize by category - DISABLED
             actionRow(
                 icon: "folder.fill",
-                iconColor: .gray,
+                iconColor: OKColor.textMuted,
                 text: "Organize by category",
                 showChevron: true
             )
@@ -159,15 +159,15 @@ struct ManageTemplatesView: View {
             // Export & share - DISABLED
             actionRow(
                 icon: "square.and.arrow.up",
-                iconColor: .gray,
+                iconColor: OKColor.textMuted,
                 text: "Export & share templates",
                 showChevron: true
             )
             .opacity(0.5)
         }
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Custom Templates Section
@@ -176,13 +176,13 @@ struct ManageTemplatesView: View {
             HStack {
                 Text("Your Templates")
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
 
                 Spacer()
 
                 Text("\(templateStore.templateCount)")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.horizontal, 4)
 
@@ -195,9 +195,9 @@ struct ManageTemplatesView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 8, x: 0, y: 4)
         }
     }
 
@@ -220,12 +220,12 @@ struct ManageTemplatesView: View {
                 Text(template.name)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
 
                 if let description = template.description, !description.isEmpty {
                     Text(description)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .lineLimit(1)
                 }
             }
@@ -239,7 +239,7 @@ struct ManageTemplatesView: View {
             } label: {
                 Image(systemName: "trash")
                     .font(.system(size: 14))
-                    .foregroundColor(.red.opacity(0.7))
+                    .foregroundColor(OKColor.riskCritical.opacity(0.7))
                     .frame(width: 32, height: 32)
             }
             .buttonStyle(.plain)
@@ -263,14 +263,14 @@ struct ManageTemplatesView: View {
 
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
 
             Spacer()
 
             if showChevron {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
         }
         .padding(.horizontal, 16)

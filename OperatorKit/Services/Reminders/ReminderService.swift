@@ -176,7 +176,9 @@ final class ReminderService: ObservableObject {
     /// INVARIANT: Only called after two-key confirmation (ConfirmWriteView)
     /// INVARIANT: Single reminder per call - no bulk writes
     /// INVARIANT: Must be called from main actor (user-driven)
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can construct one.
     func saveReminder(
+        accessToken: ServiceAccessToken,
         payload: ReminderPayload,
         secondConfirmationTimestamp: Date
     ) async -> ReminderSaveResult {
@@ -252,7 +254,9 @@ final class ReminderService: ObservableObject {
     }
     
     /// Save a reminder from a ReminderPreview (converts to payload)
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can construct one.
     func saveReminder(
+        accessToken: ServiceAccessToken,
         preview: ReminderPreview,
         listIdentifier: String?,
         secondConfirmationTimestamp: Date
@@ -266,6 +270,7 @@ final class ReminderService: ObservableObject {
         )
         
         return await saveReminder(
+            accessToken: accessToken,
             payload: payload,
             secondConfirmationTimestamp: secondConfirmationTimestamp
         )
@@ -277,6 +282,31 @@ final class ReminderService: ObservableObject {
         case .low: return .low
         case .medium: return .medium
         case .high: return .high
+        }
+    }
+
+    // MARK: - Delete (Undo support)
+
+    /// Delete a previously created reminder by identifier.
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can call.
+    func deleteReminder(
+        accessToken: ServiceAccessToken,
+        identifier: String
+    ) async -> Bool {
+        do {
+            let predicate = eventStore.predicateForReminders(in: nil)
+            let reminders = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<[EKReminder], Error>) in
+                eventStore.fetchReminders(matching: predicate) { result in
+                    cont.resume(returning: result ?? [])
+                }
+            }
+            guard let reminder = reminders.first(where: { $0.calendarItemIdentifier == identifier }) else {
+                return false
+            }
+            try eventStore.remove(reminder, commit: true)
+            return true
+        } catch {
+            return false
         }
     }
 }

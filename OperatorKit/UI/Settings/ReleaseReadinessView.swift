@@ -66,8 +66,13 @@ struct ReleaseReadinessView: View {
                 // Export Section
                 exportSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Release Readiness")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -134,7 +139,7 @@ struct ReleaseReadinessView: View {
                         .font(.subheadline)
                     Text("Quality record integrity check")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -148,7 +153,7 @@ struct ReleaseReadinessView: View {
                     Spacer()
                     Text(seal.algorithm.uppercased())
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 HStack {
@@ -157,21 +162,21 @@ struct ReleaseReadinessView: View {
                     Spacer()
                     Text("\(seal.inputsHashed.count) included")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
             Text("Integrity checks are informational only and do not affect app behavior.")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
     private var integrityStatusColor: Color {
         switch integrityStatus {
-        case .valid: return .green
-        case .mismatch: return .orange
-        case .unavailable: return .gray
+        case .valid: return OKColor.riskNominal
+        case .mismatch: return OKColor.riskWarning
+        case .unavailable: return OKColor.textMuted
         }
     }
     
@@ -183,7 +188,7 @@ struct ReleaseReadinessView: View {
             if acknowledgementStore.isCurrentVersionAcknowledged {
                 HStack {
                     Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Acknowledged")
                             .font(.subheadline)
@@ -191,7 +196,7 @@ struct ReleaseReadinessView: View {
                         if let ack = acknowledgementStore.latestAcknowledgement {
                             Text("on \(ack.acknowledgedAt.formatted(date: .abbreviated, time: .shortened))")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                     Spacer()
@@ -199,7 +204,7 @@ struct ReleaseReadinessView: View {
             } else {
                 HStack {
                     Image(systemName: "seal")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     Text("Not acknowledged")
                         .font(.subheadline)
                     Spacer()
@@ -227,12 +232,12 @@ struct ReleaseReadinessView: View {
             if let reason = acknowledgementStore.recordingBlockedReason {
                 Text(reason)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Text("This acknowledgement is a process record only. It does not affect app behavior or block releases.")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .alert("Record Release Acknowledgement?", isPresented: $showAcknowledgementConfirmation) {
             Button("Record", role: .none) {
@@ -252,7 +257,7 @@ struct ReleaseReadinessView: View {
                 Spacer()
                 Text("v\(ack.appVersion) (\(ack.buildNumber))")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
@@ -270,7 +275,7 @@ struct ReleaseReadinessView: View {
                 Spacer()
                 Text("\(ack.goldenCaseCount)")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             if let passRate = ack.latestEvalPassRate {
@@ -280,7 +285,7 @@ struct ReleaseReadinessView: View {
                     Spacer()
                     Text(String(format: "%.0f%%", passRate * 100))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -290,16 +295,16 @@ struct ReleaseReadinessView: View {
                 Spacer()
                 Text(ack.preflightPassed ? "Passed" : "Had Issues")
                     .font(.caption)
-                    .foregroundColor(ack.preflightPassed ? .green : .orange)
+                    .foregroundColor(ack.preflightPassed ? OKColor.riskNominal : OKColor.riskWarning)
             }
         }
     }
     
     private func gateStatusColor(_ status: String) -> Color {
         switch status.uppercased() {
-        case "PASS": return .green
-        case "WARN", "SKIPPED": return .orange
-        case "FAIL": return .red
+        case "PASS": return OKColor.riskNominal
+        case "WARN", "SKIPPED": return OKColor.riskWarning
+        case "FAIL": return OKColor.riskCritical
         default: return .secondary
         }
     }
@@ -320,7 +325,7 @@ struct ReleaseReadinessView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Release Status")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(overallReadinessText)
                             .font(.headline)
                     }
@@ -334,7 +339,7 @@ struct ReleaseReadinessView: View {
                     Text("App Version")
                     Spacer()
                     Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 // Build
@@ -342,7 +347,7 @@ struct ReleaseReadinessView: View {
                     Text("Build")
                     Spacer()
                     Text(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -369,18 +374,18 @@ struct ReleaseReadinessView: View {
     private var overallReadinessColor: Color {
         guard let gateResult = qualityGateResult,
               let safetyStatus = safetyContractStatus else {
-            return .gray
+            return OKColor.textMuted
         }
         
         if !safetyStatus.isValid {
-            return .red
+            return OKColor.riskCritical
         }
         
         switch gateResult.status {
-        case .pass: return .green
-        case .warn: return .orange
-        case .fail: return .red
-        case .skipped: return .gray
+        case .pass: return OKColor.riskNominal
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
+        case .skipped: return OKColor.textMuted
         }
     }
     
@@ -409,32 +414,32 @@ struct ReleaseReadinessView: View {
             if let status = safetyContractStatus {
                 HStack {
                     Image(systemName: status.matchStatus.systemImage)
-                        .foregroundColor(status.isValid ? .green : .red)
+                        .foregroundColor(status.isValid ? OKColor.riskNominal : OKColor.riskCritical)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(status.matchStatus.displayName)
                             .font(.subheadline)
                         Text("SAFETY_CONTRACT.md")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     if status.isValid {
                         Text("✓")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                     } else {
                         Text("Modified")
                             .font(.caption)
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                     }
                 }
                 
                 if !status.isValid {
                     Text("The safety contract has been modified. If this is intentional, update the expected hash.")
                         .font(.caption)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
                 
                 HStack {
@@ -442,7 +447,7 @@ struct ReleaseReadinessView: View {
                     Spacer()
                     Text(SafetyContractSnapshot.lastUpdateReason)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.trailing)
                 }
@@ -467,7 +472,7 @@ struct ReleaseReadinessView: View {
                             .fontWeight(.medium)
                         Text(result.summary)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
                 
@@ -477,12 +482,12 @@ struct ReleaseReadinessView: View {
                         HStack(alignment: .top) {
                             Image(systemName: result.status == .pass ? "checkmark" : "exclamationmark.circle")
                                 .font(.caption)
-                                .foregroundColor(result.status == .pass ? .green : .orange)
+                                .foregroundColor(result.status == .pass ? OKColor.riskNominal : OKColor.riskWarning)
                                 .frame(width: 16)
                             
                             Text(reason)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -494,10 +499,10 @@ struct ReleaseReadinessView: View {
     
     private func gateStatusColor(_ status: GateStatus) -> Color {
         switch status {
-        case .pass: return .green
-        case .warn: return .orange
-        case .fail: return .red
-        case .skipped: return .gray
+        case .pass: return OKColor.riskNominal
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
+        case .skipped: return OKColor.textMuted
         }
     }
     
@@ -510,23 +515,23 @@ struct ReleaseReadinessView: View {
                     Text("Pinned Cases")
                     Spacer()
                     Text("\(result.metrics.goldenCaseCount)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 HStack {
                     Text("Minimum Required")
                     Spacer()
                     Text("\(result.thresholds.minimumGoldenCases)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 if result.metrics.goldenCaseCount < result.thresholds.minimumGoldenCases {
                     HStack {
                         Image(systemName: "info.circle")
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                         Text("Pin more memory items as golden cases to enable quality gate.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -542,7 +547,7 @@ struct ReleaseReadinessView: View {
                     Text("Total Runs")
                     Spacer()
                     Text("\(result.metrics.totalEvalRuns)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 if let passRate = result.metrics.latestPassRate {
@@ -550,7 +555,7 @@ struct ReleaseReadinessView: View {
                         Text("Latest Pass Rate")
                         Spacer()
                         Text("\(Int(passRate * 100))%")
-                            .foregroundColor(passRate >= 0.8 ? .green : .orange)
+                            .foregroundColor(passRate >= 0.8 ? OKColor.riskNominal : OKColor.riskWarning)
                     }
                 }
                 
@@ -568,17 +573,17 @@ struct ReleaseReadinessView: View {
                         Text("Days Since Last Eval")
                         Spacer()
                         Text("\(daysSince)")
-                            .foregroundColor(daysSince > 7 ? .orange : .secondary)
+                            .foregroundColor(daysSince > 7 ? OKColor.riskWarning : .secondary)
                     }
                 }
                 
                 if result.metrics.totalEvalRuns == 0 {
                     HStack {
                         Image(systemName: "info.circle")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         Text("Run golden case evaluations from Quality & Trust to generate data.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -587,10 +592,10 @@ struct ReleaseReadinessView: View {
     
     private func driftLevelColor(_ level: String) -> Color {
         switch level.lowercased() {
-        case "none": return .green
-        case "low": return .yellow
-        case "moderate": return .orange
-        case "high": return .red
+        case "none": return OKColor.riskNominal
+        case "low": return OKColor.riskWarning
+        case "moderate": return OKColor.riskWarning
+        case "high": return OKColor.riskCritical
         default: return .secondary
         }
     }
@@ -605,10 +610,10 @@ struct ReleaseReadinessView: View {
             if comparison.channelA.runCount == 0 && comparison.channelB.runCount == 0 {
                 HStack {
                     Image(systemName: "square.split.2x1")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("Run evals in Debug and TestFlight to compare")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 // Verdict
@@ -618,7 +623,7 @@ struct ReleaseReadinessView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Comparison")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(comparison.verdict.displayName)
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -632,7 +637,7 @@ struct ReleaseReadinessView: View {
                     Spacer()
                     Text("vs")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Spacer()
                     channelBadge(name: "TestFlight", runs: comparison.channelB.runCount)
                 }
@@ -648,13 +653,13 @@ struct ReleaseReadinessView: View {
                         Spacer()
                         Text(metric.channelAValue)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text("→")
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(metric.channelBValue)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
                 
@@ -664,7 +669,7 @@ struct ReleaseReadinessView: View {
                         ForEach(comparison.signatureDiffs.indices, id: \.self) { index in
                             Text(comparison.signatureDiffs[index].description)
                                 .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -679,28 +684,28 @@ struct ReleaseReadinessView: View {
                 .fontWeight(.medium)
             Text("\(runs) runs")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color.gray.opacity(0.1))
+        .background(OKColor.textMuted.opacity(0.1))
         .cornerRadius(6)
     }
     
     private func verdictColor(_ verdict: ComparisonVerdict) -> Color {
         switch verdict {
-        case .channelABetter, .channelBBetter: return .green
-        case .equivalent: return .blue
-        case .inconclusive, .insufficientData: return .gray
+        case .channelABetter, .channelBBetter: return OKColor.riskNominal
+        case .equivalent: return OKColor.actionPrimary
+        case .inconclusive, .insufficientData: return OKColor.textMuted
         }
     }
     
     private func metricStatusColor(_ status: MetricComparison.ComparisonStatus) -> Color {
         switch status {
-        case .better: return .green
-        case .same: return .blue
-        case .worse: return .red
-        case .inconclusive: return .gray
+        case .better: return OKColor.riskNominal
+        case .same: return OKColor.actionPrimary
+        case .worse: return OKColor.riskCritical
+        case .inconclusive: return OKColor.textMuted
         }
     }
     
@@ -728,10 +733,10 @@ struct ReleaseReadinessView: View {
             
             HStack {
                 Image(systemName: "info.circle")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text("Exports contain metadata only, no user content.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }

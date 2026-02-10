@@ -5,14 +5,16 @@ import Foundation
 /// Identifies which backend is being used for draft generation
 /// INVARIANT: All backends must be strictly on-device (no network)
 enum ModelBackend: String, Codable, CaseIterable {
-    case appleOnDevice = "apple_on_device"  // Apple Foundation Models (iOS 18.1+)
-    case coreML = "core_ml"                  // Bundled Core ML model
-    case deterministic = "deterministic"     // Template-based (always available fallback)
+    case appleOnDevice = "apple_on_device"       // Apple Foundation Models (iOS 18.1+)
+    case coreML = "core_ml"                       // Bundled Core ML model
+    case structuredOnDevice = "structured"         // Context-aware prose generation (on-device)
+    case deterministic = "deterministic"           // Template-based (always available fallback)
     
     var displayName: String {
         switch self {
         case .appleOnDevice: return "Apple On-Device"
         case .coreML: return "Core ML"
+        case .structuredOnDevice: return "Structured On-Device"
         case .deterministic: return "Deterministic Templates"
         }
     }
@@ -26,7 +28,8 @@ enum ModelBackend: String, Codable, CaseIterable {
         switch self {
         case .appleOnDevice: return 0
         case .coreML: return 1
-        case .deterministic: return 99  // Fallback
+        case .structuredOnDevice: return 2  // Better than templates, below ML
+        case .deterministic: return 99      // Fallback
         }
     }
 }

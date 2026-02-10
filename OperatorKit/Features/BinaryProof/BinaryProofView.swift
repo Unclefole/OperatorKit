@@ -53,7 +53,7 @@ struct BinaryProofSnapshot: Sendable {
         return BinaryProofSnapshot(
             status: "PASS",
             statusIcon: "checkmark.seal.fill",
-            statusColor: .green,
+            statusColor: OKColor.riskNominal,
             frameworkCount: 0, // Not displayed, only metadata
             notes: [
                 "Source code verified: No direct WebKit/JavaScriptCore imports",
@@ -97,6 +97,8 @@ struct BinaryProofView: View {
         }
         .navigationTitle("Binary Proof")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .allowsHitTesting(true) // Allow scrolling but rows are non-interactive
     }
 
@@ -108,7 +110,7 @@ struct BinaryProofView: View {
                 HStack {
                     Image(systemName: "cpu")
                         .font(.title)
-                        .foregroundColor(.purple)
+                        .foregroundColor(OKColor.riskExtreme)
 
                     Text("Binary Proof")
                         .font(.headline)
@@ -116,12 +118,12 @@ struct BinaryProofView: View {
                     Spacer()
 
                     Image(systemName: "lock.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("Source code verification of linked frameworks. Confirms absence of WebKit/JavaScriptCore in app source.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -142,7 +144,7 @@ struct BinaryProofView: View {
 
                     Text("Source code audit verified")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Spacer()
@@ -153,12 +155,12 @@ struct BinaryProofView: View {
             ForEach(snapshot.notes, id: \.self) { note in
                 HStack {
                     Image(systemName: "info.circle")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                         .frame(width: 20)
 
                     Text(note)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .allowsHitTesting(false)
             }
@@ -174,7 +176,7 @@ struct BinaryProofView: View {
             ForEach(snapshot.sensitiveChecks) { check in
                 HStack {
                     Image(systemName: check.isPresent ? "xmark.circle.fill" : "checkmark.circle.fill")
-                        .foregroundColor(check.isPresent ? .red : .green)
+                        .foregroundColor(check.isPresent ? OKColor.riskCritical : OKColor.riskNominal)
                         .frame(width: 24)
 
                     Text(check.framework)
@@ -184,7 +186,7 @@ struct BinaryProofView: View {
 
                     Text(check.statusText)
                         .font(.caption)
-                        .foregroundColor(check.isPresent ? .red : .green)
+                        .foregroundColor(check.isPresent ? OKColor.riskCritical : OKColor.riskNominal)
                 }
                 .allowsHitTesting(false)
             }
@@ -206,11 +208,11 @@ struct BinaryProofView: View {
 
                 Text("Source code audit for `import` statements. This is the authoritative verification method because dyld shows iOS system transitive loads that are NOT direct imports.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
 
                 Text("Results are deterministic for a given source revision.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
             .allowsHitTesting(false)
@@ -223,11 +225,11 @@ struct BinaryProofView: View {
         Section {
             HStack {
                 Image(systemName: "shield.checkered")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
 
                 Text("All proofs verified locally on this device.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .allowsHitTesting(false)
         } footer: {

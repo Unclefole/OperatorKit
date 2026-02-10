@@ -64,8 +64,13 @@ struct AppStoreReadinessView: View {
                 // Disclaimers
                 disclaimerSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("App Store Readiness")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -108,23 +113,23 @@ struct AppStoreReadinessView: View {
             } label: {
                 HStack {
                     Image(systemName: "checklist")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Launch Checklist")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Comprehensive launch readiness validation")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -160,10 +165,10 @@ struct AppStoreReadinessView: View {
                                 }
                                 Text(finding.message)
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(OKColor.textSecondary)
                                 Text("Fix: \(finding.suggestedFix)")
                                     .font(.caption2)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(OKColor.actionPrimary)
                             }
                             .padding(.vertical, 4)
                         }
@@ -172,7 +177,7 @@ struct AppStoreReadinessView: View {
                             Text("Findings")
                             Spacer()
                             Text("\(report.findings.count)")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -184,7 +189,7 @@ struct AppStoreReadinessView: View {
                 }
             } else {
                 Text("Scanning...")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Review Risk Status")
@@ -203,9 +208,9 @@ struct AppStoreReadinessView: View {
     
     private func riskStatusColor(for status: RiskStatus) -> Color {
         switch status {
-        case .pass: return .green
-        case .warn: return .orange
-        case .fail: return .red
+        case .pass: return OKColor.riskNominal
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
         }
     }
     
@@ -219,9 +224,9 @@ struct AppStoreReadinessView: View {
     
     private func severityColor(for severity: RiskSeverity) -> Color {
         switch severity {
-        case .info: return .blue
-        case .warn: return .orange
-        case .fail: return .red
+        case .info: return OKColor.actionPrimary
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
         }
     }
     
@@ -237,9 +242,9 @@ struct AppStoreReadinessView: View {
                     Spacer()
                     Text("2 min")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -266,10 +271,10 @@ struct AppStoreReadinessView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Copy has changed")
                         .font(.caption)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     Text("Update StoreListingSnapshot.expectedHash")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -342,10 +347,10 @@ struct AppStoreReadinessView: View {
                     ForEach(docIntegrity.missingDocs, id: \.self) { doc in
                         HStack {
                             Image(systemName: "exclamationmark.triangle")
-                                .foregroundColor(.orange)
+                                .foregroundColor(OKColor.riskWarning)
                             Text("Missing: \(doc)")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -361,7 +366,7 @@ struct AppStoreReadinessView: View {
                 }
             } else {
                 Text("Loading...")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Documentation Integrity")
@@ -435,11 +440,11 @@ struct AppStoreReadinessView: View {
                         }
                         Text(shot.captionTemplate)
                             .font(.caption)
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .italic()
                         Text(shot.notes)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     .padding(.vertical, 4)
                 }
@@ -449,7 +454,7 @@ struct AppStoreReadinessView: View {
                     Spacer()
                     Text("\(ScreenshotChecklist.requiredShots.count) required")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -457,7 +462,7 @@ struct AppStoreReadinessView: View {
                 Label("Required Sizes", systemImage: "rectangle.portrait")
                 Spacer()
                 Text("\(ScreenshotChecklist.requiredSizes.filter { $0.required }.count)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Screenshot Checklist")
@@ -497,7 +502,7 @@ struct AppStoreReadinessView: View {
                 
                 Text("All copy is provided as templates. Review and customize before App Store submission.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             VStack(alignment: .leading, spacing: 8) {
@@ -507,7 +512,7 @@ struct AppStoreReadinessView: View {
                 
                 Text("Exports contain only metadata and status information. No user content is ever included.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Disclaimers")
@@ -586,9 +591,9 @@ private struct ReadinessRow: View {
         
         var color: Color {
             switch self {
-            case .pass: return .green
-            case .warn: return .orange
-            case .fail: return .red
+            case .pass: return OKColor.riskNominal
+            case .warn: return OKColor.riskWarning
+            case .fail: return OKColor.riskCritical
             case .neutral: return .primary
             }
         }
@@ -622,6 +627,8 @@ private struct CopyPreviewView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {

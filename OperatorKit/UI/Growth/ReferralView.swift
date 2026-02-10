@@ -40,8 +40,13 @@ struct ReferralView: View {
                 // Stats
                 statsSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Invite Friends")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -65,23 +70,23 @@ struct ReferralView: View {
             VStack(spacing: 16) {
                 Text("Your Referral Code")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 let code = codeStore.getOrGenerateCode()
                 
                 Text(code.code)
                     .font(.system(.title, design: .monospaced))
                     .fontWeight(.bold)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 24)
-                    .background(Color.blue.opacity(0.1))
+                    .background(OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(12)
                 
                 if copied {
                     Label("Copied!", systemImage: "checkmark")
                         .font(.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -159,14 +164,14 @@ struct ReferralView: View {
                 Text("Times Shared")
                 Spacer()
                 Text("\(ledger.shareTappedCount)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Text("Times Copied")
                 Spacer()
                 Text("\(ledger.copyTappedCount)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Your Activity")
@@ -245,9 +250,9 @@ private struct HowItWorksRow: View {
             Text("\(number)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(width: 24, height: 24)
-                .background(Color.blue)
+                .background(OKColor.actionPrimary)
                 .clipShape(Circle())
             
             Text(text)

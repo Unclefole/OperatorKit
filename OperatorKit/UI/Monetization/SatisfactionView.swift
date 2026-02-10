@@ -35,8 +35,12 @@ struct SatisfactionView: View {
                 }
             }
             .padding()
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Quick Feedback")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Skip") {
@@ -59,7 +63,7 @@ struct SatisfactionView: View {
             HStack {
                 ForEach(0..<SatisfactionQuestions.questions.count, id: \.self) { index in
                     Circle()
-                        .fill(index <= currentQuestionIndex ? Color.blue : Color.gray.opacity(0.3))
+                        .fill(index <= currentQuestionIndex ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.3))
                         .frame(width: 8, height: 8)
                 }
             }
@@ -133,7 +137,7 @@ struct SatisfactionView: View {
             // Skip hint
             Text("You can skip anytime")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -145,7 +149,7 @@ struct SatisfactionView: View {
             
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text("Thank You!")
                 .font(.title)
@@ -153,7 +157,7 @@ struct SatisfactionView: View {
             
             Text("Your feedback helps us improve.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
@@ -208,12 +212,12 @@ private struct RatingSelector: View {
                     } label: {
                         ZStack {
                             Circle()
-                                .fill(rating >= value ? Color.blue : Color.gray.opacity(0.2))
+                                .fill(rating >= value ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.2))
                                 .frame(width: 50, height: 50)
                             
                             Text("\(value)")
                                 .font(.headline)
-                                .foregroundColor(rating >= value ? .white : .primary)
+                                .foregroundColor(rating >= value ? OKColor.textPrimary : .primary)
                         }
                     }
                 }
@@ -222,13 +226,13 @@ private struct RatingSelector: View {
             HStack {
                 Text(minLabel)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Spacer()
                 
                 Text(maxLabel)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.horizontal, 8)
         }

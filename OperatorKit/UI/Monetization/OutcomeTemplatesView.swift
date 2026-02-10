@@ -52,6 +52,8 @@ struct OutcomeTemplatesView: View {
             }
             .navigationTitle("Templates")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -82,18 +84,18 @@ private struct OutcomeTemplateRow: View {
             
             Text(template.sampleIntent)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .lineLimit(2)
             
             if !template.suggestedContextTypeIds.isEmpty {
                 HStack(spacing: 4) {
                     Image(systemName: "doc.badge.plus")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Text("Works with: \(template.suggestedContextTypeIds.joined(separator: ", "))")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             

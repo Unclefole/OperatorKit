@@ -33,7 +33,7 @@ struct ReviewerSimulationChecklistView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Checklist Status")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(overallStatusText)
                             .font(.headline)
                     }
@@ -42,7 +42,7 @@ struct ReviewerSimulationChecklistView: View {
                     
                     Text("\(passedCount)/\(checkItems.count)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -61,18 +61,20 @@ struct ReviewerSimulationChecklistView: View {
             Section("Evidence Sources") {
                 Text("Each check item references specific code files or test cases that enforce the guarantee. These are verified at build time and by automated tests.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             // Disclaimer
             Section {
                 Text("This checklist is informational only. Status values are computed locally on-device and do not affect app behavior.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .navigationTitle("Reviewer Checklist")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .onAppear {
             loadChecklist()
         }
@@ -100,15 +102,15 @@ struct ReviewerSimulationChecklistView: View {
             
             Text(item.description)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             HStack {
                 Image(systemName: "doc.text")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text("Evidence: \(item.evidenceSource)")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .padding(.vertical, 4)
@@ -140,13 +142,13 @@ struct ReviewerSimulationChecklistView: View {
         let unknownCount = checkItems.filter { $0.status == .unknown }.count
         
         if failCount > 0 {
-            return .red
+            return OKColor.riskCritical
         } else if unknownCount > 0 {
-            return .orange
+            return OKColor.riskWarning
         } else if checkItems.isEmpty {
-            return .gray
+            return OKColor.textMuted
         } else {
-            return .green
+            return OKColor.riskNominal
         }
     }
     
@@ -293,9 +295,9 @@ struct ReviewerCheckItem: Identifiable {
         
         var color: Color {
             switch self {
-            case .pass: return .green
-            case .fail: return .red
-            case .unknown: return .orange
+            case .pass: return OKColor.riskNominal
+            case .fail: return OKColor.riskCritical
+            case .unknown: return OKColor.riskWarning
             }
         }
     }

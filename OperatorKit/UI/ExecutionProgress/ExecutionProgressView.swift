@@ -15,7 +15,7 @@ struct ExecutionProgressView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -70,7 +70,7 @@ struct ExecutionProgressView: View {
             // Loading Indicator
             ProgressView()
                 .scaleEffect(2)
-                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                .progressViewStyle(CircularProgressViewStyle(tint: OKColor.actionPrimary))
             
             Text(progressTitle)
                 .font(.title2)
@@ -78,7 +78,7 @@ struct ExecutionProgressView: View {
             
             Text(progressSubtitle)
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
                 .multilineTextAlignment(.center)
             
             Spacer()
@@ -125,7 +125,7 @@ struct ExecutionProgressView: View {
                         
                         Text(mailResult?.displayMessage ?? result.message)
                             .font(.body)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .multilineTextAlignment(.center)
                     }
                     
@@ -163,7 +163,7 @@ struct ExecutionProgressView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -175,24 +175,24 @@ struct ExecutionProgressView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Success Icon
     private func successIcon(_ result: ExecutionResultModel) -> some View {
         ZStack {
             Circle()
-                .fill(result.isSuccess ? Color.green.opacity(0.15) : Color.red.opacity(0.15))
+                .fill(result.isSuccess ? OKColor.riskNominal.opacity(0.15) : OKColor.riskCritical.opacity(0.15))
                 .frame(width: 100, height: 100)
             
             Image(systemName: result.isSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 60))
-                .foregroundColor(result.isSuccess ? .green : .red)
+                .foregroundColor(result.isSuccess ? OKColor.riskNominal : OKColor.riskCritical)
         }
     }
     
@@ -201,7 +201,7 @@ struct ExecutionProgressView: View {
         VStack(spacing: 12) {
             Text("Your email is ready to send")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             Button(action: {
                 showingMailComposer = true
@@ -225,19 +225,19 @@ struct ExecutionProgressView: View {
                     Image(systemName: "arrow.up.right")
                         .font(.system(size: 14))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .padding(16)
-                .background(Color.blue)
+                .background(OKColor.actionPrimary)
                 .cornerRadius(12)
             }
             
             Text("OperatorKit will never send emails automatically.\nYou must tap Send in the composer.")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
                 .multilineTextAlignment(.center)
         }
         .padding(20)
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(16)
     }
     
@@ -246,7 +246,7 @@ struct ExecutionProgressView: View {
         HStack(spacing: 12) {
             Image(systemName: result.isSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 24))
-                .foregroundColor(result.isSuccess ? .green : .orange)
+                .foregroundColor(result.isSuccess ? OKColor.riskNominal : OKColor.riskWarning)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(result.displayMessage)
@@ -257,28 +257,28 @@ struct ExecutionProgressView: View {
                 case .sentByUser:
                     Text("Email was sent by you")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 case .savedToDrafts:
                     Text("Email saved to your Drafts folder")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 case .cancelled:
                     Text("You can still send later from OperatorKit")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 case .failed:
                     Text("Please try again")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
             
             Spacer()
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Result Card
@@ -308,7 +308,7 @@ struct ExecutionProgressView: View {
             HStack {
                 Text("Type:")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 Text(result.draft.type.rawValue)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -319,7 +319,7 @@ struct ExecutionProgressView: View {
             HStack {
                 Text("Title:")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 Text(result.draft.title)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -330,16 +330,16 @@ struct ExecutionProgressView: View {
             HStack {
                 Text("Completed:")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 Text(formatDate(result.timestamp))
                     .font(.subheadline)
                 Spacer()
             }
         }
         .padding(20)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     // MARK: - Executed Actions Section
@@ -354,7 +354,7 @@ struct ExecutionProgressView: View {
                     HStack(spacing: 12) {
                         Image(systemName: executed.wasExecuted ? "checkmark.circle.fill" : "xmark.circle.fill")
                             .font(.system(size: 20))
-                            .foregroundColor(executed.wasExecuted ? .green : .red)
+                            .foregroundColor(executed.wasExecuted ? OKColor.riskNominal : OKColor.riskCritical)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text(executed.sideEffect.description)
@@ -363,7 +363,7 @@ struct ExecutionProgressView: View {
                             if let message = executed.resultMessage {
                                 Text(message)
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(OKColor.textMuted)
                             }
                             
                             // Show user action required indicator
@@ -374,7 +374,7 @@ struct ExecutionProgressView: View {
                                     Text("Your action needed to complete")
                                         .font(.caption2)
                                 }
-                                .foregroundColor(.blue)
+                                .foregroundColor(OKColor.actionPrimary)
                             }
                         }
                         
@@ -388,9 +388,9 @@ struct ExecutionProgressView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
     
@@ -408,12 +408,12 @@ struct ExecutionProgressView: View {
                 }
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.white)
+                .background(OKColor.backgroundPrimary)
                 .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                .shadow(color: OKColor.shadow.opacity(0.04), radius: 4, x: 0, y: 2)
             }
             
             Button(action: {
@@ -423,18 +423,18 @@ struct ExecutionProgressView: View {
                 Text("Back to Home")
                     .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.blue)
+                    .background(OKColor.actionPrimary)
                     .cornerRadius(12)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color(UIColor.systemGroupedBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.backgroundPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
@@ -464,9 +464,9 @@ struct ExecutionProgressView: View {
     
     private func statusColor(for status: ExecutionResultModel.ExecutionStatus) -> Color {
         switch status {
-        case .success, .savedDraftOnly: return .green
-        case .partialSuccess: return .orange
-        case .failed: return .red
+        case .success, .savedDraftOnly: return OKColor.riskNominal
+        case .partialSuccess: return OKColor.riskWarning
+        case .failed: return OKColor.riskCritical
         }
     }
     

@@ -90,7 +90,7 @@ public final class GovernanceSettingsStore: ObservableObject {
 
     /// Network status color
     public var networkStatusColor: Color {
-        AppSecurityConfig.networkAccessAllowed ? .orange : .green
+        AppSecurityConfig.networkAccessAllowed ? OKColor.riskWarning : OKColor.riskNominal
     }
 
     /// Institutional policy status text — NEVER "All Allowed"

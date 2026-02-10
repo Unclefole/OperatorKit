@@ -267,10 +267,13 @@ public enum OfflineCertificationChecks {
         category: .backgroundBehavior,
         severity: .critical,
         verify: {
-            // Verify no BGTaskScheduler usage
+            // Phase 19: BGTaskScheduler is used but restricted to allowlisted identifiers
+            let registered = Set([BackgroundScheduler.proposalTaskIdentifier, BackgroundScheduler.mirrorTaskIdentifier, BackgroundScheduler.scoutTaskIdentifier])
+            let allowed = BackgroundTasksGuard.allowlistedIdentifiers
+            let valid = registered.isSubset(of: allowed)
             return OfflineCertificationResult(
-                passed: true,
-                evidence: "No BGTaskScheduler in core pipeline"
+                passed: valid,
+                evidence: valid ? "BGTaskScheduler restricted to allowlisted identifiers" : "Non-allowlisted BG identifiers detected"
             )
         }
     )

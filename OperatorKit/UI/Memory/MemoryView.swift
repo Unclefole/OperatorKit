@@ -52,7 +52,7 @@ struct MemoryView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -123,7 +123,7 @@ struct MemoryView: View {
                 Button(action: { nav.goBack() }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
 
@@ -142,12 +142,12 @@ struct MemoryView: View {
             }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Search Bar
@@ -155,7 +155,7 @@ struct MemoryView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             TextField("Search memory...", text: $searchText)
                 .font(.body)
@@ -164,15 +164,18 @@ struct MemoryView: View {
                 Button(action: { searchText = "" }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundSecondary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(OKColor.borderSubtle, lineWidth: 0.5)
+        )
         .padding(.horizontal, 20)
         .padding(.bottom, 12)
     }
@@ -188,12 +191,15 @@ struct MemoryView: View {
                         Text(option.rawValue)
                             .font(.subheadline)
                             .fontWeight(selectedFilter == option ? .semibold : .regular)
-                            .foregroundColor(selectedFilter == option ? .white : .primary)
+                            .foregroundColor(selectedFilter == option ? .white : OKColor.textSecondary)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(selectedFilter == option ? Color.blue : Color.white)
+                            .background(selectedFilter == option ? OKColor.actionPrimary : OKColor.backgroundTertiary)
                             .cornerRadius(20)
-                            .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .strokeBorder(selectedFilter == option ? Color.clear : OKColor.borderSubtle, lineWidth: 1)
+                            )
                     }
                 }
             }
@@ -207,15 +213,15 @@ struct MemoryView: View {
         VStack(spacing: 16) {
             Image(systemName: "tray")
                 .font(.system(size: 48))
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(OKColor.textMuted.opacity(0.5))
 
             Text("No items found")
                 .font(.headline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
 
             Text("Your drafts and completed operations will appear here.\nAll data is stored securely on your device.")
                 .font(.subheadline)
-                .foregroundColor(.gray.opacity(0.8))
+                .foregroundColor(OKColor.textMuted.opacity(0.8))
                 .multilineTextAlignment(.center)
 
             // CTA — route user to create their first request
@@ -262,11 +268,11 @@ struct MemoryItemRow: View {
     
     private var iconColor: Color {
         switch item.type {
-        case .draftedEmail, .sentEmail: return .blue
-        case .summary, .documentReview: return .orange
-        case .actionItems: return .green
-        case .reminder, .createdReminder: return .purple
-        case .calendarEvent, .createdCalendarEvent, .updatedCalendarEvent: return .red
+        case .draftedEmail, .sentEmail: return OKColor.actionPrimary
+        case .summary, .documentReview: return OKColor.riskWarning
+        case .actionItems: return OKColor.riskNominal
+        case .reminder, .createdReminder: return OKColor.riskExtreme
+        case .calendarEvent, .createdCalendarEvent, .updatedCalendarEvent: return OKColor.riskCritical
         }
     }
     
@@ -289,36 +295,36 @@ struct MemoryItemRow: View {
                     Text(item.title)
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .lineLimit(1)
                     
                     Text(item.preview)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .lineLimit(2)
                     
                     HStack(spacing: 8) {
                         Text(item.type.rawValue)
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         Text("•")
                             .font(.caption2)
-                            .foregroundColor(.gray.opacity(0.5))
+                            .foregroundColor(OKColor.textMuted.opacity(0.5))
                         
                         Text(item.formattedDate)
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         // Confidence indicator
                         if let confidence = item.draftConfidence {
                             Text("•")
                                 .font(.caption2)
-                                .foregroundColor(.gray.opacity(0.5))
+                                .foregroundColor(OKColor.textMuted.opacity(0.5))
                             
                             Text("\(Int(confidence * 100))%")
                                 .font(.caption2)
-                                .foregroundColor(confidence >= 0.8 ? .green : .orange)
+                                .foregroundColor(confidence >= 0.8 ? OKColor.riskNominal : OKColor.riskWarning)
                         }
                     }
                 }
@@ -333,17 +339,20 @@ struct MemoryItemRow: View {
                         Text("\(item.attachments.count)")
                             .font(.caption)
                     }
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 }
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
             .padding(16)
-            .background(Color.white)
+            .background(OKColor.backgroundSecondary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(OKColor.borderSubtle, lineWidth: 0.5)
+            )
         }
         .contextMenu {
             Button(role: .destructive, action: onDelete) {
@@ -366,18 +375,20 @@ struct MemoryDetailView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(item.type.rawValue)
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         Text(item.title)
                             .font(.title2)
                             .fontWeight(.bold)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text(item.formattedDate)
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     
                     Divider()
+                        .overlay(OKColor.borderSubtle)
                     
                     // Trust Summary Section (Phase 5A)
                     trustSummarySection
@@ -425,8 +436,12 @@ struct MemoryDetailView: View {
                 }
                 .padding(20)
             }
+            .background(OKColor.backgroundPrimary.ignoresSafeArea())
             .navigationTitle("Details")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -453,7 +468,7 @@ struct MemoryDetailView: View {
             
             Label("Quality Evaluation", systemImage: "star.square")
                 .font(.headline)
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
             
             if goldenCaseStore.isPinned(memoryItemId: item.id) {
                 // Already pinned
@@ -465,7 +480,7 @@ struct MemoryDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Pin this as a Golden Case to use for local quality evaluation.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Button {
                         showPinDisclosure = true
@@ -478,8 +493,8 @@ struct MemoryDetailView: View {
                         .fontWeight(.medium)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(Color.purple.opacity(0.1))
-                        .foregroundColor(.purple)
+                        .background(OKColor.riskExtreme.opacity(0.1))
+                        .foregroundColor(OKColor.riskExtreme)
                         .cornerRadius(8)
                     }
                 }
@@ -494,7 +509,7 @@ struct MemoryDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: "pin.fill")
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 Text("Pinned as Golden Case")
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -503,11 +518,11 @@ struct MemoryDetailView: View {
             
             Text(goldenCase.title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Pinned \(goldenCase.createdAt.formatted(date: .abbreviated, time: .shortened))")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Button(role: .destructive) {
                 _ = goldenCaseStore.deleteCase(id: goldenCase.id)
@@ -520,7 +535,7 @@ struct MemoryDetailView: View {
             }
         }
         .padding(12)
-        .background(Color.purple.opacity(0.1))
+        .background(OKColor.riskExtreme.opacity(0.1))
         .cornerRadius(10)
     }
     
@@ -534,7 +549,7 @@ struct MemoryDetailView: View {
             
             Label("Your Feedback", systemImage: "star.bubble")
                 .font(.headline)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             if let existingFeedback = feedbackStore.getFeedback(for: item.id) {
                 // Show existing feedback
@@ -559,7 +574,7 @@ struct MemoryDetailView: View {
             // Rating
             HStack {
                 Image(systemName: feedback.rating.systemImage)
-                    .foregroundColor(feedback.rating == .helpful ? .green : .orange)
+                    .foregroundColor(feedback.rating == .helpful ? OKColor.riskNominal : OKColor.riskWarning)
                 Text("You rated this: \(feedback.rating.displayName)")
                     .font(.subheadline)
                 Spacer()
@@ -573,7 +588,7 @@ struct MemoryDetailView: View {
                             .font(.caption2)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.orange.opacity(0.2))
+                            .background(OKColor.riskWarning.opacity(0.2))
                             .cornerRadius(12)
                     }
                 }
@@ -582,7 +597,7 @@ struct MemoryDetailView: View {
             // Date
             Text("Submitted \(feedback.createdAt.formatted(date: .abbreviated, time: .shortened))")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Delete button
             Button(role: .destructive) {
@@ -605,7 +620,7 @@ struct MemoryDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Trust Summary", systemImage: "shield.checkered")
                 .font(.headline)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             VStack(spacing: 8) {
                 // Draft-first indicator
@@ -654,7 +669,7 @@ struct MemoryDetailView: View {
                     HStack {
                         Text("Confidence level")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Spacer()
                         
@@ -670,18 +685,18 @@ struct MemoryDetailView: View {
                     HStack {
                         Text("Model used")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Spacer()
                         
                         Text(backend)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
             .padding(16)
-            .background(Color.green.opacity(0.05))
+            .background(OKColor.riskNominal.opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -697,7 +712,7 @@ struct MemoryDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Audit Trail", systemImage: "clock.badge.checkmark")
                 .font(.headline)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             VStack(spacing: 8) {
                 if let intent = item.intentSummary {
@@ -717,7 +732,7 @@ struct MemoryDetailView: View {
                 }
             }
             .padding(16)
-            .background(Color.blue.opacity(0.05))
+            .background(OKColor.actionPrimary.opacity(0.05))
             .cornerRadius(12)
             
             // Model & Confidence Section (Phase 2C)
@@ -732,7 +747,7 @@ struct MemoryDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Draft Intelligence", systemImage: "cpu")
                 .font(.headline)
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
             
             VStack(spacing: 8) {
                 // Model backend
@@ -759,7 +774,7 @@ struct MemoryDetailView: View {
                     HStack {
                         Text("Confidence:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         HStack(spacing: 4) {
                             Text("\(Int(confidence * 100))%")
@@ -785,23 +800,23 @@ struct MemoryDetailView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "cpu")
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text("Deterministic fallback used")
                             .font(.caption)
                             .fontWeight(.medium)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Spacer()
                     }
                     
                     Text("A simpler on-device method was used to ensure reliability.")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .padding(.leading, 18)
                     
                     if let reason = item.fallbackReason, !reason.isEmpty {
                         Text("Reason: \(reason)")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .padding(.leading, 18)
                     }
                 }
@@ -811,25 +826,25 @@ struct MemoryDetailView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Safety Notes:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         ForEach(notes, id: \.self) { note in
                             HStack(alignment: .top, spacing: 6) {
                                 Image(systemName: "exclamationmark.shield.fill")
                                     .font(.system(size: 10))
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(OKColor.riskWarning)
                                     .padding(.top, 2)
                                 
                                 Text(note)
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(OKColor.textSecondary)
                             }
                         }
                     }
                 }
             }
             .padding(16)
-            .background(Color.purple.opacity(0.05))
+            .background(OKColor.riskExtreme.opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -842,10 +857,10 @@ struct MemoryDetailView: View {
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
-        if confidence >= 0.85 { return .green }
-        if confidence >= 0.65 { return .blue }
-        if confidence >= 0.35 { return .orange }
-        return .red
+        if confidence >= 0.85 { return OKColor.riskNominal }
+        if confidence >= 0.65 { return OKColor.actionPrimary }
+        if confidence >= 0.35 { return OKColor.riskWarning }
+        return OKColor.riskCritical
     }
     
     // MARK: - Draft Content Section
@@ -859,7 +874,7 @@ struct MemoryDetailView: View {
                     HStack {
                         Text("To:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text(recipient)
                             .font(.subheadline)
                     }
@@ -869,7 +884,7 @@ struct MemoryDetailView: View {
                     HStack {
                         Text("Subject:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text(subject)
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -886,24 +901,24 @@ struct MemoryDetailView: View {
                 if let signature = item.draftSignature {
                     Text(signature)
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 
                 if let confidence = item.draftConfidence {
                     HStack {
                         Text("Confidence:")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text("\(Int(confidence * 100))%")
                             .font(.caption)
                             .fontWeight(.semibold)
-                            .foregroundColor(confidence >= 0.8 ? .green : .orange)
+                            .foregroundColor(confidence >= 0.8 ? OKColor.riskNominal : OKColor.riskWarning)
                     }
                     .padding(.top, 8)
                 }
             }
             .padding(16)
-            .background(Color.gray.opacity(0.05))
+            .background(OKColor.textMuted.opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -920,7 +935,7 @@ struct MemoryDetailView: View {
                     Text(statusText(for: status))
                         .font(.caption)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(statusColor(for: status))
@@ -930,7 +945,7 @@ struct MemoryDetailView: View {
                 if let message = item.executionMessage {
                     Text(message)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         }
@@ -941,13 +956,13 @@ struct MemoryDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Side Effects", systemImage: "bolt.fill")
                 .font(.headline)
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
             
             VStack(spacing: 8) {
                 ForEach(item.executedSideEffects) { effect in
                     HStack(spacing: 12) {
                         Image(systemName: effect.wasExecuted ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundColor(effect.wasExecuted ? .green : .red)
+                            .foregroundColor(effect.wasExecuted ? OKColor.riskNominal : OKColor.riskCritical)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text(effect.description)
@@ -956,14 +971,14 @@ struct MemoryDetailView: View {
                             if let message = effect.resultMessage {
                                 Text(message)
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(OKColor.textMuted)
                             }
                         }
                         
                         Spacer()
                     }
                     .padding(12)
-                    .background(Color.gray.opacity(0.05))
+                    .background(OKColor.textMuted.opacity(0.05))
                     .cornerRadius(8)
                 }
             }
@@ -975,14 +990,14 @@ struct MemoryDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Reminder Created", systemImage: "bell.badge.fill")
                 .font(.headline)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             VStack(spacing: 8) {
                 // Confirmation badge
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     
                     Text("Reminder saved to Reminders app")
                         .font(.subheadline)
@@ -1010,7 +1025,7 @@ struct MemoryDetailView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Reminder Details:")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         Text(payload.title)
                             .font(.subheadline)
@@ -1019,7 +1034,7 @@ struct MemoryDetailView: View {
                         if let notes = payload.notes, !notes.isEmpty {
                             Text(notes)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                                 .lineLimit(2)
                         }
                         
@@ -1030,7 +1045,7 @@ struct MemoryDetailView: View {
                                 Text(dueDate.formatted(date: .abbreviated, time: .shortened))
                                     .font(.caption)
                             }
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         }
                         
                         if let priority = payload.priority, priority != .none {
@@ -1052,21 +1067,21 @@ struct MemoryDetailView: View {
                     Text("Created with two-key confirmation")
                         .font(.caption2)
                 }
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
                 .padding(.top, 8)
             }
             .padding(16)
-            .background(Color.green.opacity(0.05))
+            .background(OKColor.riskNominal.opacity(0.05))
             .cornerRadius(12)
         }
     }
     
     private func priorityColor(_ priority: ReminderPayload.Priority) -> Color {
         switch priority {
-        case .none: return .gray
-        case .low: return .blue
-        case .medium: return .orange
-        case .high: return .red
+        case .none: return OKColor.textMuted
+        case .low: return OKColor.actionPrimary
+        case .medium: return OKColor.riskWarning
+        case .high: return OKColor.riskCritical
         }
     }
     
@@ -1078,14 +1093,14 @@ struct MemoryDetailView: View {
                 systemImage: item.calendarOperationRaw == "updated" ? "calendar.badge.clock" : "calendar.badge.plus"
             )
             .font(.headline)
-            .foregroundColor(.blue)
+            .foregroundColor(OKColor.actionPrimary)
             
             VStack(spacing: 8) {
                 // Confirmation badge
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     Text(item.calendarOperationRaw == "updated" 
                          ? "Calendar event updated in Calendar app" 
@@ -1120,11 +1135,11 @@ struct MemoryDetailView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Changes Made:")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         Text(diffSummary)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                             .lineLimit(3)
                     }
                 }
@@ -1136,11 +1151,11 @@ struct MemoryDetailView: View {
                     Text("Created with two-key confirmation")
                         .font(.caption2)
                 }
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
                 .padding(.top, 8)
             }
             .padding(16)
-            .background(Color.blue.opacity(0.05))
+            .background(OKColor.actionPrimary.opacity(0.05))
             .cornerRadius(12)
         }
     }
@@ -1154,13 +1169,13 @@ struct MemoryDetailView: View {
             ForEach(item.attachments, id: \.self) { attachment in
                 HStack {
                     Image(systemName: "doc.fill")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text(attachment)
                         .font(.subheadline)
                     Spacer()
                 }
                 .padding(12)
-                .background(Color.gray.opacity(0.05))
+                .background(OKColor.textMuted.opacity(0.05))
                 .cornerRadius(8)
             }
         }
@@ -1186,9 +1201,9 @@ struct MemoryDetailView: View {
     
     private func statusColor(for status: PersistedMemoryItem.ExecutionStatus) -> Color {
         switch status {
-        case .success, .savedDraftOnly: return .green
-        case .partialSuccess: return .orange
-        case .failed: return .red
+        case .success, .savedDraftOnly: return OKColor.riskNominal
+        case .partialSuccess: return OKColor.riskWarning
+        case .failed: return OKColor.riskCritical
         }
     }
 }
@@ -1202,12 +1217,12 @@ struct AuditRow: View {
         HStack(alignment: .top, spacing: 8) {
             Text(label + ":")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
                 .frame(width: 70, alignment: .leading)
             
             Text(value)
                 .font(.caption)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
             
             Spacer()
         }
@@ -1225,19 +1240,19 @@ struct TrustSummaryRow: View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
             
             Spacer()
             
             HStack(spacing: 4) {
                 Image(systemName: isConfirmed ? "checkmark.circle.fill" : "minus.circle")
                     .font(.system(size: 14))
-                    .foregroundColor(isConfirmed ? .green : .gray)
+                    .foregroundColor(isConfirmed ? OKColor.riskNominal : OKColor.textMuted)
                 
                 Text(isConfirmed ? confirmedText : notConfirmedText)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(isConfirmed ? .green : .gray)
+                    .foregroundColor(isConfirmed ? OKColor.riskNominal : OKColor.textMuted)
             }
         }
     }

@@ -55,6 +55,8 @@ struct ArtifactSharingView: View {
             }
             .navigationTitle("Artifact Sharing")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -86,14 +88,14 @@ struct ArtifactSharingView: View {
             ForEach(TeamSafetyConfig.TeamArtifactType.allCases, id: \.self) { type in
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(type.displayName)
                             .font(.subheadline)
                         Text(type.description)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -123,20 +125,20 @@ struct ArtifactSharingView: View {
     private func neverShareRow(_ title: String, description: String, icon: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "xmark.circle.fill")
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
             
             Image(systemName: icon)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
         }
     }
     
@@ -150,7 +152,7 @@ struct ArtifactSharingView: View {
                         .font(.subheadline)
                     Text("Share policy settings with team")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -160,7 +162,7 @@ struct ArtifactSharingView: View {
                         .font(.subheadline)
                     Text("Share execution stats")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -170,7 +172,7 @@ struct ArtifactSharingView: View {
                         .font(.subheadline)
                     Text("Share quality metrics")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -180,7 +182,7 @@ struct ArtifactSharingView: View {
                         .font(.subheadline)
                     Text("Share audit hashes")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -190,7 +192,7 @@ struct ArtifactSharingView: View {
                         .font(.subheadline)
                     Text("Share release sign-offs")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -209,11 +211,11 @@ struct ArtifactSharingView: View {
                 HStack {
                     ProgressView()
                     Text("Loading...")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else if teamArtifacts.isEmpty {
                 Text("No team artifacts yet")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else {
                 ForEach(teamArtifacts) { artifact in
                     HStack {
@@ -222,7 +224,7 @@ struct ArtifactSharingView: View {
                                 .font(.subheadline)
                             Text("\(artifact.formattedSize) • \(artifact.uploadedAt.formatted(date: .abbreviated, time: .shortened))")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
@@ -232,7 +234,7 @@ struct ArtifactSharingView: View {
                                 Task { await deleteArtifact(artifact) }
                             } label: {
                                 Image(systemName: "trash")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(OKColor.riskCritical)
                             }
                             .buttonStyle(.plain)
                         }

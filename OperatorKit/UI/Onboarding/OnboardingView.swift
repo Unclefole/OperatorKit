@@ -40,7 +40,7 @@ struct OnboardingView: View {
                     Button("Skip") {
                         completeOnboarding()
                     }
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .padding()
                 }
                 
@@ -69,7 +69,7 @@ struct OnboardingView: View {
                     HStack(spacing: 8) {
                         ForEach(0..<totalPages, id: \.self) { index in
                             Circle()
-                                .fill(index == currentPage ? Color.blue : Color.gray.opacity(0.3))
+                                .fill(index == currentPage ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.3))
                                 .frame(width: 8, height: 8)
                         }
                     }
@@ -161,7 +161,7 @@ private struct SafetyModelPage: View {
     var body: some View {
         OnboardingPageTemplate(
             icon: "shield.checkered",
-            iconColor: .green,
+            iconColor: OKColor.riskNominal,
             title: "You're Always in Control",
             subtitle: "Nothing happens without your approval"
         ) {
@@ -197,9 +197,9 @@ private struct SafetyRow: View {
         HStack(alignment: .top, spacing: 12) {
             Text("\(number)")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(width: 28, height: 28)
-                .background(Color.green)
+                .background(OKColor.riskNominal)
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 2) {
@@ -207,7 +207,7 @@ private struct SafetyRow: View {
                     .font(.headline)
                 Text(description)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -219,7 +219,7 @@ private struct DataAccessPage: View {
     var body: some View {
         OnboardingPageTemplate(
             icon: "lock.shield",
-            iconColor: .orange,
+            iconColor: OKColor.riskWarning,
             title: "Data Access",
             subtitle: "You choose what OperatorKit can access"
         ) {
@@ -250,7 +250,7 @@ private struct DataAccessPage: View {
                 
                 Text("Permissions are requested only when needed, never upfront.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .padding(.top, 8)
             }
         }
@@ -265,7 +265,7 @@ private struct DataAccessRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
                 .frame(width: 24)
             
             Text(feature)
@@ -276,11 +276,11 @@ private struct DataAccessRow: View {
             
             Text(access)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .background(Color.gray.opacity(0.1))
+        .background(OKColor.textMuted.opacity(0.1))
         .cornerRadius(8)
     }
 }
@@ -294,7 +294,7 @@ private struct ChoosePlanPage: View {
     var body: some View {
         OnboardingPageTemplate(
             icon: "star.circle",
-            iconColor: .purple,
+            iconColor: OKColor.riskExtreme,
             title: "Choose Your Plan",
             subtitle: "Start free, upgrade anytime"
         ) {
@@ -358,12 +358,12 @@ private struct ChoosePlanPage: View {
                 if selectedPlan == .free {
                     Text("Free includes 5 drafted outcomes per week. Upgrade anytime.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .multilineTextAlignment(.center)
                 } else {
                     Text("You can complete purchase after onboarding.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -381,12 +381,12 @@ private struct PlanSummaryCard: View {
             // Selection indicator
             ZStack {
                 Circle()
-                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 2)
+                    .stroke(isSelected ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.3), lineWidth: 2)
                     .frame(width: 24, height: 24)
 
                 if isSelected {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(OKColor.actionPrimary)
                         .frame(width: 14, height: 14)
                 }
             }
@@ -395,38 +395,38 @@ private struct PlanSummaryCard: View {
                 HStack {
                     Text(tier.displayName)
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
 
                     Text(highlight)
                         .font(.caption)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(tier == .pro ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
-                        .foregroundColor(tier == .pro ? .blue : .secondary)
+                        .background(tier == .pro ? OKColor.actionPrimary.opacity(0.1) : OKColor.textMuted.opacity(0.1))
+                        .foregroundColor(tier == .pro ? OKColor.actionPrimary : .secondary)
                         .cornerRadius(4)
                 }
 
                 Text(TierMatrix.shortDescription(for: tier))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
 
             Spacer()
 
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             } else {
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding()
-        .background(isSelected ? Color.blue.opacity(0.05) : Color.gray.opacity(0.05))
+        .background(isSelected ? OKColor.actionPrimary.opacity(0.05) : OKColor.textMuted.opacity(0.05))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                .stroke(isSelected ? OKColor.actionPrimary : Color.clear, lineWidth: 2)
         )
     }
 }
@@ -437,7 +437,7 @@ private struct QuickStartPage: View {
     var body: some View {
         OnboardingPageTemplate(
             icon: "play.circle",
-            iconColor: .blue,
+            iconColor: OKColor.actionPrimary,
             title: "Quick Start",
             subtitle: "Try these sample requests"
         ) {
@@ -459,7 +459,7 @@ private struct QuickStartPage: View {
                 
                 Text("Type any request in plain language. You'll always review before it runs.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.top, 8)
             }
@@ -476,7 +476,7 @@ private struct SampleIntentCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(category)
                     .font(.caption)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .textCase(.uppercase)
                 
                 Text(intent)
@@ -486,7 +486,7 @@ private struct SampleIntentCard: View {
             Spacer()
         }
         .padding()
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(12)
     }
 }
@@ -517,7 +517,7 @@ private struct OnboardingPageTemplate<Content: View>: View {
                 
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             // Content

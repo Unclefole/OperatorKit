@@ -50,6 +50,8 @@ public struct ProcedureSharingView: View {
         }
         .navigationTitle("Procedures")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: { showingCreateSheet = true }) {
@@ -94,7 +96,7 @@ public struct ProcedureSharingView: View {
         Section {
             HStack(spacing: 12) {
                 Image(systemName: "info.circle.fill")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .font(.title2)
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -104,7 +106,7 @@ public struct ProcedureSharingView: View {
                     
                     Text("Procedures contain workflow logic only. No user data, drafts, or personal information is ever included.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .padding(.vertical, 4)
@@ -119,14 +121,14 @@ public struct ProcedureSharingView: View {
                 Text("Stored Procedures")
                 Spacer()
                 Text("\(store.count) / \(ProcedureStore.maxProcedureCount)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Text("Remaining Capacity")
                 Spacer()
                 Text("\(store.remainingCapacity)")
-                    .foregroundColor(store.isAtCapacity ? .red : .secondary)
+                    .foregroundColor(store.isAtCapacity ? OKColor.riskCritical : .secondary)
             }
         } header: {
             Text("Storage")
@@ -139,7 +141,7 @@ public struct ProcedureSharingView: View {
         Section {
             if store.procedures.isEmpty {
                 Text("No procedures yet")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .italic()
             } else {
                 ForEach(store.procedures) { procedure in
@@ -187,14 +189,14 @@ public struct ProcedureSharingView: View {
         VStack(spacing: 16) {
             Image(systemName: "lock.fill")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Procedure Sharing")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -241,7 +243,7 @@ private struct ProcedureRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: procedure.category.icon)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .frame(width: 24)
                 
                 Text(procedure.name)
@@ -260,21 +262,21 @@ private struct ProcedureRow: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
             HStack {
                 Text(procedure.category.displayName)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text("•")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text(procedure.outputType.displayName)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .padding(.vertical, 4)

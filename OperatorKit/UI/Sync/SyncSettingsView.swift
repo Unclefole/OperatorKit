@@ -76,6 +76,8 @@ struct SyncSettingsView: View {
             }
             .navigationTitle("Cloud Sync")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -145,12 +147,12 @@ struct SyncSettingsView: View {
                         if BiometricGate.isAvailable {
                             Image(systemName: "faceid")
                                 .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                     Text("Sync metadata-only packets to the cloud")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .disabled(isBiometricPending)
@@ -158,10 +160,10 @@ struct SyncSettingsView: View {
             if !syncEnabled {
                 HStack(spacing: 12) {
                     Image(systemName: "lock.shield")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("All data stays on your device")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -182,14 +184,14 @@ struct SyncSettingsView: View {
                 HStack {
                     Image(systemName: "person.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(supabaseClient.currentUser?.email ?? "Signed In")
                             .font(.subheadline)
                         Text("Tap to sign out")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
@@ -209,22 +211,22 @@ struct SyncSettingsView: View {
                 } label: {
                     HStack {
                         Image(systemName: "person.badge.plus")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         Text("Sign In")
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                 }
                 
                 if !supabaseClient.isConfigured {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle")
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                         Text("Cloud sync not configured")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -240,7 +242,7 @@ struct SyncSettingsView: View {
             ForEach(SyncSafetyConfig.SyncablePacketType.allCases, id: \.self) { type in
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text(displayName(for: type))
                         .font(.subheadline)
                 }
@@ -253,16 +255,16 @@ struct SyncSettingsView: View {
                 Text("Never Uploaded:")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 ForEach(["Drafts", "Memory items", "User inputs", "Calendar/email content"], id: \.self) { item in
                     HStack(spacing: 8) {
                         Image(systemName: "xmark.circle")
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                             .font(.caption)
                         Text(item)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -285,7 +287,7 @@ struct SyncSettingsView: View {
                             .font(.subheadline)
                         Text("\(packet.formattedSize) • Schema v\(packet.schemaVersion)")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
@@ -294,7 +296,7 @@ struct SyncSettingsView: View {
                         syncQueue.removePacket(id: packet.id)
                     } label: {
                         Image(systemName: "trash")
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                     }
                     .buttonStyle(.plain)
                 }
@@ -314,7 +316,7 @@ struct SyncSettingsView: View {
                     Text("Upload Now")
                     Spacer()
                     Text(syncQueue.summary.formattedTotalSize)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .disabled(!supabaseClient.isSignedIn || isUploading)
@@ -323,10 +325,10 @@ struct SyncSettingsView: View {
             if let result = uploadResult {
                 HStack(spacing: 8) {
                     Image(systemName: result.success ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .foregroundColor(result.success ? .green : .orange)
+                        .foregroundColor(result.success ? OKColor.riskNominal : OKColor.riskWarning)
                     Text(result.summaryText)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -344,11 +346,11 @@ struct SyncSettingsView: View {
                 HStack {
                     ProgressView()
                     Text("Loading...")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else if cloudPackets.isEmpty {
                 Text("No packets in cloud")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else {
                 ForEach(cloudPackets) { packet in
                     HStack {
@@ -357,7 +359,7 @@ struct SyncSettingsView: View {
                                 .font(.subheadline)
                             Text("\(packet.formattedSize) • \(packet.uploadedAt.formatted(date: .abbreviated, time: .shortened))")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
@@ -367,7 +369,7 @@ struct SyncSettingsView: View {
                             showingDeleteConfirmation = true
                         } label: {
                             Image(systemName: "trash")
-                                .foregroundColor(.red)
+                                .foregroundColor(OKColor.riskCritical)
                         }
                         .buttonStyle(.plain)
                     }
@@ -394,7 +396,7 @@ struct SyncSettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
                     Image(systemName: "shield.checkered")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Privacy Guarantees")
                         .font(.subheadline)
                         .fontWeight(.medium)
@@ -416,10 +418,10 @@ struct SyncSettingsView: View {
         HStack(spacing: 8) {
             Image(systemName: "checkmark")
                 .font(.caption)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -444,7 +446,7 @@ struct SyncSettingsView: View {
                     if let error = signInError {
                         Text(error)
                             .font(.caption)
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                     }
                 } header: {
                     Text("Sign In with Email")
@@ -469,6 +471,8 @@ struct SyncSettingsView: View {
             }
             .navigationTitle("Sign In")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {

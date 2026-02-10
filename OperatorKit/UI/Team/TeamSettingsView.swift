@@ -51,6 +51,8 @@ struct TeamSettingsView: View {
             }
             .navigationTitle("Team")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -89,14 +91,14 @@ struct TeamSettingsView: View {
             VStack(spacing: 16) {
                 Image(systemName: "person.crop.circle.badge.questionmark")
                     .font(.system(size: 48))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 Text("Sign In Required")
                     .font(.headline)
                 
                 Text("Sign in to your account to access team features.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
@@ -111,14 +113,14 @@ struct TeamSettingsView: View {
             VStack(spacing: 16) {
                 Image(systemName: "person.3")
                     .font(.system(size: 48))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("No Team")
                     .font(.headline)
                 
                 Text("Create a team or join an existing one to share governance artifacts.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
@@ -153,14 +155,14 @@ struct TeamSettingsView: View {
             HStack {
                 Image(systemName: "person.3.fill")
                     .font(.title2)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(team.name)
                         .font(.headline)
                     Text("Team ID: \(team.shortId)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -172,10 +174,10 @@ struct TeamSettingsView: View {
                         Text(team.memberRole.displayName)
                             .font(.caption)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.1))
+                    .background(OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(6)
                 }
             }
@@ -191,14 +193,14 @@ struct TeamSettingsView: View {
             ForEach(teamStore.members) { member in
                 HStack {
                     Image(systemName: member.role.icon)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(member.displayName)
                             .font(.subheadline)
                         Text(member.role.displayName)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
@@ -222,7 +224,7 @@ struct TeamSettingsView: View {
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                         }
                     }
                 }
@@ -234,7 +236,7 @@ struct TeamSettingsView: View {
                 } label: {
                     HStack {
                         Image(systemName: "person.badge.plus")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         Text("Invite Member")
                     }
                 }
@@ -253,21 +255,21 @@ struct TeamSettingsView: View {
             } label: {
                 HStack {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.purple)
+                        .foregroundColor(OKColor.riskExtreme)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Shared Artifacts")
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         Text("View and manage team artifacts")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -300,7 +302,7 @@ struct TeamSettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
                     Image(systemName: "lock.shield")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("Team Sharing Safety")
                         .font(.subheadline)
                         .fontWeight(.medium)
@@ -324,10 +326,10 @@ struct TeamSettingsView: View {
         HStack(spacing: 8) {
             Image(systemName: safe ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.caption)
-                .foregroundColor(safe ? .green : .red)
+                .foregroundColor(safe ? OKColor.riskNominal : OKColor.riskCritical)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -361,6 +363,8 @@ struct TeamSettingsView: View {
             }
             .navigationTitle("New Team")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { showingCreateTeam = false }
@@ -398,6 +402,8 @@ struct TeamSettingsView: View {
             }
             .navigationTitle("Join Team")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { showingJoinTeam = false }
@@ -443,6 +449,8 @@ struct TeamSettingsView: View {
             }
             .navigationTitle("Invite")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { showingInviteMember = false }

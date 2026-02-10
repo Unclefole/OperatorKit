@@ -1,5 +1,11 @@
 import Foundation
 
+/// Common protocol for context items (used by SentinelProposalEngine)
+protocol ContextItemProtocol {
+    var id: UUID { get }
+    var displayText: String { get }
+}
+
 /// A packet of user-selected context for processing
 /// INVARIANT: Context must be explicitly selected by user
 /// INVARIANT: wasExplicitlySelected must be true for any execution
@@ -38,6 +44,13 @@ struct ContextPacket: Identifiable, Equatable {
         calendarItems.count + emailItems.count + fileItems.count
     }
     
+    /// All context items as a flat array (used by Sentinel for cost estimation + citations)
+    var allContextItems: [any ContextItemProtocol] {
+        (calendarItems as [any ContextItemProtocol]) +
+        (emailItems as [any ContextItemProtocol]) +
+        (fileItems as [any ContextItemProtocol])
+    }
+
     static func == (lhs: ContextPacket, rhs: ContextPacket) -> Bool {
         lhs.id == rhs.id
     }
@@ -45,7 +58,8 @@ struct ContextPacket: Identifiable, Equatable {
 
 // MARK: - Calendar Context Item
 
-struct CalendarContextItem: Identifiable, Equatable {
+struct CalendarContextItem: Identifiable, Equatable, ContextItemProtocol {
+    var displayText: String { "\(title) on \(formattedDate) with \(attendees.joined(separator: ", "))" }
     let id: UUID
     let title: String
     let date: Date
@@ -108,7 +122,8 @@ struct CalendarContextItem: Identifiable, Equatable {
 
 // MARK: - Email Context Item
 
-struct EmailContextItem: Identifiable, Equatable {
+struct EmailContextItem: Identifiable, Equatable, ContextItemProtocol {
+    var displayText: String { "Email: \(subject) from \(sender)" }
     let id: UUID
     let subject: String
     let sender: String
@@ -147,7 +162,8 @@ struct EmailContextItem: Identifiable, Equatable {
 
 // MARK: - File Context Item
 
-struct FileContextItem: Identifiable, Equatable {
+struct FileContextItem: Identifiable, Equatable, ContextItemProtocol {
+    var displayText: String { "File: \(name) (\(fileType))" }
     let id: UUID
     let name: String
     let fileType: String

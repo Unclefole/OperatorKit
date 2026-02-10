@@ -29,7 +29,7 @@ final class MemoryStore: ObservableObject {
     
     private func setupSwiftData() {
         do {
-            let schema = Schema([PersistedMemoryItem.self])
+            let schema = Schema([PersistedMemoryItem.self, ExecutionRecord.self])
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false, // Persist to disk
@@ -53,7 +53,7 @@ final class MemoryStore: ObservableObject {
     
     private func setupInMemoryFallback() {
         do {
-            let schema = Schema([PersistedMemoryItem.self])
+            let schema = Schema([PersistedMemoryItem.self, ExecutionRecord.self])
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: true
@@ -373,7 +373,7 @@ final class MemoryStore: ObservableObject {
 enum SwiftDataProvider {
 
     static var sharedModelContainer: ModelContainer = {
-        let schema = Schema([PersistedMemoryItem.self])
+        let schema = Schema([PersistedMemoryItem.self, ExecutionRecord.self, BackgroundTaskRecord.self])
         let modelConfiguration = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false

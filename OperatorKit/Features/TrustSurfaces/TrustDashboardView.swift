@@ -149,6 +149,8 @@ struct TrustDashboardView: View, ReadOnlySurface {
             footerSection
         }
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 HStack(spacing: 8) {
@@ -169,7 +171,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.shield.fill")
                         .font(.title)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
 
                     Text("Trust Status")
                         .font(.headline)
@@ -178,12 +180,12 @@ struct TrustDashboardView: View, ReadOnlySurface {
 
                     Image(systemName: "lock.fill")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("This device automatically enforces these protections. They cannot be changed.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -197,7 +199,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: SecurityManifestUIView()) {
                     proofRow(
                         icon: "shield.checkered",
-                        iconColor: .green,
+                        iconColor: OKColor.riskNominal,
                         title: "Security Manifest",
                         subtitle: "Proof-backed security posture"
                     )
@@ -220,21 +222,21 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 label: "Approval Gate",
                 value: snapshot.approvalGateStatus,
                 icon: "hand.raised.fill",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             )
 
             StatusRow(
                 label: "Draft-First Workflow",
                 value: "Active",
                 icon: "doc.text.fill",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             )
 
             StatusRow(
                 label: "Two-Key Confirmation",
                 value: "Enabled",
                 icon: "key.fill",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             )
         } header: {
             Text("Approval Enforcement")
@@ -251,21 +253,21 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 label: "Zero-Network Self-Test",
                 value: snapshot.zeroNetworkStatus,
                 icon: "wifi.slash",
-                iconColor: .green
+                iconColor: OKColor.riskNominal
             )
 
             StatusRow(
                 label: "URLSession Isolation",
                 value: "Confined to Sync/",
                 icon: "lock.shield.fill",
-                iconColor: .green
+                iconColor: OKColor.riskNominal
             )
 
             StatusRow(
                 label: "Background Tasks",
                 value: "None",
                 icon: "moon.fill",
-                iconColor: .green
+                iconColor: OKColor.riskNominal
             )
         } header: {
             Text("Network Isolation")
@@ -282,21 +284,21 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 label: "Firewall Status",
                 value: snapshot.regressionFirewallStatus,
                 icon: "flame.fill",
-                iconColor: snapshot.regressionFirewallStatus == "Pass" ? .green : .red
+                iconColor: snapshot.regressionFirewallStatus == "Pass" ? OKColor.riskNominal : OKColor.riskCritical
             )
 
             StatusRow(
                 label: "Last Verified",
                 value: snapshot.lastVerified,
                 icon: "clock.fill",
-                iconColor: .orange
+                iconColor: OKColor.riskWarning
             )
 
             StatusRow(
                 label: "Protected Modules",
                 value: "\(snapshot.protectedModules)",
                 icon: "folder.fill.badge.gearshape",
-                iconColor: .purple
+                iconColor: OKColor.riskExtreme
             )
         } header: {
             Text("Regression Firewall")
@@ -313,21 +315,21 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 label: "Audit Events",
                 value: "\(snapshot.auditLogCount)",
                 icon: "list.bullet.rectangle.portrait.fill",
-                iconColor: .indigo
+                iconColor: OKColor.riskExtreme
             )
 
             StatusRow(
                 label: "Content Stored",
                 value: "None",
                 icon: "xmark.circle.fill",
-                iconColor: .green
+                iconColor: OKColor.riskNominal
             )
 
             StatusRow(
                 label: "Retention",
                 value: "Metadata only",
                 icon: "clock.arrow.circlepath",
-                iconColor: .gray
+                iconColor: OKColor.textMuted
             )
         } header: {
             Text("Audit Trail")
@@ -344,28 +346,28 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 label: "Terminology Canon",
                 value: snapshot.terminologyCanonStatus,
                 icon: "book.closed.fill",
-                iconColor: .teal
+                iconColor: OKColor.riskOperational
             )
 
             StatusRow(
                 label: "Release Seal",
                 value: snapshot.releaseSealStatus,
                 icon: "seal.fill",
-                iconColor: .orange
+                iconColor: OKColor.riskWarning
             )
 
             StatusRow(
                 label: "Claim Registry",
                 value: snapshot.claimRegistryVersion,
                 icon: "checkmark.seal.fill",
-                iconColor: .green
+                iconColor: OKColor.riskNominal
             )
 
             StatusRow(
                 label: "Safety Contract",
                 value: "\(snapshot.safetyGuarantees) Guarantees",
                 icon: "doc.richtext.fill",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             )
         } header: {
             Text("Release Seals (Phase 12D)")
@@ -382,7 +384,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: AuditVaultDashboardView()) {
                     proofRow(
                         icon: "archivebox.fill",
-                        iconColor: .indigo,
+                        iconColor: OKColor.riskExtreme,
                         title: "Audit Vault Lineage",
                         subtitle: "Zero-content provenance tracking"
                     )
@@ -405,7 +407,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: SecurityManifestView()) {
                     proofRow(
                         icon: "lock.shield.fill",
-                        iconColor: .green,
+                        iconColor: OKColor.riskNominal,
                         title: "Security Manifest",
                         subtitle: "WebKit-free, JavaScript-free verification"
                     )
@@ -428,7 +430,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: BinaryProofView()) {
                     proofRow(
                         icon: "cpu",
-                        iconColor: .purple,
+                        iconColor: OKColor.riskExtreme,
                         title: "Binary Proof",
                         subtitle: "Mach-O framework inspection"
                     )
@@ -451,7 +453,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: OfflineCertificationView()) {
                     proofRow(
                         icon: "airplane",
-                        iconColor: .orange,
+                        iconColor: OKColor.riskWarning,
                         title: "Offline Certification",
                         subtitle: "Zero-network verification"
                     )
@@ -474,7 +476,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: BuildSealsView()) {
                     proofRow(
                         icon: "checkmark.seal.fill",
-                        iconColor: .teal,
+                        iconColor: OKColor.riskOperational,
                         title: "Build Seals",
                         subtitle: "Entitlements, dependencies, symbols"
                     )
@@ -497,7 +499,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
                 NavigationLink(destination: ProofPackView()) {
                     proofRow(
                         icon: "shippingbox.fill",
-                        iconColor: .blue,
+                        iconColor: OKColor.actionPrimary,
                         title: "Proof Pack",
                         subtitle: "Unified trust evidence export"
                     )
@@ -523,16 +525,16 @@ struct TrustDashboardView: View, ReadOnlySurface {
 
                 Text("These protections are built into OperatorKit and enforced automatically. They cannot be disabled, modified, or bypassed.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
 
                 // Enterprise-grade visual security seal
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.shield.fill")
                         .font(.footnote)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("Verified locally • Zero network dependency")
                         .font(.footnote.weight(.medium))
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
                 .padding(.top, 4)
             }
@@ -546,14 +548,14 @@ struct TrustDashboardView: View, ReadOnlySurface {
         VStack(spacing: 16) {
             Image(systemName: "eye.slash")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
 
             Text("Trust Dashboard")
                 .font(.headline)
 
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -573,7 +575,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -581,7 +583,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
     private func disabledRow(icon: String, title: String) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
                 .frame(width: 24)
 
             Text(title)
@@ -591,7 +593,7 @@ struct TrustDashboardView: View, ReadOnlySurface {
 
             Text("Disabled")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .allowsHitTesting(false)
     }
@@ -618,7 +620,7 @@ private struct StatusRow: View {
 
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .allowsHitTesting(false)
     }

@@ -44,8 +44,13 @@ struct QualityReportView: View {
                 // Data Control Section
                 dataControlSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Quality Report")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -84,9 +89,9 @@ struct QualityReportView: View {
             if evalRunner.runs.isEmpty {
                 HStack {
                     Image(systemName: "chart.bar.doc.horizontal")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("No eval runs yet")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 // Drift Level Badge
@@ -103,21 +108,21 @@ struct QualityReportView: View {
                     Text("Total Runs")
                     Spacer()
                     Text("\(driftSummary.totalRuns)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 HStack {
                     Text("Total Cases Evaluated")
                     Spacer()
                     Text("\(driftSummary.totalCases)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 HStack {
                     Text("Pass Rate")
                     Spacer()
                     Text(String(format: "%.0f%%", driftSummary.passRate * 100))
-                        .foregroundColor(driftSummary.passRate >= 0.8 ? .green : .orange)
+                        .foregroundColor(driftSummary.passRate >= 0.8 ? OKColor.riskNominal : OKColor.riskWarning)
                 }
                 
                 if let latestDate = driftSummary.latestRunDate {
@@ -125,7 +130,7 @@ struct QualityReportView: View {
                         Text("Latest Run")
                         Spacer()
                         Text(latestDate.formatted(date: .abbreviated, time: .shortened))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -134,10 +139,10 @@ struct QualityReportView: View {
     
     private var driftLevelColor: Color {
         switch driftSummary.driftLevel {
-        case .none: return .green
-        case .low: return .yellow
-        case .moderate: return .orange
-        case .high: return .red
+        case .none: return OKColor.riskNominal
+        case .low: return OKColor.riskWarning
+        case .moderate: return OKColor.riskWarning
+        case .high: return OKColor.riskCritical
         }
     }
     
@@ -154,11 +159,11 @@ struct QualityReportView: View {
                             Text(run.runType.displayName)
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             
                             Text(run.startedAt.formatted(date: .abbreviated, time: .shortened))
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
@@ -170,12 +175,12 @@ struct QualityReportView: View {
                                 .fontWeight(.medium)
                             
                             Image(systemName: run.passCount == run.results.count ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                                .foregroundColor(run.passCount == run.results.count ? .green : .orange)
+                                .foregroundColor(run.passCount == run.results.count ? OKColor.riskNominal : OKColor.riskWarning)
                         }
                         
                         Image(systemName: "chevron.right")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -197,12 +202,12 @@ struct QualityReportView: View {
                 if count > 0 {
                     HStack {
                         Image(systemName: category.systemImage)
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .frame(width: 24)
                         Text(category.rawValue)
                         Spacer()
                         Text("\(count)")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -235,10 +240,10 @@ struct QualityReportView: View {
             
             HStack {
                 Image(systemName: "info.circle")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text("Eval runs contain metadata only, never your actual content.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -272,14 +277,14 @@ struct EvalRunDetailView: View {
                         Text("Type")
                         Spacer()
                         Text(run.runType.displayName)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     HStack {
                         Text("Started")
                         Spacer()
                         Text(run.startedAt.formatted(date: .abbreviated, time: .shortened))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     if let completed = run.completedAt {
@@ -287,7 +292,7 @@ struct EvalRunDetailView: View {
                             Text("Completed")
                             Spacer()
                             Text(completed.formatted(date: .abbreviated, time: .shortened))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                     
@@ -295,7 +300,7 @@ struct EvalRunDetailView: View {
                         Text("Pass Rate")
                         Spacer()
                         Text(String(format: "%.0f%% (%d/%d)", run.passRate * 100, run.passCount, run.results.count))
-                            .foregroundColor(run.passRate >= 0.8 ? .green : .orange)
+                            .foregroundColor(run.passRate >= 0.8 ? OKColor.riskNominal : OKColor.riskWarning)
                     }
                 }
                 
@@ -305,7 +310,7 @@ struct EvalRunDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: result.pass ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                    .foregroundColor(result.pass ? .green : .red)
+                                    .foregroundColor(result.pass ? OKColor.riskNominal : OKColor.riskCritical)
                                 
                                 Text(result.pass ? "Pass" : "Fail")
                                     .fontWeight(.medium)
@@ -314,7 +319,7 @@ struct EvalRunDetailView: View {
                                 
                                 Text("Case \(result.goldenCaseId.uuidString.prefix(8))...")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(OKColor.textSecondary)
                             }
                             
                             // Failure reasons
@@ -323,10 +328,10 @@ struct EvalRunDetailView: View {
                                     HStack(spacing: 4) {
                                         Image(systemName: "exclamationmark.triangle")
                                             .font(.caption)
-                                            .foregroundColor(.orange)
+                                            .foregroundColor(OKColor.riskWarning)
                                         Text(reason.displayName)
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(OKColor.textSecondary)
                                     }
                                 }
                             }
@@ -336,7 +341,7 @@ struct EvalRunDetailView: View {
                                 ForEach(result.notes, id: \.self) { note in
                                     Text(note)
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(OKColor.textSecondary)
                                         .padding(.leading, 20)
                                 }
                             }
@@ -346,11 +351,11 @@ struct EvalRunDetailView: View {
                                 metricBadge("Backend", result.metrics.backendUsed.components(separatedBy: "Model").first ?? "?")
                                 
                                 if result.metrics.usedFallback {
-                                    metricBadge("Fallback", "Yes", color: .orange)
+                                    metricBadge("Fallback", "Yes", color: OKColor.riskWarning)
                                 }
                                 
                                 if result.metrics.timeoutOccurred {
-                                    metricBadge("Timeout", "Yes", color: .red)
+                                    metricBadge("Timeout", "Yes", color: OKColor.riskCritical)
                                 }
                             }
                         }
@@ -358,8 +363,13 @@ struct EvalRunDetailView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Run Details")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -370,11 +380,11 @@ struct EvalRunDetailView: View {
         }
     }
     
-    private func metricBadge(_ label: String, _ value: String, color: Color = .blue) -> some View {
+    private func metricBadge(_ label: String, _ value: String, color: Color = OKColor.actionPrimary) -> some View {
         HStack(spacing: 2) {
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             Text(value)
                 .font(.caption2)
                 .fontWeight(.medium)

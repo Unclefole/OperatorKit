@@ -50,6 +50,8 @@ public struct AuditVaultDashboardView: View {
         }
         .navigationTitle("Audit Vault")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .refreshable { refresh() }
         .confirmationDialog(
             "Purge Audit Vault?",
@@ -83,7 +85,7 @@ public struct AuditVaultDashboardView: View {
                 HStack {
                     Image(systemName: "archivebox.fill")
                         .font(.title)
-                        .foregroundColor(.indigo)
+                        .foregroundColor(OKColor.riskExtreme)
                     
                     Text("Audit Vault Lineage")
                         .font(.headline)
@@ -91,7 +93,7 @@ public struct AuditVaultDashboardView: View {
                 
                 Text("Zero-content provenance tracking. Shows only hashes, counts, and timestamps - never user content.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -112,7 +114,7 @@ public struct AuditVaultDashboardView: View {
                 }
             } else {
                 Text("Loading...")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Summary")
@@ -127,7 +129,7 @@ public struct AuditVaultDashboardView: View {
         Section {
             if recentEvents.isEmpty {
                 Text("No events yet")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .italic()
             } else {
                 ForEach(recentEvents.prefix(10)) { event in
@@ -176,7 +178,7 @@ public struct AuditVaultDashboardView: View {
                 
                 Text("This vault stores only hashes, enum values, counts, and day-rounded timestamps. User text, drafts, emails, and personal data are never stored.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -188,14 +190,14 @@ public struct AuditVaultDashboardView: View {
         VStack(spacing: 16) {
             Image(systemName: "archivebox.fill")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Audit Vault")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -249,7 +251,7 @@ private struct SummaryRow: View {
             Spacer()
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }
@@ -263,7 +265,7 @@ private struct EventRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: event.kind.icon)
-                    .foregroundColor(.indigo)
+                    .foregroundColor(OKColor.riskExtreme)
                     .frame(width: 20)
                 
                 Text(event.kind.displayName)
@@ -274,20 +276,20 @@ private struct EventRow: View {
                 
                 Text("#\(event.sequenceNumber)")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Text(event.createdAtDayRounded)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 if let lineage = event.lineage {
                     Text("•")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text(lineage.outcomeType.displayName)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -316,13 +318,15 @@ private struct AuditVaultExportSheet: View {
                 Section {
                     Text("This export contains metadata only. No user content, no drafts, no personal data.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 } footer: {
                     Text("Share via the system share sheet")
                 }
             }
             .navigationTitle("Export Preview")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }

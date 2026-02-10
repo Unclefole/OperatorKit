@@ -19,7 +19,7 @@ struct PolicyCalloutView: View {
             HStack(spacing: 12) {
                 Image(systemName: "hand.raised")
                     .font(.system(size: 20))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Blocked by Policy")
@@ -28,7 +28,7 @@ struct PolicyCalloutView: View {
                     
                     Text(decision.reason)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -38,20 +38,20 @@ struct PolicyCalloutView: View {
                 Text("Edit Policy")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(Color.blue)
+                    .background(OKColor.actionPrimary)
                     .cornerRadius(8)
             }
             .accessibilityLabel("Edit execution policy")
         }
         .padding(16)
-        .background(Color.orange.opacity(0.1))
+        .background(OKColor.riskWarning.opacity(0.1))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(OKColor.riskWarning.opacity(0.3), lineWidth: 1)
         )
     }
 }
@@ -81,7 +81,7 @@ struct PolicyStatusBadge: View {
     
     private var badgeColor: Color {
         if !policy.enabled {
-            return .gray
+            return OKColor.textMuted
         }
         
         let blockedCount = [
@@ -92,11 +92,11 @@ struct PolicyStatusBadge: View {
         ].filter { $0 }.count
         
         if blockedCount == 0 {
-            return .green
+            return OKColor.riskNominal
         } else if blockedCount == 4 {
-            return .red
+            return OKColor.riskCritical
         } else {
-            return .orange
+            return OKColor.riskWarning
         }
     }
 }
@@ -112,7 +112,7 @@ struct CapabilityStatusRow: View {
         HStack(spacing: 12) {
             Image(systemName: capability.icon)
                 .font(.system(size: 16))
-                .foregroundColor(decision.allowed ? .blue : .gray)
+                .foregroundColor(decision.allowed ? OKColor.actionPrimary : OKColor.textMuted)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -121,14 +121,14 @@ struct CapabilityStatusRow: View {
                 
                 Text(decision.reason)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
             
             Image(systemName: decision.allowed ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.system(size: 16))
-                .foregroundColor(decision.allowed ? .green : .red)
+                .foregroundColor(decision.allowed ? OKColor.riskNominal : OKColor.riskCritical)
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)

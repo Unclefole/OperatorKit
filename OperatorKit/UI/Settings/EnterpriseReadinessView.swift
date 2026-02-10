@@ -45,6 +45,9 @@ struct EnterpriseReadinessView: View {
             }
             .navigationTitle("Enterprise Readiness")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -88,6 +91,8 @@ struct EnterpriseReadinessView: View {
             // Disclaimer
             disclaimerSection
         }
+        .scrollContentBackground(.hidden)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Overview Section
@@ -98,7 +103,7 @@ struct EnterpriseReadinessView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Readiness Score")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Text("\(packet.readinessScore)%")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -141,7 +146,7 @@ struct EnterpriseReadinessView: View {
                     Label("Documentation", systemImage: "doc.text")
                     Spacer()
                     Text("\(docs.presentCount)/\(docs.requiredDocsCount)")
-                        .foregroundColor(docs.missingCount == 0 ? .green : .orange)
+                        .foregroundColor(docs.missingCount == 0 ? OKColor.riskNominal : OKColor.riskWarning)
                 }
             }
             
@@ -150,7 +155,7 @@ struct EnterpriseReadinessView: View {
                     Label("Claims Registry", systemImage: "list.clipboard")
                     Spacer()
                     Text("\(claims.totalClaims) claims")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -175,7 +180,7 @@ struct EnterpriseReadinessView: View {
                     Label("Quality Gate", systemImage: "checkmark.seal")
                     Spacer()
                     Text(quality.gateStatus.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .foregroundColor(quality.gateStatus == "passed" ? .green : .secondary)
+                        .foregroundColor(quality.gateStatus == "passed" ? OKColor.riskNominal : .secondary)
                 }
                 
                 LabeledContent("Coverage", value: "\(quality.coverageScore)%")
@@ -210,7 +215,7 @@ struct EnterpriseReadinessView: View {
                     Label("Cloud Sync", systemImage: "icloud")
                     Spacer()
                     Text(team.syncEnabled ? "Enabled" : "Off (opt-in)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 HStack {
@@ -244,7 +249,7 @@ struct EnterpriseReadinessView: View {
                     Label("Pilot Mode", systemImage: "airplane")
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
             .sheet(isPresented: $showingPilotMode) {
@@ -268,7 +273,7 @@ struct EnterpriseReadinessView: View {
                 
                 Text("This packet provides evidence of safety, quality, and governance practices for enterprise procurement review. All data is metadata-only with no user content.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -282,28 +287,28 @@ struct EnterpriseReadinessView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .background(statusBackgroundColor(status))
-            .foregroundColor(.white)
+            .foregroundColor(OKColor.textPrimary)
             .cornerRadius(8)
     }
     
     private func statusBackgroundColor(_ status: EnterpriseReadinessStatus) -> Color {
         switch status {
-        case .ready: return .green
-        case .partiallyReady: return .orange
-        case .notReady: return .red
-        case .unavailable: return .gray
+        case .ready: return OKColor.riskNominal
+        case .partiallyReady: return OKColor.riskWarning
+        case .notReady: return OKColor.riskCritical
+        case .unavailable: return OKColor.textMuted
         }
     }
     
     private func scoreColor(_ score: Int) -> Color {
-        if score >= 80 { return .green }
-        if score >= 50 { return .orange }
-        return .red
+        if score >= 80 { return OKColor.riskNominal }
+        if score >= 50 { return OKColor.riskWarning }
+        return OKColor.riskCritical
     }
     
     private func statusIcon(_ passing: Bool) -> some View {
         Image(systemName: passing ? "checkmark.circle.fill" : "xmark.circle.fill")
-            .foregroundColor(passing ? .green : .red)
+            .foregroundColor(passing ? OKColor.riskNominal : OKColor.riskCritical)
     }
     
     private func riskStatusBadge(_ status: String) -> some View {
@@ -319,10 +324,10 @@ struct EnterpriseReadinessView: View {
     
     private func riskColor(_ status: String) -> Color {
         switch status {
-        case "PASS": return .green
-        case "WARN": return .orange
-        case "FAIL": return .red
-        default: return .gray
+        case "PASS": return OKColor.riskNominal
+        case "WARN": return OKColor.riskWarning
+        case "FAIL": return OKColor.riskCritical
+        default: return OKColor.textMuted
         }
     }
     

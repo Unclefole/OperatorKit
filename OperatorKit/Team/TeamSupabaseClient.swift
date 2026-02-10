@@ -529,6 +529,6 @@ extension SupabaseClient {
             logDebug("TEAM SYNC BLOCKED: User has not enabled sync", category: .flow)
             throw SyncError.notConfigured
         }
-        return try await URLSession.shared.data(for: request)
+        return try await NetworkPolicyEnforcer.shared.execute(request)
     }
 }

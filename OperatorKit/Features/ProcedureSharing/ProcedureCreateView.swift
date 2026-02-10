@@ -45,6 +45,8 @@ struct ProcedureCreateView: View {
             }
             .navigationTitle("Create Procedure")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -79,11 +81,11 @@ struct ProcedureCreateView: View {
         Section {
             HStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("Procedures contain logic only. Do not enter personal information, emails, names, or any user content.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -126,7 +128,7 @@ struct ProcedureCreateView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Prompt Scaffold")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 TextEditor(text: $promptScaffold)
                     .frame(minHeight: 80)

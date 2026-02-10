@@ -30,7 +30,7 @@ struct FirstWeekTipsView: View {
                         HStack {
                             Image(systemName: "hand.wave")
                                 .font(.title2)
-                                .foregroundColor(.blue)
+                                .foregroundColor(OKColor.actionPrimary)
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Welcome to OperatorKit")
@@ -39,14 +39,14 @@ struct FirstWeekTipsView: View {
                                 if firstWeekStore.isFirstWeek {
                                     Text("Day \(firstWeekStore.daysSinceInstall + 1) of 7")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(OKColor.textSecondary)
                                 }
                             }
                         }
                         
                         Text("Here are some things to keep in mind as you get started.")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     .padding(.vertical, 4)
                 }
@@ -91,6 +91,8 @@ struct FirstWeekTipsView: View {
             }
             .navigationTitle("First Week Tips")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -111,9 +113,9 @@ private struct TipRow: View {
             Text("\(number)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(width: 24, height: 24)
-                .background(Color.blue)
+                .background(OKColor.actionPrimary)
                 .clipShape(Circle())
             
             Text(tip)
@@ -134,7 +136,7 @@ private struct PrincipleRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
                 .frame(width: 32)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -144,7 +146,7 @@ private struct PrincipleRow: View {
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .padding(.vertical, 4)
@@ -170,11 +172,11 @@ struct FirstWeekTipsBanner: View {
             VStack(spacing: 0) {
                 HStack {
                     Image(systemName: "lightbulb")
-                        .foregroundColor(.yellow)
+                        .foregroundColor(OKColor.riskWarning)
                     
                     Text("First week tip: \(deterministicTip)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Spacer()
                     
@@ -190,12 +192,12 @@ struct FirstWeekTipsBanner: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color.yellow.opacity(0.1))
+                .background(OKColor.riskWarning.opacity(0.1))
             }
             .sheet(isPresented: $showingTips) {
                 FirstWeekTipsView()

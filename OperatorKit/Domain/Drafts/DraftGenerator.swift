@@ -22,46 +22,62 @@ final class DraftGenerator: ObservableObject {
     
     private init() {}
     
-    // MARK: - Generation
+    // MARK: - State (governed routing)
     
-    /// Generate a draft from intent and context using ModelRouter
-    /// INVARIANT: Uses on-device model only (no network calls)
+    @Published private(set) var lastProvider: ModelProvider = .onDevice
+    @Published private(set) var pendingApprovalDecision: ModelCallDecision?
+    
+    // MARK: - Generation (Governed Path)
+    
+    /// Generate a draft using governed intelligence routing.
+    /// Kernel decides provider. Cloud is token-gated. All calls evidence-logged.
     func generate(
         intent: IntentRequest,
         context: ContextPacket,
-        recipient: String? = nil
+        recipient: String? = nil,
+        riskTierHint: String? = nil
     ) async throws -> Draft {
         isGenerating = true
         lastError = nil
+        pendingApprovalDecision = nil
         
         defer { isGenerating = false }
         
-        log("DraftGenerator: Starting generation for \(intent.intentType.rawValue)")
-        
-        // Build model input
-        let input = ModelInput.from(intent: intent, context: context)
+        log("DraftGenerator: Starting governed generation for \(intent.intentType.rawValue)")
         
         do {
-            // Generate using ModelRouter
-            let output = try await modelRouter.generate(input: input)
-            
-            // Store for reference
-            lastDraftOutput = output
-            lastModelMetadata = modelRouter.currentModelMetadata()
-            
-            // Determine recipient from context if not provided
-            let finalRecipient = recipient ?? extractRecipient(from: context, intent: intent)
-            
-            // Convert to Draft
-            let draft = Draft.from(
-                output: output,
-                recipient: finalRecipient,
-                modelMetadata: lastModelMetadata
+            // Use governed path through ModelRouter
+            let result = try await modelRouter.generateGoverned(
+                intent: intent,
+                context: context,
+                riskTierHint: riskTierHint
             )
             
-            log("DraftGenerator: Generated \(draft.type.rawValue) with confidence \(draft.confidencePercentage)%")
-            
-            return draft
+            switch result {
+            case .success(let output, let provider):
+                lastDraftOutput = output
+                lastModelMetadata = modelRouter.currentModelMetadata()
+                lastProvider = provider
+                
+                let finalRecipient = recipient ?? extractRecipient(from: context, intent: intent)
+                let draft = Draft.from(
+                    output: output,
+                    recipient: finalRecipient,
+                    modelMetadata: lastModelMetadata
+                )
+                
+                log("DraftGenerator: Generated \(draft.type.rawValue) via \(provider.displayName) with confidence \(draft.confidencePercentage)%")
+                return draft
+                
+            case .denied(let reason):
+                throw ModelError.generationFailed("Kernel denied model call: \(reason)")
+                
+            case .requiresApproval(let decision):
+                // Surface to UI — caller should check pendingApprovalDecision
+                pendingApprovalDecision = decision
+                log("DraftGenerator: Cloud call requires human approval — surfacing to UI")
+                throw CloudModelError.requiresHumanApproval
+            }
             
         } catch {
             lastError = error.localizedDescription

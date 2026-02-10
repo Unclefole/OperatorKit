@@ -198,10 +198,20 @@ public final class InvariantCheckRunner {
         return .passed("No URLSession Network Usage (compile-time guarded)")
     }
     
-    /// Checks that BackgroundTasks framework is not used
+    /// Checks that BackgroundTasks are restricted to allowlisted identifiers only
     private func checkNoBackgroundTaskUsage() -> InvariantCheckResult {
-        // BGTaskScheduler would require UIBackgroundModes which we verify is absent
-        return .passed("No Background Task Usage (Info.plist verified)")
+        // Phase 19: BG tasks are now allowlisted for Sentinel + audit mirroring.
+        // Verify only allowlisted identifiers are used.
+        let registered = Set([
+            BackgroundScheduler.proposalTaskIdentifier,
+            BackgroundScheduler.mirrorTaskIdentifier,
+            BackgroundScheduler.scoutTaskIdentifier
+        ])
+        let allowed = BackgroundTasksGuard.allowlistedIdentifiers
+        guard registered.isSubset(of: allowed) else {
+            return .failed("Background Task Allowlist", reason: "Non-allowlisted BG identifiers: \(registered.subtracting(allowed))")
+        }
+        return .passed("Background tasks restricted to allowlisted identifiers")
     }
     
     /// Checks that push notification registration is not present

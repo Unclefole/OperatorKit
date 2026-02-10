@@ -52,6 +52,8 @@ struct UsageDisciplineView: View {
             }
             .navigationTitle("Usage")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -80,7 +82,7 @@ struct UsageDisciplineView: View {
                         .font(.headline)
                     Text(rateShaper.currentIntensity.description)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -118,10 +120,10 @@ struct UsageDisciplineView: View {
     
     private var intensityColor: Color {
         switch rateShaper.currentIntensity {
-        case .low: return .green
-        case .normal: return .blue
-        case .elevated: return .orange
-        case .heavy: return .red
+        case .low: return OKColor.riskNominal
+        case .normal: return OKColor.actionPrimary
+        case .elevated: return OKColor.riskWarning
+        case .heavy: return OKColor.riskCritical
         }
     }
     
@@ -160,7 +162,7 @@ struct UsageDisciplineView: View {
             Text(label)
             Spacer()
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -171,30 +173,30 @@ struct UsageDisciplineView: View {
             if let cooldown = rateShaper.cooldownRemaining {
                 HStack {
                     Image(systemName: "clock")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     Text("Cooldown")
                     Spacer()
                     Text("\(Int(cooldown))s remaining")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
             } else {
                 HStack {
                     Image(systemName: "checkmark.circle")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("Ready")
                     Spacer()
                     Text("No cooldown")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
             }
             
             if let message = rateShaper.lastRateShapeMessage {
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: "info.circle")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text(message)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -221,20 +223,20 @@ struct UsageDisciplineView: View {
             if let limit = TierBoundaryChecker.TierLimits.limit(for: entitlementManager.currentTier) {
                 HStack {
                     Image(systemName: "number.circle")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("Weekly Limit")
                     Spacer()
                     Text("\(limit) executions")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 HStack {
                     Image(systemName: "infinity.circle")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Weekly Limit")
                     Spacer()
                     Text("Unlimited")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
         } header: {
@@ -252,9 +254,9 @@ struct UsageDisciplineView: View {
     
     private var tierColor: Color {
         switch entitlementManager.currentTier {
-        case .free: return .gray
-        case .pro: return .blue
-        case .team: return .orange
+        case .free: return OKColor.textMuted
+        case .pro: return OKColor.actionPrimary
+        case .team: return OKColor.riskWarning
         }
     }
     
@@ -294,17 +296,17 @@ struct UsageDisciplineView: View {
                 } label: {
                     HStack {
                         Image(systemName: "star.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Upgrade to Pro")
-                                .foregroundColor(.primary)
+                                .foregroundColor(OKColor.textPrimary)
                             Text("Unlimited executions and memory")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                 }
             }
@@ -320,11 +322,11 @@ struct UsageDisciplineView: View {
     private func guidanceRow(icon: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 20)
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }

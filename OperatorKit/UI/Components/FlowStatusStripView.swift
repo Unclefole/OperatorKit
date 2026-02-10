@@ -36,18 +36,18 @@ struct FlowStatusStripView: View {
     private func workingStrip(step: AppState.FlowWorkStep) -> some View {
         HStack(spacing: 12) {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                .progressViewStyle(CircularProgressViewStyle(tint: OKColor.actionPrimary))
                 .scaleEffect(0.8)
             
             Text(step.displayText)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
             
             Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Working: \(step.displayText)")
         .accessibilityAddTraits(.updatesFrequently)
@@ -58,18 +58,18 @@ struct FlowStatusStripView: View {
         HStack(spacing: 12) {
             Image(systemName: "info.circle.fill")
                 .font(.system(size: 18))
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
             
             Text(reason)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
             
             Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.orange.opacity(0.05))
+        .background(OKColor.riskWarning.opacity(0.05))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Blocked: \(reason)")
     }
@@ -80,7 +80,7 @@ struct FlowStatusStripView: View {
             HStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(.red)
+                    .foregroundColor(OKColor.riskCritical)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(error.title)
@@ -89,7 +89,7 @@ struct FlowStatusStripView: View {
                     
                     Text(error.message)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 
@@ -101,7 +101,7 @@ struct FlowStatusStripView: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.gray.opacity(0.5))
+                        .foregroundColor(OKColor.textMuted.opacity(0.5))
                 }
                 .accessibilityLabel("Dismiss error")
             }
@@ -120,13 +120,13 @@ struct FlowStatusStripView: View {
                                     .font(.caption)
                                     .fontWeight(.medium)
                             }
-                            .foregroundColor(action == error.recoveryActions.first ? .white : .red)
+                            .foregroundColor(action == error.recoveryActions.first ? OKColor.textPrimary : OKColor.riskCritical)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(
                                 action == error.recoveryActions.first
-                                    ? Color.red
-                                    : Color.red.opacity(0.1)
+                                    ? OKColor.riskCritical
+                                    : OKColor.riskCritical.opacity(0.1)
                             )
                             .cornerRadius(6)
                         }
@@ -139,7 +139,7 @@ struct FlowStatusStripView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.red.opacity(0.05))
+        .background(OKColor.riskCritical.opacity(0.05))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Error: \(error.title). \(error.message)")
     }

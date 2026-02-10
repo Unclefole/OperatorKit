@@ -46,6 +46,8 @@ struct ActivationPlaybookView: View {
             }
             .navigationTitle("Get Started")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Skip") {
@@ -66,7 +68,7 @@ struct ActivationPlaybookView: View {
         VStack(spacing: 12) {
             Image(systemName: "star.circle.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.yellow)
+                .foregroundColor(OKColor.riskWarning)
             
             Text("Your First 3 Wins")
                 .font(.title2)
@@ -74,7 +76,7 @@ struct ActivationPlaybookView: View {
             
             Text("Try these quick tasks to see what you can do. Each one takes less than a minute.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .padding(.top, 20)
@@ -87,7 +89,7 @@ struct ActivationPlaybookView: View {
             HStack {
                 Text("Progress")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Spacer()
                 
@@ -97,7 +99,7 @@ struct ActivationPlaybookView: View {
             }
             
             ProgressView(value: activationStore.progress)
-                .tint(.green)
+                .tint(OKColor.riskNominal)
         }
         .padding()
         .background(Color(.systemGray6))
@@ -137,7 +139,7 @@ struct ActivationPlaybookView: View {
             if activationStore.isPlaybookCompleted {
                 Label("All done! You're ready to go.", systemImage: "checkmark.circle.fill")
                     .font(.subheadline)
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
             }
             
             Button {
@@ -150,7 +152,7 @@ struct ActivationPlaybookView: View {
             
             Text("You can always try these later from Settings.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.top, 16)
     }
@@ -169,21 +171,21 @@ private struct ActivationStepCard: View {
                 // Icon
                 Image(systemName: step.icon)
                     .font(.title2)
-                    .foregroundColor(isCompleted ? .green : .blue)
+                    .foregroundColor(isCompleted ? OKColor.riskNominal : OKColor.actionPrimary)
                     .frame(width: 44, height: 44)
-                    .background(isCompleted ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
+                    .background(isCompleted ? OKColor.riskNominal.opacity(0.1) : OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(10)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {
                         Text("Step \(step.stepNumber)")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         
                         if isCompleted {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.green)
+                                .foregroundColor(OKColor.riskNominal)
                         }
                     }
                     
@@ -196,18 +198,18 @@ private struct ActivationStepCard: View {
             
             Text(step.stepDescription)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Sample Intent Preview
             VStack(alignment: .leading, spacing: 4) {
                 Text("Sample:")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text("\"\(step.sampleIntent)\"")
                     .font(.subheadline)
                     .italic()
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
                     .padding(8)
                     .background(Color(.systemGray6))
                     .cornerRadius(6)
@@ -224,15 +226,15 @@ private struct ActivationStepCard: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(isCompleted ? .gray : .blue)
+            .tint(isCompleted ? OKColor.textMuted : OKColor.actionPrimary)
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.05), radius: 4, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isCompleted ? Color.green.opacity(0.3) : Color.clear, lineWidth: 2)
+                .stroke(isCompleted ? OKColor.riskNominal.opacity(0.3) : Color.clear, lineWidth: 2)
         )
     }
 }

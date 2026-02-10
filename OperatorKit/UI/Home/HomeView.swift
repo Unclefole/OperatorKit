@@ -39,8 +39,8 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            // Background — white base
-            Color.white.ignoresSafeArea()
+            // Background — dark base
+            OKColor.backgroundPrimary.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 0) {
@@ -53,11 +53,11 @@ struct HomeView: View {
                         VStack(spacing: 0) {
                             OKColors.intelligenceGradient
                                 .frame(height: 280)
-                            // Soft fade from blue to white
+                            // Soft fade from blue to dark
                             LinearGradient(
                                 colors: [
                                     OKColors.intelligenceEnd.opacity(0.15),
-                                    Color.white
+                                    OKColor.backgroundPrimary
                                 ],
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -95,6 +95,8 @@ struct HomeView: View {
         }
         .navigationTitle("OperatorKit")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -113,19 +115,19 @@ struct HomeView: View {
                 // Microphone icon in lighter blue circle (matches design)
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.20))
+                        .fill(OKColor.textPrimary.opacity(0.20))
                         .frame(width: 64, height: 64)
 
                     Image(systemName: "mic.fill")
                         .font(.system(size: 26, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
 
                 // Exact spec text — two lines, white on blue
                 VStack(spacing: 6) {
                     Text("What do you want handled?")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
 
                     Text("Nothing executes without your approval.")
                         .font(.system(size: 14, weight: .medium))
@@ -282,7 +284,7 @@ struct RecentOperationCard: View {
                 // Status tag — rounded capsule
                 Text(statusText)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)
                     .background(Capsule().fill(statusColor))
@@ -290,8 +292,8 @@ struct RecentOperationCard: View {
             .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 3)
+                    .fill(OKColor.textPrimary)
+                    .shadow(color: OKColor.shadow.opacity(0.05), radius: 8, x: 0, y: 3)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -344,8 +346,8 @@ struct HomeActionCard: View {
             .padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+                    .fill(OKColor.textPrimary)
+                    .shadow(color: OKColor.shadow.opacity(0.06), radius: 8, x: 0, y: 3)
             )
         }
         .buttonStyle(OperationButtonStyle())

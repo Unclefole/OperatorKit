@@ -50,7 +50,7 @@ struct CreateTemplateView: View {
                         } label: {
                             Image(systemName: icon)
                                 .font(.system(size: 24))
-                                .foregroundColor(selectedIcon == icon ? selectedColor.swiftUIColor : .gray)
+                                .foregroundColor(selectedIcon == icon ? selectedColor.swiftUIColor : OKColor.textMuted)
                                 .frame(width: 44, height: 44)
                                 .background(
                                     RoundedRectangle(cornerRadius: 8)
@@ -117,6 +117,8 @@ struct CreateTemplateView: View {
         }
         .navigationTitle("Create Template")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Cancel") {
@@ -151,11 +153,11 @@ struct CreateTemplateView: View {
                 Text(templateName.isEmpty ? "Template Name" : templateName)
                     .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(templateName.isEmpty ? .gray : .primary)
+                    .foregroundColor(templateName.isEmpty ? OKColor.textMuted : .primary)
 
                 Text(templateDescription.isEmpty ? "Description" : templateDescription)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                     .lineLimit(2)
             }
 

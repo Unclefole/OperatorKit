@@ -160,6 +160,8 @@ struct ProofPackView: View {
         }
         .navigationTitle("Proof Pack")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 
     // MARK: - Header Section
@@ -170,7 +172,7 @@ struct ProofPackView: View {
                 HStack {
                     Image(systemName: "shippingbox.fill")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
 
                     Text("Proof Pack")
                         .font(.headline)
@@ -178,12 +180,12 @@ struct ProofPackView: View {
                     Spacer()
 
                     Image(systemName: "lock.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("Unified trust evidence bundle. Contains metadata only — no user data, no drafts, no personal information.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -224,7 +226,7 @@ struct ProofPackView: View {
                 Text("Status")
                 Spacer()
                 Text(snapshot.binaryProof.overallStatus)
-                    .foregroundColor(snapshot.binaryProof.overallStatus == "PASS" ? .green : .orange)
+                    .foregroundColor(snapshot.binaryProof.overallStatus == "PASS" ? OKColor.riskNominal : OKColor.riskWarning)
             }
             .allowsHitTesting(false)
         } header: {
@@ -240,7 +242,7 @@ struct ProofPackView: View {
                 Text("Status")
                 Spacer()
                 Text(snapshot.regressionFirewall.overallStatus)
-                    .foregroundColor(snapshot.regressionFirewall.allPassed ? .green : .red)
+                    .foregroundColor(snapshot.regressionFirewall.allPassed ? OKColor.riskNominal : OKColor.riskCritical)
             }
             .allowsHitTesting(false)
 
@@ -248,7 +250,7 @@ struct ProofPackView: View {
                 Text("Rules")
                 Spacer()
                 Text("\(snapshot.regressionFirewall.passed)/\(snapshot.regressionFirewall.ruleCount) passed")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .allowsHitTesting(false)
         } header: {
@@ -264,7 +266,7 @@ struct ProofPackView: View {
                 Text("Events")
                 Spacer()
                 Text("\(snapshot.auditVault.eventCount)/\(snapshot.auditVault.maxCapacity)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .allowsHitTesting(false)
 
@@ -272,7 +274,7 @@ struct ProofPackView: View {
                 Text("Edits Tracked")
                 Spacer()
                 Text("\(snapshot.auditVault.editCount)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .allowsHitTesting(false)
         } header: {
@@ -314,11 +316,11 @@ struct ProofPackView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "shield.checkered")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
 
                     Text("All proofs verified locally on this device.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("This export contains NO user data")
@@ -327,7 +329,7 @@ struct ProofPackView: View {
 
                 Text("Proof Pack is a verification artifact for auditors and enterprises. It is not telemetry, monitoring, diagnostics, or analytics.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
             .allowsHitTesting(false)
@@ -359,11 +361,11 @@ private struct SummaryRow: View {
             Spacer()
 
             Image(systemName: passed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(passed ? .green : .red)
+                .foregroundColor(passed ? OKColor.riskNominal : OKColor.riskCritical)
 
             Text(passed ? "Pass" : "Fail")
                 .font(.caption)
-                .foregroundColor(passed ? .green : .red)
+                .foregroundColor(passed ? OKColor.riskNominal : OKColor.riskCritical)
         }
         .allowsHitTesting(false)
     }
@@ -383,11 +385,11 @@ private struct BooleanRow: View {
             Spacer()
 
             Image(systemName: isPresent ? "xmark.circle.fill" : "checkmark.circle.fill")
-                .foregroundColor(isPresent ? .red : .green)
+                .foregroundColor(isPresent ? OKColor.riskCritical : OKColor.riskNominal)
 
             Text(isPresent ? "Present" : "Absent")
                 .font(.caption)
-                .foregroundColor(isPresent ? .red : .green)
+                .foregroundColor(isPresent ? OKColor.riskCritical : OKColor.riskNominal)
         }
         .allowsHitTesting(false)
     }
@@ -408,7 +410,7 @@ private struct FlagRow: View {
 
             Text(enabled ? "Enabled" : "Disabled")
                 .font(.caption)
-                .foregroundColor(enabled ? .green : .secondary)
+                .foregroundColor(enabled ? OKColor.riskNominal : .secondary)
         }
         .allowsHitTesting(false)
     }
@@ -427,7 +429,7 @@ private struct DetailRow: View {
             Spacer()
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .allowsHitTesting(false)
     }

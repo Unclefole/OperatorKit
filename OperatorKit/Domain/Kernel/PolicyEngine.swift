@@ -480,6 +480,9 @@ public enum PolicyViolationType: String, Codable, CaseIterable {
     case signatureMismatch = "signature_mismatch"
     case unauthorizedExecution = "unauthorized_execution"
     case rateLimitExceeded = "rate_limit_exceeded"
+    case emergencyStop = "emergency_stop"
+    case scopeViolation = "scope_violation"
+    case dataCorruption = "data_corruption"
 }
 
 public enum ViolationSeverity: String, Codable, CaseIterable {

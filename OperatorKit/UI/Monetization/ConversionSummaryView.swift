@@ -47,8 +47,13 @@ struct ConversionSummaryView: View {
                 // Disclaimer
                 disclaimerSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Conversion Summary")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -79,7 +84,7 @@ struct ConversionSummaryView: View {
                 Label("Current Variant", systemImage: "a.square")
                 Spacer()
                 Text(variantStore.currentVariant.displayName)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Button {
@@ -89,7 +94,7 @@ struct ConversionSummaryView: View {
                     Label("Change Variant", systemImage: "slider.horizontal.3")
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -148,7 +153,7 @@ struct ConversionSummaryView: View {
                 )
             } else {
                 Text("Loading...")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Funnel Counts")
@@ -193,11 +198,11 @@ struct ConversionSummaryView: View {
                 // Summary row
                 HStack {
                     Label("Total Growth Actions", systemImage: "chart.line.uptrend.xyaxis")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Spacer()
                     Text("\(summary.totalGrowthActions)")
                         .fontWeight(.bold)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
             }
         } header: {
@@ -275,7 +280,7 @@ struct ConversionSummaryView: View {
                 
                 Text("All conversion data is stored locally on this device. No analytics services, no identifiers, no network transmission.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -314,7 +319,7 @@ private struct FunnelRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(highlight ? .green : .blue)
+                .foregroundColor(highlight ? OKColor.riskNominal : OKColor.actionPrimary)
                 .frame(width: 24)
             
             Text(step)
@@ -324,7 +329,7 @@ private struct FunnelRow: View {
             
             Text("\(count)")
                 .fontWeight(highlight ? .bold : .regular)
-                .foregroundColor(highlight ? .green : .primary)
+                .foregroundColor(highlight ? OKColor.riskNominal : .primary)
         }
     }
 }
@@ -344,7 +349,7 @@ private struct RateRow: View {
                     .font(.subheadline)
                 Text(description)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
@@ -364,7 +369,7 @@ private struct RateRow: View {
     private var rateColor: Color {
         guard let rate = rate else { return .secondary }
         if highlight {
-            return rate > 0.1 ? .green : (rate > 0.05 ? .orange : .red)
+            return rate > 0.1 ? OKColor.riskNominal : (rate > 0.05 ? OKColor.riskWarning : OKColor.riskCritical)
         }
         return .primary
     }
@@ -390,25 +395,30 @@ private struct VariantPickerSheet: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(variant.displayName)
                                     .font(.subheadline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(OKColor.textPrimary)
                                 
                                 Text(variantDescription(for: variant))
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(OKColor.textSecondary)
                             }
                             
                             Spacer()
                             
                             if variant == currentVariant {
                                 Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(OKColor.actionPrimary)
                             }
                         }
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Select Variant")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }

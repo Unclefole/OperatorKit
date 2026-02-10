@@ -45,6 +45,8 @@ public struct SecurityManifestUIView: View {
         }
         .navigationTitle("Security Manifest")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .onAppear(perform: loadManifest)
     }
     
@@ -58,7 +60,7 @@ public struct SecurityManifestUIView: View {
                     HStack {
                         Image(systemName: "shield.checkered")
                             .font(.title)
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         
                         Text("Security Posture")
                             .font(.headline)
@@ -66,7 +68,7 @@ public struct SecurityManifestUIView: View {
                     
                     Text("Each item below is backed by verifiable proof. No marketing claims.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(.vertical, 4)
             }
@@ -122,7 +124,7 @@ public struct SecurityManifestUIView: View {
                     
                     Text("It reflects the current state of proof artifacts. No actions can be taken from this screen.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(.vertical, 4)
             }
@@ -136,7 +138,7 @@ public struct SecurityManifestUIView: View {
             ProgressView()
             Text("Loading security manifest...")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -146,14 +148,14 @@ public struct SecurityManifestUIView: View {
         VStack(spacing: 16) {
             Image(systemName: "shield.slash")
                 .font(.system(size: 48))
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             Text("Security Manifest Disabled")
                 .font(.headline)
             
             Text("This feature is currently disabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -163,7 +165,7 @@ public struct SecurityManifestUIView: View {
     private func proofSourceRow(label: String, description: String, icon: String) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -172,7 +174,7 @@ public struct SecurityManifestUIView: View {
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -229,7 +231,7 @@ private struct SecurityManifestRow: View {
         HStack(spacing: 12) {
             // Status Icon
             Image(systemName: item.isVerified ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(item.isVerified ? .green : .red)
+                .foregroundColor(item.isVerified ? OKColor.riskNominal : OKColor.riskCritical)
                 .font(.title3)
             
             // Content
@@ -240,11 +242,11 @@ private struct SecurityManifestRow: View {
                 
                 Text(item.description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text("Source: \(item.proofSource)")
                     .font(.caption2)
-                    .foregroundStyle(Color.gray.opacity(0.6))
+                    .foregroundStyle(OKColor.textMuted.opacity(0.6))
             }
             
             Spacer()

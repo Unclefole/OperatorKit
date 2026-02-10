@@ -61,14 +61,14 @@ struct UpgradePromptCard: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                 }
             }
             
             Text(context.message)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Button {
                 ConversionLedger.shared.recordEvent(.upgradeTapped)
@@ -79,13 +79,13 @@ struct UpgradePromptCard: View {
                     .fontWeight(.medium)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(OKColor.actionPrimary)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(8)
             }
         }
         .padding()
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(12)
         .onAppear {
             // Only record impression if actually shown
@@ -159,13 +159,13 @@ enum UpgradeContext {
     var iconColor: Color {
         switch self {
         case .afterDraftCompletion:
-            return .blue
+            return OKColor.actionPrimary
         case .diagnosticsSection:
-            return .purple
+            return OKColor.riskExtreme
         case .qualityAndTrust:
-            return .orange
+            return OKColor.riskWarning
         case .usageLimitApproaching:
-            return .yellow
+            return OKColor.riskWarning
         }
     }
 }
@@ -202,7 +202,7 @@ struct InlineUpgradeLink: View {
                     Image(systemName: "chevron.right")
                         .font(.caption2)
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             }
         }
     }

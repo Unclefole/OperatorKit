@@ -27,7 +27,7 @@ struct ConfirmWriteView: View {
         NavigationView {
             ZStack {
                 // Background
-                Color(UIColor.systemGroupedBackground)
+                OKColor.backgroundPrimary
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -82,7 +82,7 @@ struct ConfirmWriteView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .frame(width: 36, height: 36)
                         .background(Color(UIColor.systemGray5))
                         .clipShape(Circle())
@@ -107,7 +107,7 @@ struct ConfirmWriteView: View {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.shield.fill")
                     .font(.system(size: 24))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Final Review")
@@ -115,18 +115,18 @@ struct ConfirmWriteView: View {
                         .fontWeight(.semibold)
                     Text("Confirm these details are correct. Nothing is created until you tap Confirm.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
             }
             .padding(16)
-            .background(Color.blue.opacity(0.1))
+            .background(OKColor.actionPrimary.opacity(0.1))
             .cornerRadius(12)
             .padding(.horizontal, 20)
         }
         .padding(.bottom, 8)
-        .background(Color(UIColor.systemGroupedBackground))
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Safety Callout Block
@@ -136,7 +136,7 @@ struct ConfirmWriteView: View {
             HStack(spacing: 10) {
                 Image(systemName: "hand.raised.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("You are about to make a change")
                     .font(.headline)
@@ -145,29 +145,29 @@ struct ConfirmWriteView: View {
             
             Text("This action will create or modify data outside OperatorKit.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("You will be asked to confirm before anything is written.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Specific note for reminders
             HStack(spacing: 6) {
                 Image(systemName: "bell.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 Text("One reminder will be created. No bulk actions.")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             .padding(.top, 4)
         }
         .padding(16)
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                .stroke(OKColor.actionPrimary.opacity(0.2), lineWidth: 1)
         )
     }
     
@@ -178,7 +178,7 @@ struct ConfirmWriteView: View {
             HStack {
                 Image(systemName: sideEffect.type.icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("Action Details")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -197,9 +197,9 @@ struct ConfirmWriteView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Reminder Details Card
@@ -209,7 +209,7 @@ struct ConfirmWriteView: View {
             HStack {
                 Image(systemName: "bell.badge.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("Reminder Details")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -223,7 +223,7 @@ struct ConfirmWriteView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Title")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text(payload.title)
                         .font(.body)
                         .fontWeight(.medium)
@@ -234,10 +234,10 @@ struct ConfirmWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Notes")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(notes)
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                             .lineLimit(3)
                     }
                 }
@@ -247,7 +247,7 @@ struct ConfirmWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Due Date")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(dueDate.formatted(date: .long, time: .shortened))
                             .font(.body)
                     }
@@ -255,10 +255,10 @@ struct ConfirmWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Due Date")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text("No due date set")
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
                 
@@ -267,7 +267,7 @@ struct ConfirmWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Priority")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         HStack(spacing: 4) {
                             ForEach(0..<priorityLevel(priority), id: \.self) { _ in
                                 Image(systemName: "exclamationmark")
@@ -284,22 +284,22 @@ struct ConfirmWriteView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Target List")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     if let listId = payload.listIdentifier {
                         Text("Custom list: \(listId)")
                             .font(.body)
                     } else {
                         Text("Default Reminders list")
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Permission Status Card
@@ -311,7 +311,7 @@ struct ConfirmWriteView: View {
             HStack {
                 Image(systemName: permissionGranted ? "checkmark.shield.fill" : "xmark.shield.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(permissionGranted ? .green : .red)
+                    .foregroundColor(permissionGranted ? OKColor.riskNominal : OKColor.riskCritical)
                 Text("Permission Status")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -321,7 +321,7 @@ struct ConfirmWriteView: View {
             if permissionGranted {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("Reminders access granted")
                         .font(.subheadline)
                 }
@@ -329,10 +329,10 @@ struct ConfirmWriteView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 8) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                         Text("Reminders access required")
                             .font(.subheadline)
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                     }
                     
                     Button(action: openSettings) {
@@ -342,15 +342,15 @@ struct ConfirmWriteView: View {
                         }
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Invariant Card
@@ -360,7 +360,7 @@ struct ConfirmWriteView: View {
             HStack {
                 Image(systemName: "shield.checkered")
                     .font(.system(size: 16))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 Text("What OperatorKit Guarantees")
                     .font(.subheadline)
                     .fontWeight(.semibold)
@@ -375,7 +375,7 @@ struct ConfirmWriteView: View {
             }
         }
         .padding(16)
-        .background(Color.green.opacity(0.05))
+        .background(OKColor.riskNominal.opacity(0.05))
         .cornerRadius(12)
     }
     
@@ -393,12 +393,12 @@ struct ConfirmWriteView: View {
                 Text("Cancel")
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.white)
+                    .background(OKColor.backgroundPrimary)
                     .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                    .shadow(color: OKColor.shadow.opacity(0.04), radius: 4, x: 0, y: 2)
             }
             
             // Confirm Button
@@ -406,7 +406,7 @@ struct ConfirmWriteView: View {
                 HStack(spacing: 8) {
                     if isConfirming {
                         ProgressView()
-                            .tint(.white)
+                            .tint(OKColor.iconOnColor)
                     } else {
                         Image(systemName: "checkmark.circle.fill")
                     }
@@ -414,10 +414,10 @@ struct ConfirmWriteView: View {
                 }
                 .font(.body)
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(canConfirm ? Color.red : Color.gray)
+                .background(canConfirm ? OKColor.riskCritical : OKColor.textMuted)
                 .cornerRadius(12)
             }
             .disabled(!canConfirm || isConfirming)
@@ -425,14 +425,14 @@ struct ConfirmWriteView: View {
             if !canConfirm {
                 Text("Open Settings to grant Reminders access, then return here.")
                     .font(.caption)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color(UIColor.systemGroupedBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.backgroundPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
@@ -496,10 +496,10 @@ struct ConfirmWriteView: View {
     
     private func priorityColor(_ priority: ReminderPayload.Priority) -> Color {
         switch priority {
-        case .none: return .gray
-        case .low: return .blue
-        case .medium: return .orange
-        case .high: return .red
+        case .none: return OKColor.textMuted
+        case .low: return OKColor.actionPrimary
+        case .medium: return OKColor.riskWarning
+        case .high: return OKColor.riskCritical
         }
     }
 }
@@ -514,7 +514,7 @@ private struct DetailRow: View {
         HStack(alignment: .top) {
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .frame(width: 80, alignment: .leading)
             Text(value)
                 .font(.subheadline)
@@ -530,10 +530,10 @@ private struct InvariantRow: View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.caption)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }

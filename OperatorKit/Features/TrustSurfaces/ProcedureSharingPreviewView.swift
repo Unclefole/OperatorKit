@@ -40,6 +40,8 @@ public struct ProcedureSharingPreviewView: View {
         }
         .navigationTitle("Procedure Sharing")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
     
     // MARK: - Header Section
@@ -50,7 +52,7 @@ public struct ProcedureSharingPreviewView: View {
                 HStack {
                     Image(systemName: "doc.on.doc.fill")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     Text("Procedure Sharing Preview")
                         .font(.headline)
@@ -61,7 +63,7 @@ public struct ProcedureSharingPreviewView: View {
                         .font(.caption)
                 } icon: {
                     Image(systemName: "eye.fill")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
             }
             .padding(.vertical, 4)
@@ -78,7 +80,7 @@ public struct ProcedureSharingPreviewView: View {
                 
                 Text("Procedures are **logic-only**. They contain rules, not content.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         } header: {
@@ -128,12 +130,12 @@ public struct ProcedureSharingPreviewView: View {
                         .fontWeight(.semibold)
                 } icon: {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
                 
                 Text("Procedure sharing is a Team tier feature. This preview shows the concept. Sharing, export, and import are not enabled.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -145,14 +147,14 @@ public struct ProcedureSharingPreviewView: View {
         VStack(spacing: 16) {
             Image(systemName: "eye.slash")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Procedure Sharing Preview")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -171,7 +173,7 @@ private struct ProcedureExampleRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: example.icon)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .frame(width: 24)
                 
                 Text(example.name)
@@ -182,16 +184,16 @@ private struct ProcedureExampleRow: View {
                 
                 Text("[SYNTHETIC]")
                     .font(.caption2)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color.orange.opacity(0.1))
+                    .background(OKColor.riskWarning.opacity(0.1))
                     .cornerRadius(4)
             }
             
             Text(example.description)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 4)
     }
@@ -206,7 +208,7 @@ private struct NotSharedRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
                 .frame(width: 24)
             
             Text(item)
@@ -215,7 +217,7 @@ private struct NotSharedRow: View {
             Spacer()
             
             Image(systemName: "xmark.circle.fill")
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
         }
     }
 }

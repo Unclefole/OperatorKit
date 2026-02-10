@@ -35,7 +35,7 @@ struct SupportExportView: View {
                         HStack {
                             ProgressView()
                             Text("Building support packet...")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 } else if let packet = packet {
@@ -104,6 +104,8 @@ struct SupportExportView: View {
             }
             .navigationTitle("Support Export")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -165,7 +167,7 @@ private struct InfoRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             

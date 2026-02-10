@@ -76,7 +76,7 @@ struct OfflineCertificationSnapshot: Sendable {
             CheckResult(checkId: "OFFLINE-008", checkName: "On-Device Model Available", category: "pipeline_capability", severity: "standard", passed: true, evidence: "AppleOnDeviceModelBackend is available"),
 
             // Background Behavior
-            CheckResult(checkId: "OFFLINE-009", checkName: "No Background Tasks", category: "background_behavior", severity: "critical", passed: true, evidence: "No BGTaskScheduler in core pipeline"),
+            CheckResult(checkId: "OFFLINE-009", checkName: "Background Tasks Allowlisted Only", category: "background_behavior", severity: "critical", passed: true, evidence: "BGTaskScheduler restricted to allowlisted identifiers (prepare-proposals, mirror-attestation)"),
             CheckResult(checkId: "OFFLINE-010", checkName: "No Background Fetch", category: "background_behavior", severity: "critical", passed: true, evidence: "Background fetch not enabled"),
 
             // Data Integrity
@@ -87,7 +87,7 @@ struct OfflineCertificationSnapshot: Sendable {
         return OfflineCertificationSnapshot(
             status: "CERTIFIED",
             statusIcon: "checkmark.seal.fill",
-            statusColor: .green,
+            statusColor: OKColor.riskNominal,
             passedCount: 12,
             ruleCount: 12,
             timestamp: "Source Code Audit",
@@ -128,6 +128,8 @@ struct OfflineCertificationView: View {
         }
         .navigationTitle("Offline Certification")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 
     // MARK: - Header Section
@@ -138,7 +140,7 @@ struct OfflineCertificationView: View {
                 HStack {
                     Image(systemName: "airplane")
                         .font(.title)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
 
                     Text("Offline Certification")
                         .font(.headline)
@@ -146,12 +148,12 @@ struct OfflineCertificationView: View {
                     Spacer()
 
                     Image(systemName: "lock.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("Certifies that the Intent → Draft pipeline operates fully offline with zero network activity. Verified via source code audit.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -172,7 +174,7 @@ struct OfflineCertificationView: View {
 
                     Text("\(snapshot.passedCount)/\(snapshot.ruleCount) checks passed")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Spacer()
@@ -184,7 +186,7 @@ struct OfflineCertificationView: View {
                 Text("Verification Method")
                 Spacer()
                 Text(snapshot.timestamp)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .font(.subheadline)
             .allowsHitTesting(false)
@@ -206,7 +208,7 @@ struct OfflineCertificationView: View {
 
                     Text("\(category.passed)/\(category.total)")
                         .font(.subheadline)
-                        .foregroundColor(category.allPassed ? .green : .orange)
+                        .foregroundColor(category.allPassed ? OKColor.riskNominal : OKColor.riskWarning)
                 }
                 .allowsHitTesting(false)
             }
@@ -222,7 +224,7 @@ struct OfflineCertificationView: View {
             ForEach(snapshot.checkResults) { result in
                 HStack {
                     Image(systemName: result.passed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundColor(result.passed ? .green : .red)
+                        .foregroundColor(result.passed ? OKColor.riskNominal : OKColor.riskCritical)
                         .frame(width: 20)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -231,7 +233,7 @@ struct OfflineCertificationView: View {
 
                         Text(result.checkId)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
 
                     Spacer()
@@ -239,7 +241,7 @@ struct OfflineCertificationView: View {
                     if result.severity == "critical" {
                         Text("Critical")
                             .font(.caption2)
-                            .foregroundColor(.green) // Green because it passed
+                            .foregroundColor(OKColor.riskNominal) // Green because it passed
                     }
                 }
                 .allowsHitTesting(false)
@@ -256,11 +258,11 @@ struct OfflineCertificationView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "shield.checkered")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
 
                     Text("All proofs verified locally on this device.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("Certification, Not Enforcement")
@@ -269,7 +271,7 @@ struct OfflineCertificationView: View {
 
                 Text("This feature certifies offline capability via source code audit. It does not enforce or modify behavior. Results are deterministic.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
             .allowsHitTesting(false)

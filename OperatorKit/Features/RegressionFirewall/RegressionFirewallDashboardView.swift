@@ -51,6 +51,8 @@ public struct RegressionFirewallDashboardView: View {
         }
         .navigationTitle("Regression Firewall")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .refreshable {
             runVerification()
         }
@@ -73,7 +75,7 @@ public struct RegressionFirewallDashboardView: View {
                     
                     Text(report.summaryText)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -90,28 +92,28 @@ public struct RegressionFirewallDashboardView: View {
                 Text("Total Rules")
                 Spacer()
                 Text("\(report.ruleCount)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Text("Passed")
                 Spacer()
                 Text("\(report.passedCount)")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
             }
             
             HStack {
                 Text("Failed")
                 Spacer()
                 Text("\(report.failedCount)")
-                    .foregroundColor(report.failedCount > 0 ? .red : .secondary)
+                    .foregroundColor(report.failedCount > 0 ? OKColor.riskCritical : .secondary)
             }
             
             HStack {
                 Text("Last Verified")
                 Spacer()
                 Text(report.formattedVerifiedAt)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Verification Summary")
@@ -134,7 +136,7 @@ public struct RegressionFirewallDashboardView: View {
                 Text(category.rawValue)
                 Spacer()
                 Image(systemName: allPassed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundColor(allPassed ? .green : .red)
+                    .foregroundColor(allPassed ? OKColor.riskNominal : OKColor.riskCritical)
             }
         }
     }
@@ -150,12 +152,12 @@ public struct RegressionFirewallDashboardView: View {
                 
                 Text("This firewall verifies that safety guarantees are intact. All checks run locally on your device. No data is sent anywhere.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 if report.status == .failed {
                     Text("If verification fails, the app should be updated or reinstalled. Do not attempt manual repairs.")
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundColor(OKColor.riskCritical)
                 }
             }
             .padding(.vertical, 4)
@@ -170,7 +172,7 @@ public struct RegressionFirewallDashboardView: View {
                 ProgressView()
                     .padding(.trailing, 8)
                 Text("Verifying...")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -181,14 +183,14 @@ public struct RegressionFirewallDashboardView: View {
         VStack(spacing: 16) {
             Image(systemName: "shield.slash")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Regression Firewall")
                 .font(.headline)
             
             Text("Verification is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -211,9 +213,9 @@ public struct RegressionFirewallDashboardView: View {
     
     private func statusColor(_ status: FirewallStatus) -> Color {
         switch status {
-        case .passed: return .green
-        case .failed: return .red
-        case .disabled: return .gray
+        case .passed: return OKColor.riskNominal
+        case .failed: return OKColor.riskCritical
+        case .disabled: return OKColor.textMuted
         }
     }
     
@@ -231,7 +233,7 @@ private struct RuleResultRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: result.passed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundColor(result.passed ? .green : .red)
+                    .foregroundColor(result.passed ? OKColor.riskNominal : OKColor.riskCritical)
                 
                 Text(result.ruleName)
                     .font(.subheadline)
@@ -241,12 +243,12 @@ private struct RuleResultRow: View {
                 
                 Text(result.ruleId)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Text(result.evidence)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 4)
     }

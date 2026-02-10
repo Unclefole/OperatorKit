@@ -87,7 +87,7 @@ struct ChevronNavigationRow<Content: View>: View {
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
         }
     }

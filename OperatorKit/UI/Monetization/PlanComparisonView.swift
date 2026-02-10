@@ -88,8 +88,8 @@ private struct TierCard: View {
                         .fontWeight(.medium)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.green.opacity(0.1))
-                        .foregroundColor(.green)
+                        .background(OKColor.riskNominal.opacity(0.1))
+                        .foregroundColor(OKColor.riskNominal)
                         .cornerRadius(6)
                 }
                 
@@ -99,8 +99,8 @@ private struct TierCard: View {
                         .fontWeight(.medium)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
-                        .foregroundColor(.blue)
+                        .background(OKColor.actionPrimary.opacity(0.1))
+                        .foregroundColor(OKColor.actionPrimary)
                         .cornerRadius(6)
                 }
             }
@@ -110,11 +110,11 @@ private struct TierCard: View {
                 ForEach(TierFeatures.features(for: tier), id: \.self) { feature in
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                             .font(.caption)
                         Text(feature)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -123,31 +123,31 @@ private struct TierCard: View {
             if let executionLimit = TierQuotas.weeklyExecutionLimit(for: tier) {
                 HStack(spacing: 8) {
                     Image(systemName: "bolt")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                         .font(.caption)
                     Text("\(executionLimit) drafted outcomes/week")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 HStack(spacing: 8) {
                     Image(systemName: "infinity")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                         .font(.caption)
                     Text("Unlimited drafted outcomes")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isCurrent ? Color.green.opacity(0.05) : (isHighlighted ? Color.blue.opacity(0.05) : Color.gray.opacity(0.05)))
+                .fill(isCurrent ? OKColor.riskNominal.opacity(0.05) : (isHighlighted ? OKColor.actionPrimary.opacity(0.05) : OKColor.textMuted.opacity(0.05)))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isCurrent ? Color.green : (isHighlighted ? Color.blue : Color.clear), lineWidth: isCurrent ? 2 : (isHighlighted ? 2 : 0))
+                .stroke(isCurrent ? OKColor.riskNominal : (isHighlighted ? OKColor.actionPrimary : Color.clear), lineWidth: isCurrent ? 2 : (isHighlighted ? 2 : 0))
         )
         .opacity(isCurrent ? 0.8 : 1.0)
     }
@@ -162,9 +162,9 @@ private struct TierCard: View {
     
     private var tierColor: Color {
         switch tier {
-        case .free: return .gray
-        case .pro: return .blue
-        case .team: return .orange
+        case .free: return OKColor.textMuted
+        case .pro: return OKColor.actionPrimary
+        case .team: return OKColor.riskWarning
         }
     }
 }

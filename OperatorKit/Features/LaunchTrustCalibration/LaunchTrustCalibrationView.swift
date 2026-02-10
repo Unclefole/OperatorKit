@@ -81,7 +81,7 @@ public struct LaunchTrustCalibrationView: View {
                 // Success state: checkmark shield
                 Image(systemName: "checkmark.shield.fill")
                     .font(.system(size: 64))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
             } else {
                 // Calibrating state: OperatorKit logo
                 OperatorKitLogoView(size: .extraLarge, showText: false)
@@ -121,7 +121,7 @@ public struct LaunchTrustCalibrationView: View {
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
+                .fill(OKColor.backgroundSecondary)
         )
     }
     
@@ -133,10 +133,10 @@ public struct LaunchTrustCalibrationView: View {
                 Button(action: completeCalibration) {
                     Text("Continue")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.green)
+                        .background(OKColor.riskNominal)
                         .cornerRadius(12)
                 }
                 .padding(.horizontal, 24)
@@ -148,14 +148,14 @@ public struct LaunchTrustCalibrationView: View {
                     
                     Text("Verifying...")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
             // Explanation text
             Text("Each check reads existing proof artifacts.\nNo data leaves your device.")
                 .font(.caption)
-                .foregroundColor(Color.gray.opacity(0.6))
+                .foregroundColor(OKColor.textMuted.opacity(0.6))
                 .multilineTextAlignment(.center)
         }
     }
@@ -265,7 +265,7 @@ private struct CalibrationStepRow: View {
                 
                 Text(step.proofSource)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
@@ -283,7 +283,7 @@ private struct CalibrationStepRow: View {
                     .progressViewStyle(CircularProgressViewStyle())
             } else {
                 Image(systemName: "circle")
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
         case .running:
@@ -292,12 +292,12 @@ private struct CalibrationStepRow: View {
             
         case .passed:
             Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
                 .font(.title3)
             
         case .failed:
             Image(systemName: "xmark.circle.fill")
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
                 .font(.title3)
         }
     }
@@ -307,7 +307,7 @@ private struct CalibrationStepRow: View {
         case .pending: return isActive ? .primary : .secondary
         case .running: return .primary
         case .passed: return .primary
-        case .failed: return .red
+        case .failed: return OKColor.riskCritical
         }
     }
     

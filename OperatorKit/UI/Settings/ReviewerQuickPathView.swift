@@ -39,6 +39,8 @@ struct ReviewerQuickPathView: View {
             }
             .navigationTitle("Reviewer Quick Path")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -54,14 +56,14 @@ struct ReviewerQuickPathView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Image(systemName: "clock")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Estimated time: 2 minutes")
                         .font(.headline)
                 }
                 
                 Text("This guide shows the key screens a reviewer should see when testing OperatorKit.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 8)
         } header: {
@@ -78,7 +80,7 @@ struct ReviewerQuickPathView: View {
                 title: "First Launch → Onboarding",
                 description: "5 screens explaining safety model, data access, and pricing",
                 icon: "1.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
             
             QuickPathStep(
@@ -86,7 +88,7 @@ struct ReviewerQuickPathView: View {
                 title: "Type a Request",
                 description: "Enter 'Draft an email about tomorrow's meeting'",
                 icon: "2.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
             
             QuickPathStep(
@@ -94,7 +96,7 @@ struct ReviewerQuickPathView: View {
                 title: "Review Draft",
                 description: "See generated draft card with edit/cancel options",
                 icon: "3.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
             
             QuickPathStep(
@@ -102,7 +104,7 @@ struct ReviewerQuickPathView: View {
                 title: "Approval Gate",
                 description: "Confirm 'Run', 'Edit', or 'Cancel' dialog appears",
                 icon: "4.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
             
             QuickPathStep(
@@ -110,7 +112,7 @@ struct ReviewerQuickPathView: View {
                 title: "Settings → Pricing",
                 description: "View Free/Pro/Team tiers with restore option",
                 icon: "5.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
             
             QuickPathStep(
@@ -118,7 +120,7 @@ struct ReviewerQuickPathView: View {
                 title: "Settings → Help Center",
                 description: "FAQ, troubleshooting, contact support (opens Mail)",
                 icon: "6.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
             
             QuickPathStep(
@@ -126,7 +128,7 @@ struct ReviewerQuickPathView: View {
                 title: "Settings → Privacy",
                 description: "Permission states, safety guarantees list",
                 icon: "7.circle.fill",
-                color: .blue
+                color: OKColor.actionPrimary
             )
         } header: {
             Text("Quick Path (7 Steps)")
@@ -205,7 +207,7 @@ struct ReviewerQuickPathView: View {
                 
                 Text("Use sandbox account to test purchase flow. Restore purchases available in Settings → Subscription.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
             
@@ -216,7 +218,7 @@ struct ReviewerQuickPathView: View {
                 
                 Text("Permissions are requested only when needed (e.g., Calendar access when creating an event). Deny permissions to see graceful handling.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
             
@@ -227,7 +229,7 @@ struct ReviewerQuickPathView: View {
                 
                 Text("Help Center → Contact Support opens Mail composer. User must manually tap Send. No auto-send.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         } header: {
@@ -258,7 +260,7 @@ private struct QuickPathStep: View {
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .padding(.vertical, 4)
@@ -275,7 +277,7 @@ private struct NotExpectedRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(text)
@@ -283,7 +285,7 @@ private struct NotExpectedRow: View {
                 
                 Text(detail)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .padding(.vertical, 2)
@@ -298,7 +300,7 @@ private struct GuaranteeRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.shield")
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text(text)
                 .font(.subheadline)

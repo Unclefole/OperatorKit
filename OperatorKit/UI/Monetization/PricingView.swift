@@ -63,8 +63,12 @@ struct PricingView: View {
                 }
                 .padding()
             }
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Pricing")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -101,7 +105,7 @@ struct PricingView: View {
             
             Text(PricingCopy.tagline)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
         }
     }
@@ -111,14 +115,14 @@ struct PricingView: View {
     private var currentPlanBadge: some View {
         HStack {
             Image(systemName: "checkmark.seal.fill")
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             Text("You're on \(entitlementManager.currentTier.displayName)")
                 .font(.subheadline)
                 .fontWeight(.medium)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(Color.green.opacity(0.1))
+        .background(OKColor.riskNominal.opacity(0.1))
         .cornerRadius(20)
     }
     
@@ -167,14 +171,14 @@ struct PricingView: View {
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
-                            .background(Color.purple.opacity(0.2))
-                            .foregroundColor(.purple)
+                            .background(OKColor.riskExtreme.opacity(0.2))
+                            .foregroundColor(OKColor.riskExtreme)
                             .cornerRadius(4)
                     }
                     
                     Text("Pro features forever. No subscription.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -182,7 +186,7 @@ struct PricingView: View {
                 if isLifetimeOwner {
                     Label("Owned", systemImage: "checkmark.seal.fill")
                         .font(.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 } else if let product = lifetimeProduct {
                     Button {
                         selectedProduct = product
@@ -193,8 +197,8 @@ struct PricingView: View {
                             .fontWeight(.semibold)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(Color.purple)
-                            .foregroundColor(.white)
+                            .background(OKColor.riskExtreme)
+                            .foregroundColor(OKColor.textPrimary)
                             .cornerRadius(8)
                     }
                     .disabled(isPurchasing)
@@ -202,7 +206,7 @@ struct PricingView: View {
                     Text(PricingPackageRegistry.lifetimeSovereignPrice)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -214,11 +218,11 @@ struct PricingView: View {
             }
         }
         .padding()
-        .background(Color.purple.opacity(0.05))
+        .background(OKColor.riskExtreme.opacity(0.05))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isLifetimeOwner ? Color.green : Color.purple.opacity(0.3), lineWidth: isLifetimeOwner ? 2 : 1)
+                .stroke(isLifetimeOwner ? OKColor.riskNominal : OKColor.riskExtreme.opacity(0.3), lineWidth: isLifetimeOwner ? 2 : 1)
         )
     }
     
@@ -226,10 +230,10 @@ struct PricingView: View {
         HStack(spacing: 8) {
             Image(systemName: "checkmark")
                 .font(.caption)
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -243,16 +247,16 @@ struct PricingView: View {
             ForEach(PricingCopy.valueProps, id: \.self) { prop in
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text(prop)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(12)
     }
     
@@ -262,7 +266,7 @@ struct PricingView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "hand.raised.fill")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("Our Promise")
                     .font(.headline)
             }
@@ -276,18 +280,18 @@ struct PricingView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(12)
     }
     
     private func privacyRow(_ text: String, icon: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 20)
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -308,8 +312,8 @@ struct PricingView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.gray.opacity(0.1))
-                .foregroundColor(.blue)
+                .background(OKColor.textMuted.opacity(0.1))
+                .foregroundColor(OKColor.actionPrimary)
                 .cornerRadius(12)
             }
             .disabled(purchaseController.purchaseState == .restoring)
@@ -325,7 +329,7 @@ struct PricingView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             }
             
             // Not now
@@ -333,7 +337,7 @@ struct PricingView: View {
                 dismiss()
             } label: {
                 Text("Not Now")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -344,7 +348,7 @@ struct PricingView: View {
         VStack(spacing: 8) {
             Text(PricingCopy.subscriptionDisclosure)
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
             
             // Packaging status (Phase 11B)
@@ -381,16 +385,16 @@ struct PricingView: View {
             
             Text("Pricing package: \(result.status.displayName)")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 4)
     }
     
     private func statusColor(for status: PricingValidationStatus) -> Color {
         switch status {
-        case .pass: return .green
-        case .warn: return .orange
-        case .fail: return .red
+        case .pass: return OKColor.riskNominal
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
         }
     }
     
@@ -469,8 +473,8 @@ private struct PlanCard: View {
                         .fontWeight(.medium)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.green.opacity(0.1))
-                        .foregroundColor(.green)
+                        .background(OKColor.riskNominal.opacity(0.1))
+                        .foregroundColor(OKColor.riskNominal)
                         .cornerRadius(6)
                 }
                 
@@ -480,8 +484,8 @@ private struct PlanCard: View {
                         .fontWeight(.medium)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
-                        .foregroundColor(.blue)
+                        .background(OKColor.actionPrimary.opacity(0.1))
+                        .foregroundColor(OKColor.actionPrimary)
                         .cornerRadius(6)
                 }
             }
@@ -489,7 +493,7 @@ private struct PlanCard: View {
             // Description
             Text(TierMatrix.shortDescription(for: tier))
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Features
             VStack(alignment: .leading, spacing: 4) {
@@ -497,10 +501,10 @@ private struct PlanCard: View {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark")
                             .font(.caption)
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         Text(bullet)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -510,11 +514,11 @@ private struct PlanCard: View {
                 Text("Free forever")
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else if products.isEmpty {
                 Text("Loading...")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else {
                 ForEach(products, id: \.id) { product in
                     ProductButton(
@@ -529,11 +533,11 @@ private struct PlanCard: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isCurrent ? Color.green.opacity(0.05) : Color.gray.opacity(0.05))
+                .fill(isCurrent ? OKColor.riskNominal.opacity(0.05) : OKColor.textMuted.opacity(0.05))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(tier == .pro && !isCurrent ? Color.blue : Color.clear, lineWidth: 2)
+                .stroke(tier == .pro && !isCurrent ? OKColor.actionPrimary : Color.clear, lineWidth: 2)
         )
     }
     
@@ -547,9 +551,9 @@ private struct PlanCard: View {
     
     private var tierColor: Color {
         switch tier {
-        case .free: return .gray
-        case .pro: return .blue
-        case .team: return .orange
+        case .free: return OKColor.textMuted
+        case .pro: return OKColor.actionPrimary
+        case .team: return OKColor.riskWarning
         }
     }
 }
@@ -573,7 +577,7 @@ private struct ProductButton: View {
                     if let introOffer = product.subscription?.introductoryOffer {
                         Text(introOfferText(introOffer))
                             .font(.caption)
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                     }
                 }
                 
@@ -588,8 +592,8 @@ private struct ProductButton: View {
                 }
             }
             .padding()
-            .background(Color.blue.opacity(0.1))
-            .foregroundColor(.blue)
+            .background(OKColor.actionPrimary.opacity(0.1))
+            .foregroundColor(OKColor.actionPrimary)
             .cornerRadius(8)
         }
         .disabled(isLoading || isCurrent)

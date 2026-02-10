@@ -56,6 +56,8 @@ struct SovereignExportFlowView: View {
             }
             .navigationTitle("Export")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -84,7 +86,7 @@ struct SovereignExportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
             
             Text("Important")
                 .font(.title2)
@@ -104,8 +106,8 @@ struct SovereignExportFlowView: View {
                 Text("I Understand, Continue")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(OKColor.actionPrimary)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()
@@ -119,7 +121,7 @@ struct SovereignExportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "key.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
             
             Text("Create Passphrase")
                 .font(.title2)
@@ -137,13 +139,13 @@ struct SovereignExportFlowView: View {
                 if !passphrase.isEmpty && passphrase != confirmPassphrase {
                     Text("Passphrases do not match")
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundColor(OKColor.riskCritical)
                 }
                 
                 if passphrase.count > 0 && passphrase.count < 8 {
                     Text("Passphrase must be at least 8 characters")
                         .font(.caption)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
             }
             .padding()
@@ -154,8 +156,8 @@ struct SovereignExportFlowView: View {
                 Text("Encrypt & Export")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(canExport ? Color.purple : Color.gray)
-                    .foregroundColor(.white)
+                    .background(canExport ? OKColor.riskExtreme : OKColor.textMuted)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .disabled(!canExport)
@@ -181,7 +183,7 @@ struct SovereignExportFlowView: View {
             
             Text("Your configuration is being encrypted locally.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -192,7 +194,7 @@ struct SovereignExportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text("Export Ready")
                 .font(.title2)
@@ -200,7 +202,7 @@ struct SovereignExportFlowView: View {
             
             Text("Your encrypted export is ready to save.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
@@ -208,8 +210,8 @@ struct SovereignExportFlowView: View {
                 Text("Save File")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
+                    .background(OKColor.riskNominal)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()
@@ -223,7 +225,7 @@ struct SovereignExportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
             
             Text("Export Failed")
                 .font(.title2)
@@ -231,7 +233,7 @@ struct SovereignExportFlowView: View {
             
             Text(errorMessage ?? "An unknown error occurred")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
             
             Spacer()
@@ -240,8 +242,8 @@ struct SovereignExportFlowView: View {
                 Text("Close")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.gray)
-                    .foregroundColor(.white)
+                    .background(OKColor.textMuted)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()

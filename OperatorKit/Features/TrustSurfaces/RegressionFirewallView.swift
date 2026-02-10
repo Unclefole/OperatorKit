@@ -40,6 +40,8 @@ public struct RegressionFirewallView: View {
         }
         .navigationTitle("Regression Firewall")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
     
     // MARK: - Header Section
@@ -50,7 +52,7 @@ public struct RegressionFirewallView: View {
                 HStack {
                     Image(systemName: "flame.fill")
                         .font(.title)
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     
                     Text("Regression Firewall")
                         .font(.headline)
@@ -58,7 +60,7 @@ public struct RegressionFirewallView: View {
                 
                 Text("This view shows existing safety tests. No tests can be run, added, or modified from this screen.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -146,7 +148,7 @@ public struct RegressionFirewallView: View {
         Section {
             HStack {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 
                 Text("Last Verified")
                     .font(.subheadline)
@@ -155,12 +157,12 @@ public struct RegressionFirewallView: View {
                 
                 Text("Phase 12D")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Image(systemName: "testtube.2")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Test Scope")
                     .font(.subheadline)
@@ -169,12 +171,12 @@ public struct RegressionFirewallView: View {
                 
                 Text("Frozen")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Image(systemName: "lock.fill")
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 Text("New Tests Allowed")
                     .font(.subheadline)
@@ -183,7 +185,7 @@ public struct RegressionFirewallView: View {
                 
                 Text("No")
                     .font(.subheadline)
-                    .foregroundColor(.red)
+                    .foregroundColor(OKColor.riskCritical)
             }
         } header: {
             Text("Firewall Status")
@@ -198,14 +200,14 @@ public struct RegressionFirewallView: View {
         VStack(spacing: 16) {
             Image(systemName: "eye.slash")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Regression Firewall")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -225,7 +227,7 @@ private struct ProtectedModuleRow: View {
     var body: some View {
         HStack {
             Image(systemName: "lock.shield.fill")
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -235,14 +237,14 @@ private struct ProtectedModuleRow: View {
                 
                 Text(path)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
             
             Text(status)
                 .font(.caption)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
         }
     }
 }
@@ -256,7 +258,7 @@ private struct TestCategoryRow: View {
     var body: some View {
         HStack {
             Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
                 .frame(width: 24)
             
             Text(category)
@@ -266,7 +268,7 @@ private struct TestCategoryRow: View {
             
             Text("\(testCount) tests")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }

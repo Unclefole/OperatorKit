@@ -46,8 +46,13 @@ struct PolicyEditorView: View {
                 // Actions
                 actionsSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Execution Policy")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -130,12 +135,12 @@ struct PolicyEditorView: View {
                         if BiometricGate.isAvailable {
                             Image(systemName: "faceid")
                                 .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                     Text("When disabled, all capabilities are allowed")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .disabled(isBiometricPending)
@@ -143,10 +148,10 @@ struct PolicyEditorView: View {
             if editedPolicy.enabled {
                 HStack {
                     Image(systemName: "info.circle")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text(editedPolicy.summary)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -176,7 +181,7 @@ struct PolicyEditorView: View {
             HStack(spacing: 12) {
                 Image(systemName: capability.icon)
                     .font(.system(size: 16))
-                    .foregroundColor(isCapabilityAllowed(capability) ? .blue : .gray)
+                    .foregroundColor(isCapabilityAllowed(capability) ? OKColor.actionPrimary : OKColor.textMuted)
                     .frame(width: 24)
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -184,7 +189,7 @@ struct PolicyEditorView: View {
                         .font(.body)
                     Text(capability.description)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -231,10 +236,10 @@ struct PolicyEditorView: View {
                 HStack {
                     if let limit = editedPolicy.maxExecutionsPerDay {
                         Text("\(limit) per day")
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                     } else {
                         Text("No limit")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
@@ -298,12 +303,12 @@ struct PolicyEditorView: View {
                         if BiometricGate.isAvailable {
                             Image(systemName: "faceid")
                                 .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                     Text("Always show confirmation before executing actions")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .disabled(isBiometricPending)
@@ -325,7 +330,7 @@ struct PolicyEditorView: View {
             } label: {
                 HStack {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Export Policy")
                     Spacer()
                 }
@@ -337,7 +342,7 @@ struct PolicyEditorView: View {
             } label: {
                 HStack {
                     Image(systemName: "arrow.counterclockwise")
-                        .foregroundColor(.red)
+                        .foregroundColor(OKColor.riskCritical)
                     Text("Reset to Defaults")
                     Spacer()
                 }

@@ -51,11 +51,11 @@ enum UnifiedWorkflowItem: Identifiable, Equatable {
         switch self {
         case .staticTemplate(let template):
             switch template.iconColor {
-            case .blue: return .blue
-            case .pink: return .pink
-            case .green: return .green
-            case .orange: return .orange
-            case .purple: return .purple
+            case .blue: return OKColor.actionPrimary
+            case .pink: return OKColor.riskCritical
+            case .green: return OKColor.riskNominal
+            case .orange: return OKColor.riskWarning
+            case .purple: return OKColor.riskExtreme
             }
         case .customTemplate(let template):
             return template.color.swiftUIColor

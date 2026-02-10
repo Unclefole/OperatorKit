@@ -56,13 +56,13 @@ struct OperatorKitLogoView: View {
 
                 Image(systemName: "mic.fill")
                     .font(.system(size: size.iconSize, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
             }
 
             if showText {
                 Text("OperatorKit")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
             }
         }
         .accessibilityLabel("OperatorKit")

@@ -58,6 +58,8 @@ struct TeamSalesKitView: View {
             }
             .navigationTitle("Enterprise & Team")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -90,24 +92,24 @@ struct TeamSalesKitView: View {
             } label: {
                 HStack {
                     Image(systemName: "airplane.circle")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Pilot Mode")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("7-day evaluation framework")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -126,24 +128,24 @@ struct TeamSalesKitView: View {
             } label: {
                 HStack {
                     Image(systemName: trialStore.hasActiveTrial ? "checkmark.seal.fill" : "gift")
-                        .foregroundColor(trialStore.hasActiveTrial ? .green : .purple)
+                        .foregroundColor(trialStore.hasActiveTrial ? OKColor.riskNominal : OKColor.riskExtreme)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(trialStore.hasActiveTrial ? "Team Trial Active" : "Start Team Trial")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text(trialStore.statusMessage)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -161,7 +163,7 @@ struct TeamSalesKitView: View {
                 HStack {
                     Image(systemName: "person.3.fill")
                         .font(.title2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     Text("Team Plan")
                         .font(.title3)
@@ -195,24 +197,24 @@ struct TeamSalesKitView: View {
             } label: {
                 HStack {
                     Image(systemName: "doc.badge.checkmark")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Procurement Packet")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Safety, quality, and governance evidence")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -231,24 +233,24 @@ struct TeamSalesKitView: View {
             } label: {
                 HStack {
                     Image(systemName: "envelope.open")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                         .frame(width: 32)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Email Templates")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Security review, pilot, invoice requests")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -290,7 +292,7 @@ struct TeamSalesKitView: View {
                 
                 Text("OperatorKit is designed for enterprise deployment with strong privacy guarantees. No user content is ever shared, synced, or exported. Team features are governance-only.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -302,18 +304,18 @@ struct TeamSalesKitView: View {
             Image(systemName: "checkmark")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
         }
     }
     
     private func checklistItem(_ number: Int, _ text: String, done: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: done ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(done ? .green : .gray)
+                .foregroundColor(done ? OKColor.riskNominal : OKColor.textMuted)
             
             Text("\(number). \(text)")
                 .font(.subheadline)
@@ -363,24 +365,24 @@ private struct ProcurementTemplateSelector: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: template.icon)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(OKColor.actionPrimary)
                                     .frame(width: 24)
                                 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(template.name)
                                         .font(.subheadline)
                                         .fontWeight(.medium)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(OKColor.textPrimary)
                                     
                                     Text(template.templateDescription)
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(OKColor.textSecondary)
                                 }
                                 
                                 Spacer()
                                 
                                 Image(systemName: "arrow.up.right")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(OKColor.textMuted)
                             }
                         }
                     }
@@ -390,6 +392,8 @@ private struct ProcurementTemplateSelector: View {
             }
             .navigationTitle("Email Templates")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }

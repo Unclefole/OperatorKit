@@ -45,6 +45,8 @@ struct PinAsGoldenCaseSheet: View {
             }
             .navigationTitle("Pin as Golden Case")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -75,7 +77,7 @@ struct PinAsGoldenCaseSheet: View {
             HStack(spacing: 12) {
                 Image(systemName: "pin.circle.fill")
                     .font(.system(size: 40))
-                    .foregroundColor(.purple)
+                    .foregroundColor(OKColor.riskExtreme)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Pin as Golden Case")
@@ -84,7 +86,7 @@ struct PinAsGoldenCaseSheet: View {
                     
                     Text("For local quality evaluation")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -96,24 +98,24 @@ struct PinAsGoldenCaseSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "info.circle")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("What This Does")
                     .font(.headline)
             }
             
             Text("This saves a small, local-only metadata snapshot for evaluation. The snapshot is used to track quality over time and detect drift.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Key points
             VStack(alignment: .leading, spacing: 8) {
-                disclosurePoint(icon: "checkmark.shield", text: "No content is stored", color: .green)
-                disclosurePoint(icon: "iphone", text: "Stays on your device", color: .green)
-                disclosurePoint(icon: "trash", text: "You can delete anytime", color: .green)
-                disclosurePoint(icon: "xmark.icloud", text: "Never transmitted", color: .green)
+                disclosurePoint(icon: "checkmark.shield", text: "No content is stored", color: OKColor.riskNominal)
+                disclosurePoint(icon: "iphone", text: "Stays on your device", color: OKColor.riskNominal)
+                disclosurePoint(icon: "trash", text: "You can delete anytime", color: OKColor.riskNominal)
+                disclosurePoint(icon: "xmark.icloud", text: "Never transmitted", color: OKColor.riskNominal)
             }
             .padding(12)
-            .background(Color.green.opacity(0.1))
+            .background(OKColor.riskNominal.opacity(0.1))
             .cornerRadius(10)
         }
     }
@@ -134,7 +136,7 @@ struct PinAsGoldenCaseSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "doc.text")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text("What's Stored")
                     .font(.headline)
             }
@@ -159,7 +161,7 @@ struct PinAsGoldenCaseSheet: View {
             
             Text("No email content, calendar details, or personal information is stored.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -167,7 +169,7 @@ struct PinAsGoldenCaseSheet: View {
         HStack {
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             Spacer()
             Text(value)
                 .font(.caption)
@@ -192,7 +194,7 @@ struct PinAsGoldenCaseSheet: View {
             
             Text("\(customTitle.count)/\(GoldenCase.maxTitleLength) characters")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -210,8 +212,8 @@ struct PinAsGoldenCaseSheet: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.purple)
-                .foregroundColor(.white)
+                .background(OKColor.riskExtreme)
+                .foregroundColor(OKColor.textPrimary)
                 .cornerRadius(12)
             }
             
@@ -220,7 +222,7 @@ struct PinAsGoldenCaseSheet: View {
             } label: {
                 Text("Cancel")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }

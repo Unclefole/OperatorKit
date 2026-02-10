@@ -100,8 +100,13 @@ struct SubscriptionStatusView: View {
                 Text("Subscriptions are managed through your Apple ID. OperatorKit does not store any payment information.")
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(OKColor.backgroundPrimary)
         .navigationTitle("Subscription")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
         .refreshable {
             await refresh()
         }
@@ -125,7 +130,7 @@ struct SubscriptionStatusView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Plan")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 HStack(spacing: 8) {
                     Text(appState.currentTier.displayName)
@@ -155,7 +160,7 @@ struct SubscriptionStatusView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Renews")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Text(renewalDate)
                         .font(.subheadline)
@@ -179,7 +184,7 @@ struct SubscriptionStatusView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Executions")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text("\(remaining) remaining")
                     .font(.subheadline)
@@ -189,7 +194,7 @@ struct SubscriptionStatusView: View {
             
             Text("\(used)/\(total)")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Executions: \(remaining) of \(total) remaining this week")
@@ -204,7 +209,7 @@ struct SubscriptionStatusView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Saved Items")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text("\(remaining) remaining")
                     .font(.subheadline)
@@ -214,7 +219,7 @@ struct SubscriptionStatusView: View {
             
             Text("\(currentCount)/\(limit)")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Saved items: \(remaining) of \(limit) remaining")
@@ -230,12 +235,12 @@ struct SubscriptionStatusView: View {
             } label: {
                 HStack {
                     Image(systemName: "star.fill")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Upgrade to Pro")
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .accessibilityLabel("Upgrade to Pro")
@@ -252,7 +257,7 @@ struct SubscriptionStatusView: View {
         } label: {
             HStack {
                 Image(systemName: "arrow.clockwise")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("Restore Purchases")
                 Spacer()
                 if purchaseController.purchaseState == .restoring {
@@ -272,12 +277,12 @@ struct SubscriptionStatusView: View {
         } label: {
             HStack {
                 Image(systemName: "gear")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("Manage Subscription")
                 Spacer()
                 Image(systemName: "arrow.up.right")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .accessibilityLabel("Manage subscription")
@@ -289,14 +294,14 @@ struct SubscriptionStatusView: View {
     private var privacyInfoRow: some View {
         HStack(spacing: 12) {
             Image(systemName: "lock.shield")
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("Privacy Unchanged")
                     .font(.subheadline)
                 Text("Pro and Free have identical privacy guarantees. No data leaves your device.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .accessibilityElement(children: .combine)
@@ -306,14 +311,14 @@ struct SubscriptionStatusView: View {
     private var dataUseInfoRow: some View {
         HStack(spacing: 12) {
             Image(systemName: "creditcard")
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("Payments by Apple")
                     .font(.subheadline)
                 Text("All payments are processed by Apple. OperatorKit never sees your payment information.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .accessibilityElement(children: .combine)
@@ -328,23 +333,23 @@ struct SubscriptionStatusView: View {
         } label: {
             HStack {
                 Image(systemName: "star.circle")
-                    .foregroundColor(.yellow)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("First 3 Wins")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                     
                     Text("Quick tasks to get started")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .sheet(isPresented: $showingActivationPlaybook) {
@@ -358,7 +363,7 @@ struct SubscriptionStatusView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(WhyWeChargeText.shortExplanation)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     

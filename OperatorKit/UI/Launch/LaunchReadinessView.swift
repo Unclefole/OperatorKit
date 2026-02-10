@@ -52,6 +52,8 @@ struct LaunchReadinessView: View {
             }
             .navigationTitle("Launch Readiness")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -81,7 +83,7 @@ struct LaunchReadinessView: View {
                 HStack {
                     ProgressView()
                     Text("Running checks...")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else if let result = checklistResult {
                 VStack(alignment: .leading, spacing: 12) {
@@ -96,15 +98,15 @@ struct LaunchReadinessView: View {
                     
                     // Counts
                     HStack(spacing: 16) {
-                        CountBadge(count: result.passCount, label: "Pass", color: .green)
-                        CountBadge(count: result.warnCount, label: "Warn", color: .orange)
-                        CountBadge(count: result.failCount, label: "Fail", color: .red)
+                        CountBadge(count: result.passCount, label: "Pass", color: OKColor.riskNominal)
+                        CountBadge(count: result.warnCount, label: "Warn", color: OKColor.riskWarning)
+                        CountBadge(count: result.failCount, label: "Fail", color: OKColor.riskCritical)
                     }
                     
                     // Advisory note
                     Text("This checklist is advisory only and does not affect app functionality.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(.vertical, 4)
             }
@@ -165,10 +167,10 @@ struct LaunchReadinessView: View {
     
     private func statusColor(_ status: LaunchCheckStatus) -> Color {
         switch status {
-        case .pending: return .gray
-        case .passing: return .green
-        case .warning: return .orange
-        case .failing: return .red
+        case .pending: return OKColor.textMuted
+        case .passing: return OKColor.riskNominal
+        case .warning: return OKColor.riskWarning
+        case .failing: return OKColor.riskCritical
         }
     }
 }
@@ -190,7 +192,7 @@ private struct CheckItemRow: View {
                 if let details = item.details {
                     Text(details)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -200,10 +202,10 @@ private struct CheckItemRow: View {
     
     private var statusColor: Color {
         switch item.status {
-        case .pending: return .gray
-        case .passing: return .green
-        case .warning: return .orange
-        case .failing: return .red
+        case .pending: return OKColor.textMuted
+        case .passing: return OKColor.riskNominal
+        case .warning: return OKColor.riskWarning
+        case .failing: return OKColor.riskCritical
         }
     }
 }
@@ -224,7 +226,7 @@ private struct CountBadge: View {
             
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }

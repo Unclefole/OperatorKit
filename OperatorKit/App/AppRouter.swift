@@ -82,10 +82,19 @@ struct AppRouter {
         case "draft": return .draft
         case "approval": return .approval
         case "execution": return .execution
+        case "workspace": return .workspace
         case "memory": return .memory
         case "templates": return .templates
         case "privacy": return .privacy
         case "fallback": return .fallback
+        case "enterprise-onboarding": return .enterpriseOnboarding
+        case "trust-registry": return .trustRegistry
+        case "integrity": return .integrityIncident
+        case "audit-status": return .auditStatus
+        case "pilot-runner": return .pilotRunner
+        case "kill-switches": return .killSwitches
+        case "review-pack": return .reviewPack
+        case "scout": return .scoutDashboard
         default: return nil
         }
     }
@@ -100,6 +109,7 @@ struct AppRouter {
         case .draft: host = "draft"
         case .approval: host = "approval"
         case .execution: host = "execution"
+        case .workspace: host = "workspace"
         case .memory: host = "memory"
         case .templates: host = "templates"
         case .manageTemplates: host = "manage-templates"
@@ -108,6 +118,15 @@ struct AppRouter {
         case .workflowDetail: host = "workflow-detail"
         case .customTemplateDetail: host = "custom-template-detail"
         case .operationDetail: host = "operation-detail"
+        case .operatorChannel: host = "operator-channel"
+        case .enterpriseOnboarding: host = "enterprise-onboarding"
+        case .trustRegistry: host = "trust-registry"
+        case .integrityIncident: host = "integrity"
+        case .auditStatus: host = "audit-status"
+        case .pilotRunner: host = "pilot-runner"
+        case .killSwitches: host = "kill-switches"
+        case .reviewPack: host = "review-pack"
+        case .scoutDashboard: host = "scout"
         }
         return URL(string: "operatorkit://\(host)")
     }

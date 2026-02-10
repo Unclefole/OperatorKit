@@ -40,7 +40,9 @@ final class MailComposerService: NSObject, ObservableObject {
     /// Presents the mail composer with draft content
     /// INVARIANT: User must manually tap Send - app cannot send automatically
     /// INVARIANT: Only called after explicit user approval
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can construct one.
     func presentComposer(
+        accessToken: ServiceAccessToken,
         draft: Draft,
         from viewController: UIViewController,
         completion: @escaping (MailComposeResult) -> Void
@@ -93,7 +95,9 @@ final class MailComposerService: NSObject, ObservableObject {
     }
     
     /// Present composer using SwiftUI hosting
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can construct one.
     func presentComposer(
+        accessToken: ServiceAccessToken,
         draft: Draft,
         completion: @escaping (MailComposeResult) -> Void
     ) {
@@ -109,7 +113,7 @@ final class MailComposerService: NSObject, ObservableObject {
             topViewController = presented
         }
         
-        presentComposer(draft: draft, from: topViewController, completion: completion)
+        presentComposer(accessToken: accessToken, draft: draft, from: topViewController, completion: completion)
     }
 }
 
@@ -292,14 +296,14 @@ struct MailComposerSheetModifier: ViewModifier {
                     VStack(spacing: 20) {
                         Image(systemName: "envelope.badge.exclamationmark")
                             .font(.system(size: 48))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         Text("Mail Not Available")
                             .font(.headline)
                         
                         Text("Please configure a mail account in Settings to send emails.")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .multilineTextAlignment(.center)
                         
                         Button("Dismiss") {

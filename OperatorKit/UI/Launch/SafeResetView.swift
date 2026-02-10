@@ -31,7 +31,7 @@ struct SafeResetView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Image(systemName: "exclamationmark.triangle")
-                                .foregroundColor(.orange)
+                                .foregroundColor(OKColor.riskWarning)
                             
                             Text("Data Reset Options")
                                 .font(.headline)
@@ -39,7 +39,7 @@ struct SafeResetView: View {
                         
                         Text("These actions permanently delete local data. They do not affect your subscription or execution safety.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     .padding(.vertical, 4)
                 }
@@ -62,7 +62,7 @@ struct SafeResetView: View {
                     Section {
                         HStack {
                             Text("Last reset:")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                             
                             Spacer()
                             
@@ -72,7 +72,7 @@ struct SafeResetView: View {
                                 
                                 Text(lastDate, style: .relative)
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(OKColor.textSecondary)
                             }
                         }
                     } header: {
@@ -82,6 +82,8 @@ struct SafeResetView: View {
             }
             .navigationTitle("Reset Data")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -118,17 +120,17 @@ private struct ResetActionRow: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 Image(systemName: action.icon)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                     .frame(width: 24)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(action.displayName)
                         .font(.subheadline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                     
                     Text(action.description)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .lineLimit(2)
                 }
                 
@@ -137,7 +139,7 @@ private struct ResetActionRow: View {
                 if action.affectsSupport {
                     Image(systemName: "info.circle")
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
         }

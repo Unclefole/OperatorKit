@@ -47,8 +47,13 @@ struct PilotModeView: View {
                 // Safety Note
                 safetyNoteSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Pilot Mode")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -78,7 +83,7 @@ struct PilotModeView: View {
                 HStack {
                     Image(systemName: "airplane.circle.fill")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     VStack(alignment: .leading) {
                         Text("Enterprise Pilot")
@@ -86,13 +91,13 @@ struct PilotModeView: View {
                         
                         Text("7-day evaluation framework")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
                 
                 Text("Use this checklist to run a structured pilot evaluation. Export all artifacts at the end for stakeholder review.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 8)
         }
@@ -161,23 +166,23 @@ struct PilotModeView: View {
             } label: {
                 HStack {
                     Image(systemName: "envelope.badge")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                         .frame(width: 24)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Pilot Kickoff Email")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Share pilot plan with stakeholders")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "arrow.up.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
             
@@ -186,23 +191,23 @@ struct PilotModeView: View {
             } label: {
                 HStack {
                     Image(systemName: "shield.checkered")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                         .frame(width: 24)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Security Review Follow-Up")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Request security assessment")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "arrow.up.right")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
         } header: {
@@ -223,7 +228,7 @@ struct PilotModeView: View {
                 
                 Text("Pilot mode provides a structured evaluation framework and export tools. It does not change execution behavior, safety guarantees, or approval requirements.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -289,10 +294,10 @@ private struct ChecklistRow: View {
             Text("Day \(item.day)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.blue)
+                .background(OKColor.actionPrimary)
                 .cornerRadius(4)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -302,7 +307,7 @@ private struct ChecklistRow: View {
                 
                 Text(item.taskDescription)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -318,23 +323,23 @@ private struct ExportRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
             
             Image(systemName: "square.and.arrow.up")
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
         }
     }
 }
@@ -347,7 +352,7 @@ private struct PilotExportDetailView: View {
             Section {
                 Text("Use individual exports to share specific artifacts with different stakeholders.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Section {
@@ -371,6 +376,8 @@ private struct PilotExportDetailView: View {
         }
         .navigationTitle("Individual Exports")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 }
 

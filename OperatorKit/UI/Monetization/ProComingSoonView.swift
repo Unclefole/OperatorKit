@@ -21,7 +21,7 @@ struct ProComingSoonView: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [Color.blue, Color.purple],
+                                colors: [OKColor.actionPrimary, OKColor.riskExtreme],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -30,7 +30,7 @@ struct ProComingSoonView: View {
 
                     Image(systemName: "star.fill")
                         .font(.system(size: 36))
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
 
                 Text("Pro Coming Soon")
@@ -39,7 +39,7 @@ struct ProComingSoonView: View {
 
                 Text("Pro features will be available in a future update. Stay tuned!")
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
 
@@ -53,19 +53,21 @@ struct ProComingSoonView: View {
                     Text("Done")
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.blue)
+                        .background(OKColor.actionPrimary)
                         .cornerRadius(12)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 32)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(UIColor.systemGroupedBackground))
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("OperatorKit Pro")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {

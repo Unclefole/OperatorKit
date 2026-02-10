@@ -31,7 +31,7 @@ struct WorkflowTemplatesView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -99,7 +99,7 @@ struct WorkflowTemplatesView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -111,12 +111,12 @@ struct WorkflowTemplatesView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
 
     // MARK: - Search Bar
@@ -125,16 +125,16 @@ struct WorkflowTemplatesView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
 
             TextField("Search workflows...", text: $searchText)
                 .font(.body)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 4, x: 0, y: 2)
         .padding(.horizontal, 20)
         .padding(.bottom, 12)
     }
@@ -145,17 +145,17 @@ struct WorkflowTemplatesView: View {
         HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 18))
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Failed to load custom templates")
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
 
                 Text(error.localizedDescription)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .lineLimit(2)
             }
 
@@ -169,11 +169,11 @@ struct WorkflowTemplatesView: View {
                 Text("Retry")
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
         }
         .padding(16)
-        .background(Color.orange.opacity(0.1))
+        .background(OKColor.riskWarning.opacity(0.1))
         .cornerRadius(12)
     }
 
@@ -186,14 +186,14 @@ struct WorkflowTemplatesView: View {
 
             Text("Loading custom templates...")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
 
             Spacer()
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
     // MARK: - Empty Search State
@@ -202,15 +202,15 @@ struct WorkflowTemplatesView: View {
         VStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 32))
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(OKColor.textMuted.opacity(0.5))
 
             Text("No workflows found")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
 
             Text("Try a different search term")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
         }
         .padding(32)
     }
@@ -224,22 +224,22 @@ struct WorkflowTemplatesView: View {
             HStack(spacing: 12) {
                 Image(systemName: "gearshape.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
 
                 Text("Manage Templates")
                     .font(.body)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
             .padding(16)
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 }
@@ -270,13 +270,13 @@ struct UnifiedTemplateCard: View {
                         Text(item.name)
                             .font(.body)
                             .fontWeight(.semibold)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
 
                         if item.isCustom {
                             Text("Custom")
                                 .font(.caption2)
                                 .fontWeight(.medium)
-                                .foregroundColor(.white)
+                                .foregroundColor(OKColor.textPrimary)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(item.iconColor)
@@ -286,7 +286,7 @@ struct UnifiedTemplateCard: View {
 
                     Text(item.descriptionText)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .lineLimit(2)
                 }
 
@@ -294,12 +294,12 @@ struct UnifiedTemplateCard: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
             .padding(16)
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 }
@@ -312,11 +312,11 @@ struct WorkflowTemplateCard: View {
 
     private var iconBackgroundColor: Color {
         switch template.iconColor {
-        case .blue: return .blue
-        case .pink: return .pink
-        case .green: return .green
-        case .orange: return .orange
-        case .purple: return .purple
+        case .blue: return OKColor.actionPrimary
+        case .pink: return OKColor.riskCritical
+        case .green: return OKColor.riskNominal
+        case .orange: return OKColor.riskWarning
+        case .purple: return OKColor.riskExtreme
         }
     }
 
@@ -337,11 +337,11 @@ struct WorkflowTemplateCard: View {
                     Text(template.name)
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
 
                     Text(template.description)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .lineLimit(2)
                 }
 
@@ -349,12 +349,12 @@ struct WorkflowTemplateCard: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
             .padding(16)
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 }
@@ -369,7 +369,7 @@ struct WorkflowDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -418,7 +418,7 @@ struct WorkflowDetailView: View {
             }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -443,12 +443,12 @@ struct WorkflowDetailView: View {
 
             Text(template.description)
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white)
+                .background(OKColor.backgroundPrimary)
                 .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 
@@ -473,9 +473,9 @@ struct WorkflowDetailView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 
@@ -496,11 +496,11 @@ struct WorkflowDetailView: View {
 
                     Text(template.settings.confidenceRequired.rawValue)
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
 
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.gray.opacity(0.4))
+                        .foregroundColor(OKColor.textMuted.opacity(0.4))
                 }
                 .padding(16)
 
@@ -518,9 +518,9 @@ struct WorkflowDetailView: View {
                 }
                 .padding(16)
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 
@@ -544,17 +544,17 @@ struct WorkflowDetailView: View {
             }
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(.white)
+            .foregroundColor(OKColor.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
-            .background(Color.blue)
+            .background(OKColor.actionPrimary)
             .cornerRadius(14)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color(UIColor.systemGroupedBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.backgroundPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
 }
@@ -570,24 +570,24 @@ struct WorkflowStepRow: View {
             HStack(spacing: 16) {
                 ZStack {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(OKColor.actionPrimary)
                         .frame(width: 28, height: 28)
 
                     Text("\(step.stepNumber)")
                         .font(.caption)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(step.title)
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
 
                     Text(step.instructions)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .lineLimit(2)
 
                     if let attachment = step.attachmentName {
@@ -597,7 +597,7 @@ struct WorkflowStepRow: View {
                             Text(attachment)
                                 .font(.caption2)
                         }
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     }
                 }
 
@@ -605,7 +605,7 @@ struct WorkflowStepRow: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
             .padding(16)
         }
@@ -625,7 +625,7 @@ struct EditStepSheet: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.4)
+            OKColor.shadow.opacity(0.4)
                 .ignoresSafeArea()
                 .onTapGesture {
                     isPresented = false
@@ -636,7 +636,7 @@ struct EditStepSheet: View {
 
                 VStack(spacing: 20) {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.gray.opacity(0.4))
+                        .fill(OKColor.textMuted.opacity(0.4))
                         .frame(width: 36, height: 5)
                         .padding(.top, 12)
 
@@ -646,7 +646,7 @@ struct EditStepSheet: View {
                         }) {
                             Text("Cancel")
                                 .font(.body)
-                                .foregroundColor(.blue)
+                                .foregroundColor(OKColor.actionPrimary)
                         }
 
                         Spacer()
@@ -666,7 +666,7 @@ struct EditStepSheet: View {
                             Text("Save")
                                 .font(.body)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.blue)
+                                .foregroundColor(OKColor.actionPrimary)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -677,25 +677,25 @@ struct EditStepSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Step Name")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
 
                             TextField("Step name", text: $editedName)
                                 .font(.body)
                                 .padding(12)
-                                .background(Color.gray.opacity(0.1))
+                                .background(OKColor.textMuted.opacity(0.1))
                                 .cornerRadius(8)
                         }
 
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Instructions")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
 
                             TextEditor(text: $editedInstructions)
                                 .font(.body)
                                 .frame(height: 100)
                                 .padding(8)
-                                .background(Color.gray.opacity(0.1))
+                                .background(OKColor.textMuted.opacity(0.1))
                                 .cornerRadius(8)
                         }
 
@@ -709,13 +709,13 @@ struct EditStepSheet: View {
                                 .labelsHidden()
                         }
                         .padding(12)
-                        .background(Color.gray.opacity(0.05))
+                        .background(OKColor.textMuted.opacity(0.05))
                         .cornerRadius(8)
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 40)
                 }
-                .background(Color.white)
+                .background(OKColor.backgroundPrimary)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
             }
         }

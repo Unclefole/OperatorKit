@@ -92,6 +92,14 @@
         <string>arm64</string>
     </array>
 
+    <!-- Background Processing Task Identifiers -->
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>com.operatorkit.bg.prepare-proposals</string>
+        <string>com.operatorkit.bg.mirror-attestation</string>
+        <string>com.operatorkit.bg.scout</string>
+    </array>
+
     <!-- Scene Configuration for SwiftUI -->
     <key>UIApplicationSceneManifest</key>
     <dict>

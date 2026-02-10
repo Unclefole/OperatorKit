@@ -198,13 +198,27 @@ public enum RegressionFirewallRules {
     
     private static let backgroundRule1 = RegressionFirewallRule(
         id: "BG-001",
-        name: "No BGTaskScheduler Usage",
+        name: "Background Tasks Use Allowlisted Identifiers Only",
         category: .backgroundExecution,
-        description: "App does not schedule background tasks.",
+        description: "Only allowlisted BG identifiers are registered. Non-allowlisted identifiers are forbidden.",
         severity: .critical,
         verify: {
-            // Architectural constraint
-            return .pass("No BGTaskScheduler registrations")
+            // Phase 19: BG tasks are now allowed but ONLY for these identifiers
+            let allowlisted: Set<String> = [
+                "com.operatorkit.bg.prepare-proposals",
+                "com.operatorkit.bg.mirror-attestation",
+                "com.operatorkit.bg.scout"
+            ]
+            // Verify the identifiers match what BackgroundScheduler registers
+            let registered: Set<String> = [
+                BackgroundScheduler.proposalTaskIdentifier,
+                BackgroundScheduler.mirrorTaskIdentifier,
+                BackgroundScheduler.scoutTaskIdentifier
+            ]
+            guard registered == allowlisted else {
+                return .fail("Non-allowlisted BG identifiers found: \(registered.subtracting(allowlisted))")
+            }
+            return .pass("BG tasks restricted to allowlisted identifiers: \(allowlisted.sorted())")
         }
     )
     

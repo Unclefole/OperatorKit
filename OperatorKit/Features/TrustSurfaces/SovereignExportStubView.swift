@@ -40,6 +40,8 @@ public struct SovereignExportStubView: View {
         }
         .navigationTitle("Sovereign Export")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
     
     // MARK: - Header Section
@@ -50,7 +52,7 @@ public struct SovereignExportStubView: View {
                 HStack {
                     Image(systemName: "lock.doc.fill")
                         .font(.title)
-                        .foregroundColor(.purple)
+                        .foregroundColor(OKColor.riskExtreme)
                     
                     Text("Sovereign Export")
                         .font(.headline)
@@ -61,7 +63,7 @@ public struct SovereignExportStubView: View {
                         .font(.caption)
                 } icon: {
                     Image(systemName: "clock.fill")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
             }
             .padding(.vertical, 4)
@@ -78,7 +80,7 @@ public struct SovereignExportStubView: View {
                 
                 Text("The goal is data sovereignty: your data, your format, your storage.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         } header: {
@@ -137,7 +139,7 @@ public struct SovereignExportStubView: View {
         Section {
             HStack {
                 Image(systemName: "clock.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("Implementation Status")
                     .font(.subheadline)
@@ -146,12 +148,12 @@ public struct SovereignExportStubView: View {
                 
                 Text("Planned")
                     .font(.subheadline)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
             }
             
             HStack {
                 Image(systemName: "calendar")
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 Text("Target Phase")
                     .font(.subheadline)
@@ -160,7 +162,7 @@ public struct SovereignExportStubView: View {
                 
                 Text("TBD")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Status")
@@ -185,7 +187,7 @@ public struct SovereignExportStubView: View {
                 .padding(.vertical, 8)
             }
             .disabled(true)
-            .foregroundColor(.gray)
+            .foregroundColor(OKColor.textMuted)
             
             HStack {
                 Spacer()
@@ -193,10 +195,10 @@ public struct SovereignExportStubView: View {
                 Label {
                     Text("Coming in a future update")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 } icon: {
                     Image(systemName: "sparkles")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                 }
                 
                 Spacer()
@@ -212,14 +214,14 @@ public struct SovereignExportStubView: View {
         VStack(spacing: 16) {
             Image(systemName: "eye.slash")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Sovereign Export")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -238,7 +240,7 @@ private struct PlannedFeatureRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
                 .frame(width: 24)
             
             Text(feature)
@@ -248,7 +250,7 @@ private struct PlannedFeatureRow: View {
             
             Text("Planned")
                 .font(.caption)
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
         }
     }
 }
@@ -261,7 +263,7 @@ private struct NotPlannedRow: View {
     var body: some View {
         HStack {
             Image(systemName: "xmark.circle.fill")
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
                 .frame(width: 24)
             
             Text(item)
@@ -271,7 +273,7 @@ private struct NotPlannedRow: View {
             
             Text("Never")
                 .font(.caption)
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
         }
     }
 }

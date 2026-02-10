@@ -42,8 +42,13 @@ struct PipelineDashboardView: View {
                 actionsSection
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Pipeline")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -78,7 +83,7 @@ struct PipelineDashboardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Total")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("\(store.items.count)")
                         .font(.title2)
                         .fontWeight(.bold)
@@ -89,11 +94,11 @@ struct PipelineDashboardView: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text("Open")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("\(store.openItems.count)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
                 
                 Spacer()
@@ -101,11 +106,11 @@ struct PipelineDashboardView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Won")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("\(store.closedWonItems.count)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
             }
             .padding(.vertical, 8)
@@ -219,7 +224,7 @@ private struct StageRow: View {
             if items.isEmpty {
                 Text("No items")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else {
                 ForEach(items) { item in
                     Button {
@@ -227,17 +232,17 @@ private struct StageRow: View {
                     } label: {
                         HStack {
                             Image(systemName: item.channel.icon)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                             
                             Text("Item from \(item.createdAtDayRounded)")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                             
                             Spacer()
                             
                             Image(systemName: "chevron.right")
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                         }
                     }
                 }
@@ -245,7 +250,7 @@ private struct StageRow: View {
         } label: {
             HStack {
                 Image(systemName: stage.icon)
-                    .foregroundColor(stage.isOpen ? .blue : (stage == .closedWon ? .green : .red))
+                    .foregroundColor(stage.isOpen ? OKColor.actionPrimary : (stage == .closedWon ? OKColor.riskNominal : OKColor.riskCritical))
                     .frame(width: 24)
                 
                 Text(stage.displayName)
@@ -254,7 +259,7 @@ private struct StageRow: View {
                 
                 Text("\(count)")
                     .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -269,7 +274,7 @@ private struct ChannelRow: View {
     var body: some View {
         HStack {
             Image(systemName: channel.icon)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .frame(width: 24)
             
             Text(channel.displayName)
@@ -278,7 +283,7 @@ private struct ChannelRow: View {
             
             Text("\(count)")
                 .fontWeight(.semibold)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }
@@ -296,7 +301,7 @@ private struct StageSelectorSheet: View {
             List {
                 Section {
                     Text("Current: \(item.stage.displayName)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 } header: {
                     Text("Move Opportunity")
                 }
@@ -317,12 +322,14 @@ private struct StageSelectorSheet: View {
                 if item.stage.nextStages.isEmpty {
                     Section {
                         Text("This opportunity is closed and cannot be moved.")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
             .navigationTitle("Move Stage")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }
@@ -357,8 +364,13 @@ private struct ChannelSelectorSheet: View {
                     Text("Creates a new opportunity at 'Lead Contacted' stage.")
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("New Opportunity")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }

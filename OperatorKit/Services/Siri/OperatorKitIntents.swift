@@ -423,6 +423,46 @@ struct OperatorTestIntent: AppIntent {
     }
 }
 
+// MARK: - Operator Channel Intent (Sentinel Proposal Path)
+
+/// Routes intent through OperatorChannel → SentinelProposalEngine → ProposalCard
+/// INVARIANT: ONLY routes - NEVER executes side effects
+/// INVARIANT: Opens app with OperatorChannel and pending proposal
+struct OperatorChannelIntent: AppIntent {
+
+    static var title: LocalizedStringResource = "Ask Operator"
+    static var description = IntentDescription("Submit a request to Operator Channel for governed review")
+
+    /// Opens the app when run via Siri
+    static var openAppWhenRun: Bool = true
+
+    /// Spotlight searchable
+    static var isDiscoverable: Bool = true
+
+    @Parameter(title: "Request", description: "What should Operator do?")
+    var requestText: String
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let trimmed = requestText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return .result(
+                dialog: IntentDialog("Please describe what you'd like Operator to do.")
+            )
+        }
+
+        // Route through OperatorChannel — NEVER executes, only generates proposal
+        _ = await OperatorChannel.shared.handleSiriHandoff(
+            rawText: trimmed,
+            intentType: .draftEmail  // Default; Sentinel classifies the real type
+        )
+
+        return .result(
+            dialog: IntentDialog("Proposal generated. Review and approve in OperatorKit.")
+        )
+    }
+}
+
 // MARK: - Siri Source Type
 
 /// Identifies the source of Siri routing for UI display

@@ -45,9 +45,12 @@ struct DataUseDisclosureView: View {
                 }
                 .padding(20)
             }
-            .background(Color(UIColor.systemGroupedBackground))
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Data Use")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -68,7 +71,7 @@ struct DataUseDisclosureView: View {
             
             Text("This document explains what data OperatorKit can access, when access occurs, and what protections are in place. OperatorKit is designed to give you control over every action.")
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -99,7 +102,7 @@ struct DataUseDisclosureView: View {
             
             Text("OperatorKit does not access: Photos, Contacts (beyond calendar participants), Location, Health data, Financial data, Browsing history, or any other personal information.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .padding(.top, 8)
         }
     }
@@ -181,7 +184,7 @@ struct DataUseDisclosureView: View {
             
             Text("All text generation and processing in OperatorKit happens entirely on your device.")
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             VStack(alignment: .leading, spacing: 8) {
                 onDeviceRow("Draft generation uses on-device models only")
@@ -193,7 +196,7 @@ struct DataUseDisclosureView: View {
             
             Text("When the preferred on-device model is unavailable, OperatorKit uses a deterministic template-based fallback that also runs entirely on your device.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .padding(.top, 8)
         }
     }
@@ -206,7 +209,7 @@ struct DataUseDisclosureView: View {
             
             Text("If you have questions about how OperatorKit handles your data, please contact us through the App Store or visit our support page.")
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -216,7 +219,7 @@ struct DataUseDisclosureView: View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             Text(title)
                 .font(.headline)
@@ -232,15 +235,15 @@ struct DataUseDisclosureView: View {
             
             Text(description)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             
             Text(permission)
                 .font(.caption2)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
         }
         .padding(12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(8)
     }
     
@@ -249,7 +252,7 @@ struct DataUseDisclosureView: View {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 14))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 
                 Text(title)
                     .font(.subheadline)
@@ -258,7 +261,7 @@ struct DataUseDisclosureView: View {
             
             Text(description)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.leading, 22)
         }
@@ -268,11 +271,11 @@ struct DataUseDisclosureView: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "xmark.circle")
                 .font(.system(size: 14))
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -282,7 +285,7 @@ struct DataUseDisclosureView: View {
             HStack(spacing: 8) {
                 Image(systemName: "hand.raised.fill")
                     .font(.system(size: 14))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text(title)
                     .font(.subheadline)
@@ -291,7 +294,7 @@ struct DataUseDisclosureView: View {
             
             Text(description)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.leading, 22)
         }
@@ -301,11 +304,11 @@ struct DataUseDisclosureView: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "checkmark")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
         }
     }
 }

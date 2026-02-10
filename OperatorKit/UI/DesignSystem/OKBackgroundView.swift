@@ -1,37 +1,23 @@
 import SwiftUI
 
 // MARK: - OperatorKit Background View
-/// Consistent light background for all OperatorKit screens
-/// Provides the signature soft blue/ice gradient look
+/// Consistent dark background for all OperatorKit screens
+/// Uses the design token system for the unified mission-control aesthetic.
 
 public struct OKBackgroundView: View {
 
     public init() {}
 
     public var body: some View {
-        ZStack {
-            // Base: Pure white
-            OKColors.backgroundPrimary
-
-            // Overlay: Subtle blue/purple ice gradient
-            LinearGradient(
-                colors: [
-                    Color(hex: "EEF4FF").opacity(0.7),  // Soft ice blue
-                    Color(hex: "F5F3FF").opacity(0.5),  // Soft lavender
-                    OKColors.backgroundPrimary
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        .ignoresSafeArea()
+        OKColor.backgroundPrimary
+            .ignoresSafeArea()
     }
 }
 
 // MARK: - View Extension for Easy Application
 
 public extension View {
-    /// Apply the standard OperatorKit light background
+    /// Apply the standard OperatorKit dark background
     /// - Parameter isHome: Set to true for Home screen (uses its own styling)
     func okScreenBackground(isHome: Bool = false) -> some View {
         ZStack {
@@ -39,12 +25,11 @@ public extension View {
                 // Home uses its own background - don't override
                 self
             } else {
-                // Standard OperatorKit light background
                 OKBackgroundView()
                 self
             }
         }
-        .preferredColorScheme(ColorScheme.light) // Force light mode for consistency
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -52,7 +37,9 @@ public extension View {
     VStack {
         Text("OperatorKit")
             .font(.largeTitle)
-        Text("Consistent Light Background")
+            .foregroundColor(OKColor.textPrimary)
+        Text("Consistent Dark Background")
+            .foregroundColor(OKColor.textSecondary)
     }
     .okScreenBackground()
 }

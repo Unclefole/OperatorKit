@@ -36,7 +36,7 @@ struct ConfirmCalendarWriteView: View {
         NavigationView {
             ZStack {
                 // Background
-                Color(UIColor.systemGroupedBackground)
+                OKColor.backgroundPrimary
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -96,7 +96,7 @@ struct ConfirmCalendarWriteView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .frame(width: 36, height: 36)
                         .background(Color(UIColor.systemGray5))
                         .clipShape(Circle())
@@ -121,7 +121,7 @@ struct ConfirmCalendarWriteView: View {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.shield.fill")
                     .font(.system(size: 24))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Final Review")
@@ -131,18 +131,18 @@ struct ConfirmCalendarWriteView: View {
                          ? "Confirm these changes are correct. The event won't be modified until you tap Confirm."
                          : "Confirm these details are correct. The event won't be created until you tap Confirm.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
             }
             .padding(16)
-            .background(Color.blue.opacity(0.1))
+            .background(OKColor.actionPrimary.opacity(0.1))
             .cornerRadius(12)
             .padding(.horizontal, 20)
         }
         .padding(.bottom, 8)
-        .background(Color(UIColor.systemGroupedBackground))
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Safety Callout Block
@@ -152,7 +152,7 @@ struct ConfirmCalendarWriteView: View {
             HStack(spacing: 10) {
                 Image(systemName: "hand.raised.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("You are about to make a change")
                     .font(.headline)
@@ -161,41 +161,41 @@ struct ConfirmCalendarWriteView: View {
             
             Text("This action will create or modify data outside OperatorKit.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("You will be asked to confirm before anything is written.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Specific note for calendar
             if isUpdate {
                 HStack(spacing: 6) {
                     Image(systemName: "calendar.badge.clock")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text("Only events you explicitly selected can be modified.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 .padding(.top, 4)
             } else {
                 HStack(spacing: 6) {
                     Image(systemName: "calendar.badge.plus")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text("One calendar event will be created.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 .padding(.top, 4)
             }
         }
         .padding(16)
-        .background(Color.blue.opacity(0.05))
+        .background(OKColor.actionPrimary.opacity(0.05))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                .stroke(OKColor.actionPrimary.opacity(0.2), lineWidth: 1)
         )
     }
     
@@ -206,7 +206,7 @@ struct ConfirmCalendarWriteView: View {
             HStack {
                 Image(systemName: sideEffect.type.icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text(isUpdate ? "Event Update" : "New Event")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -225,9 +225,9 @@ struct ConfirmCalendarWriteView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Event Details Card
@@ -237,7 +237,7 @@ struct ConfirmCalendarWriteView: View {
             HStack {
                 Image(systemName: "calendar.badge.plus")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 Text("Event Details")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -251,7 +251,7 @@ struct ConfirmCalendarWriteView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Title")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text(payload.title)
                         .font(.body)
                         .fontWeight(.medium)
@@ -261,11 +261,11 @@ struct ConfirmCalendarWriteView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Time")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     HStack(spacing: 8) {
                         Image(systemName: "clock")
                             .font(.caption)
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         Text(payload.formattedTimeRange)
                             .font(.body)
                     }
@@ -275,7 +275,7 @@ struct ConfirmCalendarWriteView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Duration")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("\(payload.durationMinutes) minutes")
                         .font(.body)
                 }
@@ -285,7 +285,7 @@ struct ConfirmCalendarWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Timezone")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(tz)
                             .font(.body)
                     }
@@ -296,11 +296,11 @@ struct ConfirmCalendarWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Location")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         HStack(spacing: 8) {
                             Image(systemName: "mappin.and.ellipse")
                                 .font(.caption)
-                                .foregroundColor(.red)
+                                .foregroundColor(OKColor.riskCritical)
                             Text(location)
                                 .font(.body)
                         }
@@ -312,10 +312,10 @@ struct ConfirmCalendarWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Notes")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(notes)
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                             .lineLimit(3)
                     }
                 }
@@ -325,13 +325,13 @@ struct ConfirmCalendarWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Attendees")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         VStack(alignment: .leading, spacing: 2) {
                             ForEach(payload.attendeesEmails, id: \.self) { email in
                                 HStack(spacing: 8) {
                                     Image(systemName: "person.circle")
                                         .font(.caption)
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(OKColor.actionPrimary)
                                     Text(email)
                                         .font(.body)
                                 }
@@ -345,13 +345,13 @@ struct ConfirmCalendarWriteView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Reminders")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         VStack(alignment: .leading, spacing: 2) {
                             ForEach(payload.alarmOffsetsMinutes, id: \.self) { offset in
                                 HStack(spacing: 8) {
                                     Image(systemName: "bell")
                                         .font(.caption)
-                                        .foregroundColor(.orange)
+                                        .foregroundColor(OKColor.riskWarning)
                                     Text(formatAlarmOffset(offset))
                                         .font(.body)
                                 }
@@ -364,22 +364,22 @@ struct ConfirmCalendarWriteView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Target Calendar")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     if let calId = payload.calendarIdentifier {
                         Text("Custom calendar: \(calId)")
                             .font(.body)
                     } else {
                         Text("Default Calendar")
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Diff Card (For Updates)
@@ -389,7 +389,7 @@ struct ConfirmCalendarWriteView: View {
             HStack {
                 Image(systemName: "arrow.left.arrow.right")
                     .font(.system(size: 20))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 Text("Changes")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -399,7 +399,7 @@ struct ConfirmCalendarWriteView: View {
             if !diff.hasChanges {
                 Text("No changes detected")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else {
                 VStack(spacing: 12) {
                     if let titleChange = diff.titleChanged {
@@ -427,13 +427,13 @@ struct ConfirmCalendarWriteView: View {
                             HStack(alignment: .top) {
                                 Text("Added:")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(OKColor.textMuted)
                                     .frame(width: 60, alignment: .leading)
                                 VStack(alignment: .leading) {
                                     ForEach(attendeesChange.added, id: \.self) { email in
                                         Text("+ \(email)")
                                             .font(.caption)
-                                            .foregroundColor(.green)
+                                            .foregroundColor(OKColor.riskNominal)
                                     }
                                 }
                                 Spacer()
@@ -443,13 +443,13 @@ struct ConfirmCalendarWriteView: View {
                             HStack(alignment: .top) {
                                 Text("Removed:")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(OKColor.textMuted)
                                     .frame(width: 60, alignment: .leading)
                                 VStack(alignment: .leading) {
                                     ForEach(attendeesChange.removed, id: \.self) { email in
                                         Text("- \(email)")
                                             .font(.caption)
-                                            .foregroundColor(.red)
+                                            .foregroundColor(OKColor.riskCritical)
                                     }
                                 }
                                 Spacer()
@@ -460,7 +460,7 @@ struct ConfirmCalendarWriteView: View {
             }
         }
         .padding(16)
-        .background(Color.orange.opacity(0.05))
+        .background(OKColor.riskWarning.opacity(0.05))
         .cornerRadius(12)
     }
     
@@ -473,7 +473,7 @@ struct ConfirmCalendarWriteView: View {
             HStack {
                 Image(systemName: permissionGranted ? "checkmark.shield.fill" : "xmark.shield.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(permissionGranted ? .green : .red)
+                    .foregroundColor(permissionGranted ? OKColor.riskNominal : OKColor.riskCritical)
                 Text("Permission Status")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -483,7 +483,7 @@ struct ConfirmCalendarWriteView: View {
             if permissionGranted {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("Calendar access granted")
                         .font(.subheadline)
                 }
@@ -491,10 +491,10 @@ struct ConfirmCalendarWriteView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 8) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                         Text("Calendar access required")
                             .font(.subheadline)
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                     }
                     
                     Button(action: openSettings) {
@@ -504,15 +504,15 @@ struct ConfirmCalendarWriteView: View {
                         }
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Invariant Card
@@ -522,7 +522,7 @@ struct ConfirmCalendarWriteView: View {
             HStack {
                 Image(systemName: "shield.checkered")
                     .font(.system(size: 16))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 Text("What OperatorKit Guarantees")
                     .font(.subheadline)
                     .fontWeight(.semibold)
@@ -540,7 +540,7 @@ struct ConfirmCalendarWriteView: View {
             }
         }
         .padding(16)
-        .background(Color.green.opacity(0.05))
+        .background(OKColor.riskNominal.opacity(0.05))
         .cornerRadius(12)
     }
     
@@ -558,12 +558,12 @@ struct ConfirmCalendarWriteView: View {
                 Text("Cancel")
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.white)
+                    .background(OKColor.backgroundPrimary)
                     .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                    .shadow(color: OKColor.shadow.opacity(0.04), radius: 4, x: 0, y: 2)
             }
             
             // Confirm Button
@@ -571,7 +571,7 @@ struct ConfirmCalendarWriteView: View {
                 HStack(spacing: 8) {
                     if isConfirming {
                         ProgressView()
-                            .tint(.white)
+                            .tint(OKColor.iconOnColor)
                     } else {
                         Image(systemName: "checkmark.circle.fill")
                     }
@@ -579,10 +579,10 @@ struct ConfirmCalendarWriteView: View {
                 }
                 .font(.body)
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(canConfirm ? (isUpdate ? Color.orange : Color.blue) : Color.gray)
+                .background(canConfirm ? (isUpdate ? OKColor.riskWarning : OKColor.actionPrimary) : OKColor.textMuted)
                 .cornerRadius(12)
             }
             .disabled(!canConfirm || isConfirming)
@@ -590,14 +590,14 @@ struct ConfirmCalendarWriteView: View {
             if !canConfirm {
                 Text("Open Settings to grant Calendar access, then return here.")
                     .font(.caption)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color(UIColor.systemGroupedBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.backgroundPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
@@ -673,7 +673,7 @@ private struct DetailRow: View {
         HStack(alignment: .top) {
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .frame(width: 80, alignment: .leading)
             Text(value)
                 .font(.subheadline)
@@ -692,37 +692,37 @@ private struct DiffRow: View {
             Text(field)
                 .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             HStack(alignment: .top, spacing: 8) {
                 VStack(alignment: .leading) {
                     Text("Before:")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text(oldValue)
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundColor(OKColor.riskCritical)
                         .strikethrough()
                 }
                 
                 Image(systemName: "arrow.right")
                     .font(.caption)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 VStack(alignment: .leading) {
                     Text("After:")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     Text(newValue)
                         .font(.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
                 
                 Spacer()
             }
         }
         .padding(8)
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(6)
     }
 }
@@ -734,10 +734,10 @@ private struct InvariantRow: View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.caption)
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }

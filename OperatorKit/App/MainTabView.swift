@@ -1,16 +1,17 @@
 import SwiftUI
 
 // ============================================================================
-// MAIN TAB VIEW — FOUR-TAB BOTTOM NAVIGATION
+// MAIN TAB VIEW — MISSION CONTROL FOUR-TAB NAVIGATION
 // ============================================================================
-// Home (default) | Tasks | Analytics | Settings
-// Clean, institutional tab bar. Home is always the default selected tab.
+// Control (default) | Insights | Policies | Config
 //
 // WIRING:
-// Tab 1 — HomeView (with NavigationStack + Route-based navigation)
-// Tab 2 — MemoryView (real operations history / task ledger)
-// Tab 3 — QualityReportView (real analytics surface)
-// Tab 4 — PrivacyControlsView (real settings hub with all sub-screens)
+// Tab 0 — ControlDashboardView (mission control: execution tracker, risk,
+//          high-risk actions, direct controls, audit trail)
+//          + HomeView with Route-based navigation for execution flow
+// Tab 1 — AnalyticsTabView → Insights (operations history + analytics)
+// Tab 2 — PolicyEditorView → Policies (governance rules)
+// Tab 3 — SettingsTabView → Config (privacy, sync, team, diagnostics)
 //
 // ZERO placeholders. All tabs route to production views.
 // ============================================================================
@@ -22,58 +23,57 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $nav.selectedTab) {
 
-            // ── Tab 1: Home ──────────────────────────────────
-            // Primary execution surface. NavigationStack with
-            // Route-based destinations for the full workflow flow.
+            // ── Tab 0: Control ───────────────────────────────
+            // Mission-control dashboard. Primary execution surface.
+            // NavigationStack with Route-based destinations for workflow.
             NavigationStack(path: $nav.path) {
-                HomeView()
+                ControlDashboardView()
                     .navigationDestination(for: Route.self) { route in
                         route.destinationView
                     }
             }
             .tabItem {
-                Image(systemName: "house.fill")
-                Text("Home")
+                Image(systemName: "shield.checkered")
+                Text("Control")
             }
             .tag(0)
 
-            // ── Tab 2: Tasks ─────────────────────────────────
-            // MemoryView = real operations history / task ledger.
-            // MemoryView manages its own header (.navigationBarHidden).
+            // ── Tab 1: Insights ──────────────────────────────
+            // Operations history, quality analytics, memory view.
             NavigationStack {
                 TasksTabView()
             }
             .tabItem {
-                Image(systemName: "checklist")
-                Text("Tasks")
+                Image(systemName: "chart.bar.fill")
+                Text("Insights")
             }
             .tag(1)
 
-            // ── Tab 3: Analytics ─────────────────────────────
-            // QualityReportView = real analytics.
-            // QualityReportView contains its own NavigationView,
-            // so we do NOT wrap it in another NavigationStack.
-            AnalyticsTabView()
-                .tabItem {
-                    Image(systemName: "chart.bar.fill")
-                    Text("Analytics")
-                }
-                .tag(2)
+            // ── Tab 2: Policies ──────────────────────────────
+            // Governance rules and policy editor.
+            NavigationStack {
+                PolicyEditorView()
+            }
+            .tabItem {
+                Image(systemName: "doc.text.fill")
+                Text("Policies")
+            }
+            .tag(2)
 
-            // ── Tab 4: Settings ──────────────────────────────
-            // PrivacyControlsView = real settings hub.
-            // Contains sheets for: Policies, Sync, Team, Diagnostics,
-            // Quality & Trust, App Store Readiness, Customer Proof, etc.
-            // Manages its own header (.navigationBarHidden).
+            // ── Tab 3: Config ────────────────────────────────
+            // Privacy controls, sync, team, diagnostics, app store.
             NavigationStack {
                 SettingsTabView()
             }
             .tabItem {
                 Image(systemName: "gearshape.fill")
-                Text("Settings")
+                Text("Config")
             }
             .tag(3)
         }
-        .tint(OKColors.intelligenceStart)
+        .tint(OKColor.riskOperational)
+        .toolbarBackground(OKColor.backgroundSecondary, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
+        .toolbarColorScheme(.dark, for: .tabBar)
     }
 }

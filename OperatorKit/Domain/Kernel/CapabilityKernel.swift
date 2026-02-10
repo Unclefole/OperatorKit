@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import Security
 
 // ============================================================================
 // CAPABILITY KERNEL — PHASE 1 PRIMARY MOAT
@@ -163,8 +164,8 @@ public final class CapabilityKernel: ObservableObject {
             )
             try? evidenceEngine.logApproval(approval, planId: toolPlan.id)
             
-            // Proceed to execution
-            return await executeAuthorized(
+            // Record authorization (actual execution happens via ExecutionEngine)
+            return await recordAuthorizedPlan(
                 toolPlan: toolPlan,
                 riskAssessment: riskAssessment,
                 verificationResult: verificationResult,
@@ -249,8 +250,8 @@ public final class CapabilityKernel: ObservableObject {
             )
         }
         
-        // Proceed to execution
-        return await executeAuthorized(
+        // Record authorization (actual execution happens via ExecutionEngine)
+        return await recordAuthorizedPlan(
             toolPlan: pendingContext.toolPlan,
             riskAssessment: pendingContext.riskAssessment,
             verificationResult: pendingContext.verificationResult,
@@ -317,9 +318,96 @@ public final class CapabilityKernel: ObservableObject {
         Array(pendingPlans.values)
     }
     
+    // MARK: - Emergency Stop
+    
+    /// Cancel all pending plans and halt execution.
+    /// Logged to EvidenceEngine as a system event.
+    /// Called from Direct Controls in the mission-control UI.
+    public func emergencyStop() {
+        let cancelledCount = pendingPlans.count
+        
+        // Cancel all pending plans
+        for (planId, _) in pendingPlans {
+            let denial = ApprovalRecord(
+                planId: planId,
+                approved: false,
+                approvalType: .denied,
+                approverIdentifier: "EMERGENCY_STOP",
+                reason: "Emergency stop activated by operator"
+            )
+            try? evidenceEngine.logApproval(denial, planId: planId)
+        }
+        pendingPlans.removeAll()
+        
+        // Cancel any in-flight tasks
+        activeExecutionTask?.cancel()
+        activeExecutionTask = nil
+
+        // EXECUTION PERSISTENCE: Fail all in-flight execution records
+        let haltedRecords = ExecutionRecordStore.shared.haltAllExecuting()
+        if haltedRecords > 0 {
+            log("[EMERGENCY_STOP] \(haltedRecords) execution record(s) moved to .failed")
+        }
+
+        // Set halted state — NOT idle — must be explicit
+        currentPhase = .halted
+        
+        // Log emergency stop event
+        let violation = PolicyViolation(
+            violationType: .emergencyStop,
+            description: "Emergency stop activated — \(cancelledCount) pending plan(s) cancelled",
+            severity: .critical
+        )
+        try? evidenceEngine.logViolation(violation, planId: nil)
+    }
+    
+    /// Resume from halted state (requires explicit operator action)
+    public func resumeFromHalt() {
+        guard currentPhase == .halted else { return }
+        currentPhase = .idle
+        try? evidenceEngine.logGenericArtifact(
+            type: "system_resume",
+            planId: UUID(),
+            jsonString: "{\"action\":\"resume_from_halt\",\"timestamp\":\"\(Date())\"}"
+        )
+    }
+    
+    /// Escalate all pending plans for human review. Called from Direct Controls UI.
+    /// Returns the number of plans escalated.
+    @discardableResult
+    public func escalatePendingPlans() -> Int {
+        let escalated = pendingPlans.count
+        for (planId, _) in pendingPlans {
+            currentPhase = .awaitingApproval
+            try? evidenceEngine.logGenericArtifact(
+                type: "escalation",
+                planId: planId,
+                jsonString: "{\"action\":\"manual_escalation\",\"planId\":\"\(planId)\",\"timestamp\":\"\(Date())\"}"
+            )
+        }
+        return escalated
+    }
+    
+    /// Whether there are pending plans that can be escalated
+    public var hasPendingPlans: Bool {
+        !pendingPlans.isEmpty
+    }
+    
+    /// Cancellable reference for in-flight execution
+    public var activeExecutionTask: Task<Void, Never>?
+    
     // MARK: - Internal Execution
     
-    private func executeAuthorized(
+    /// Records authorization decision and evidence for an approved plan.
+    ///
+    /// ARCHITECTURAL NOTE: This method does NOT perform side effects.
+    /// Real execution dispatches through ExecutionEngine (token-gated).
+    /// This method records the kernel's authorization evidence chain only.
+    ///
+    /// The unified pipeline is:
+    ///   Kernel.execute(intent:) → risk/probes/policy → recordAuthorizedPlan() → evidence
+    ///   ApprovalView → KernelBridge.issueToken() → ExecutionEngine.execute(token:) → side effects
+    private func recordAuthorizedPlan(
         toolPlan: ToolPlan,
         riskAssessment: RiskAssessment,
         verificationResult: KernelVerificationResult,
@@ -334,36 +422,18 @@ public final class CapabilityKernel: ObservableObject {
             activeCooldowns[toolPlan.intent.type.hashableKey] = cooldownEnd
         }
         
-        // PHASE 9: EXECUTE — Perform the authorized action
+        // PHASE 9: AUTHORIZE — Plan is authorized, ready for token issuance
         currentPhase = .execute
         
-        let executionStartTime = Date()
-        let outcome: KernelExecutionOutcome
+        let outcome = KernelExecutionOutcome(
+            planId: toolPlan.id,
+            success: true,
+            status: .completed,
+            startedAt: Date(),
+            resultSummary: "Plan authorized — ready for token-gated execution via ExecutionEngine"
+        )
         
-        do {
-            // Execute via the appropriate executor
-            // For Phase 1, we simulate execution
-            try await simulateExecution(toolPlan: toolPlan)
-            
-            outcome = KernelExecutionOutcome(
-                planId: toolPlan.id,
-                success: true,
-                status: .completed,
-                startedAt: executionStartTime,
-                resultSummary: "Execution completed successfully"
-            )
-        } catch {
-            outcome = KernelExecutionOutcome(
-                planId: toolPlan.id,
-                success: false,
-                status: .failed,
-                startedAt: executionStartTime,
-                errorMessage: error.localizedDescription,
-                resultSummary: "Execution failed: \(error.localizedDescription)"
-            )
-        }
-        
-        // Log execution outcome
+        // Log authorization outcome
         try? evidenceEngine.logExecutionOutcome(outcome, planId: toolPlan.id)
         
         // PHASE 10: LOG EVIDENCE — Create complete chain
@@ -385,10 +455,10 @@ public final class CapabilityKernel: ObservableObject {
         
         let result = KernelExecutionResult(
             id: UUID(),
-            status: outcome.success ? .completed : .failed,
+            status: .completed,
             planId: toolPlan.id,
             phase: .complete,
-            message: outcome.resultSummary,
+            message: "Plan authorized — token can be issued for execution",
             startedAt: startTime,
             completedAt: Date(),
             toolPlan: toolPlan,
@@ -401,12 +471,6 @@ public final class CapabilityKernel: ObservableObject {
         
         lastExecutionResult = result
         return result
-    }
-    
-    private func simulateExecution(toolPlan: ToolPlan) async throws {
-        // Phase 1: Simulate execution with a small delay
-        // In production, this would dispatch to actual executors
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1s
     }
     
     // MARK: - Token Issuance
@@ -438,7 +502,110 @@ public final class CapabilityKernel: ObservableObject {
             signature: signature
         )
     }
-    
+
+    /// Hardened token issuance from a validated ProposalPack + ApprovalSession.
+    /// Includes plan hash, approved scopes, reversibility, and session linkage.
+    public func issueHardenedToken(
+        proposal: ProposalPack,
+        session: ApprovalSession,
+        humanSignature: Data? = nil
+    ) -> AuthorizationToken? {
+        // GATE 0: Kernel lockdown — no tokens issued during integrity failure
+        guard !KernelIntegrityGuard.shared.isLocked else {
+            logError("[KERNEL] Cannot issue token — EXECUTION LOCKDOWN active")
+            return nil
+        }
+
+        // GATE: Session must be approved and not expired
+        guard session.isApproved else {
+            logError("[KERNEL] Cannot issue token — session not approved or expired")
+            return nil
+        }
+
+        // GATE: Device must be trusted
+        guard TrustedDeviceRegistry.shared.isCurrentDeviceTrusted else {
+            logError("[KERNEL] Cannot issue token — current device not trusted")
+            return nil
+        }
+
+        // GATE: Trust epoch integrity must hold
+        let epochManager = TrustEpochManager.shared
+        guard epochManager.verifyIntegrity() else {
+            logError("[KERNEL] Cannot issue token — trust epoch integrity check failed")
+            return nil
+        }
+
+        let planId = proposal.toolPlan.id
+        let issuedAt = Date()
+        let expiresAt = issuedAt.addingTimeInterval(60)
+
+        // Sign with the ACTIVE epoch-versioned key
+        let currentKeyVersion = epochManager.activeKeyVersion
+        let currentEpoch = epochManager.trustEpoch
+
+        let signature = CapabilityKernel.computeSignature(
+            planId: planId,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt
+        )
+
+        // Compute plan hash for tamper detection
+        let planMaterial = "\(planId)\(proposal.toolPlan.intent.summary)\(proposal.toolPlan.executionSteps.count)"
+        let planHashDigest = SHA256.hash(data: planMaterial.data(using: .utf8)!)
+        let planHash = planHashDigest.compactMap { String(format: "%02x", $0) }.joined()
+
+        let scopes = proposal.permissionManifest.scopes.map {
+            "\($0.domain.rawValue).\($0.access.rawValue)(\($0.detail))"
+        }
+
+        // Build collected signatures for quorum
+        var collectedSigs: [CollectedSignature] = []
+        if let sig = humanSignature, let fingerprint = SecureEnclaveApprover.shared.deviceFingerprint {
+            collectedSigs.append(CollectedSignature(
+                signerId: fingerprint,
+                signerType: .deviceOperator,
+                signatureData: sig,
+                signedAt: issuedAt
+            ))
+        }
+
+        // Quorum policy: required signers determined by risk tier
+        let requiredCount = CapabilityKernel.requiredSignerCount(for: session.riskTier)
+
+        let token = AuthorizationToken(
+            planId: planId,
+            riskTier: session.riskTier,
+            approvalType: .userConfirm,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt,
+            signature: signature,
+            planHash: planHash,
+            approvedScopes: scopes,
+            reversibilityRequired: proposal.riskAnalysis.reversibilityClass == .irreversible ? false : true,
+            approvalSessionId: session.id,
+            humanSignature: humanSignature,
+            requiredSigners: requiredCount,
+            collectedSignatures: collectedSigs,
+            keyVersion: currentKeyVersion,
+            epoch: currentEpoch
+        )
+
+        // Link token to session
+        ApprovalSessionStore.shared.linkToken(token.id, to: session.id)
+
+        // Log token issuance
+        let hasSE = humanSignature != nil
+        try? evidenceEngine.logGenericArtifact(
+            type: "hardened_token_issued",
+            planId: planId,
+            jsonString: """
+            {"tokenId":"\(token.id)","planId":"\(planId)","sessionId":"\(session.id)","riskTier":"\(session.riskTier.rawValue)","scopeCount":\(scopes.count),"expiresAt":"\(expiresAt)","planHash":"\(planHash.prefix(16))...","secureEnclaveAttested":\(hasSE),"quorumMet":\(token.quorumMet),"keyVersion":\(currentKeyVersion),"epoch":\(currentEpoch)}
+            """
+        )
+
+        return token
+    }
+
     // MARK: - Intent Processing
     
     private func normalizeIntent(_ intent: ExecutionIntent) -> ExecutionIntent? {
@@ -856,7 +1023,39 @@ extension CapabilityKernel {
         public let issuedAt: Date
         public let expiresAt: Date
         public let signature: String
-        
+
+        // HARDENED FIELDS (Sentinel Proposal Engine integration)
+        /// SHA256 hash of the approved ToolPlan — prevents post-approval tampering
+        public let planHash: String
+        /// Scopes approved for this execution (from PermissionManifest)
+        public let approvedScopes: [String]
+        /// Whether this execution MUST be reversible
+        public let reversibilityRequired: Bool
+        /// Links to the ApprovalSession that authorized this token
+        public let approvalSessionId: UUID?
+
+        // SECURE ENCLAVE — Hardware-backed human approval
+        /// ECDSA signature from Secure Enclave over the planHash.
+        /// Proves a biometrically-authenticated human approved this specific plan.
+        /// nil only for legacy tokens issued before SE integration.
+        public let humanSignature: Data?
+
+        // HYBRID QUORUM — prepared for multi-signer authority
+        /// Number of signatures required for this token to be valid.
+        /// Default 1 = device-sovereign (local human only).
+        /// Future: 2 = hybrid quorum (device + org co-sign).
+        public let requiredSigners: Int
+        /// Collected cryptographic signatures from authorized principals.
+        public let collectedSignatures: [CollectedSignature]
+
+        // KEY LIFECYCLE — epoch-bound, version-tracked
+        /// The signing key version used to produce this token's HMAC.
+        /// ExecutionEngine HARD FAILs if this != TrustEpochManager.activeKeyVersion.
+        public let keyVersion: Int
+        /// The trust epoch at issuance time.
+        /// ExecutionEngine HARD FAILs if this != TrustEpochManager.trustEpoch.
+        public let epoch: Int
+
         /// fileprivate: ONLY CapabilityKernel.swift can create tokens.
         /// No other file in the module can call this initializer.
         fileprivate init(
@@ -865,7 +1064,16 @@ extension CapabilityKernel {
             approvalType: ApprovalType,
             issuedAt: Date = Date(),
             expiresAt: Date,
-            signature: String
+            signature: String,
+            planHash: String = "",
+            approvedScopes: [String] = [],
+            reversibilityRequired: Bool = false,
+            approvalSessionId: UUID? = nil,
+            humanSignature: Data? = nil,
+            requiredSigners: Int = 1,
+            collectedSignatures: [CollectedSignature] = [],
+            keyVersion: Int = 1,
+            epoch: Int = 1
         ) {
             self.id = UUID()
             self.planId = planId
@@ -874,6 +1082,15 @@ extension CapabilityKernel {
             self.issuedAt = issuedAt
             self.expiresAt = expiresAt
             self.signature = signature
+            self.planHash = planHash
+            self.approvedScopes = approvedScopes
+            self.reversibilityRequired = reversibilityRequired
+            self.approvalSessionId = approvalSessionId
+            self.humanSignature = humanSignature
+            self.requiredSigners = requiredSigners
+            self.collectedSignatures = collectedSignatures
+            self.keyVersion = keyVersion
+            self.epoch = epoch
         }
         
         /// Basic validity: not expired and signature is non-empty.
@@ -894,14 +1111,140 @@ extension CapabilityKernel {
             )
             return signature == expectedSignature
         }
+
+        /// Verify Secure Enclave human signature.
+        /// Returns true if humanSignature is present and valid, OR if
+        /// SE is not available (simulator fallback — logged as degraded).
+        public var hasValidHumanSignature: Bool {
+            guard let sig = humanSignature, !planHash.isEmpty else {
+                return false
+            }
+            return SecureEnclaveApprover.shared.verifySignature(sig, planHash: planHash)
+        }
+
+        /// Whether the quorum requirement is met.
+        public var quorumMet: Bool {
+            collectedSignatures.count >= requiredSigners
+        }
+    }
+
+    /// A cryptographic signature from an authorized principal.
+    public struct CollectedSignature {
+        public let signerId: String        // SHA256 of signer's public key
+        public let signerType: SignerType
+        public let signatureData: Data     // DER-encoded ECDSA signature
+        public let signedAt: Date
+
+        public enum SignerType: String, CaseIterable {
+            case deviceOperator = "device_operator"         // SE on this device — primary human
+            case organizationAuthority = "org_authority"    // Enterprise policy server co-sign
+            case emergencyOverride = "emergency_override"   // Secondary human signer (break-glass)
+        }
+    }
+
+    // MARK: - Quorum Policy by Risk Tier
+    //
+    // INVARIANT: Authority must be collectively proven — never inferred.
+    // No override flags. No bypass. FAIL CLOSED.
+    //
+    //  LOW:      deviceOperator (1 signer)
+    //  HIGH:     deviceOperator + organizationAuthority (2 signers)
+    //  CRITICAL: deviceOperator + organizationAuthority + emergencyOverride (3 signers)
+
+    /// Returns the required signer types for a given risk tier.
+    public static func requiredSignerTypes(for riskTier: RiskTier) -> [CollectedSignature.SignerType] {
+        switch riskTier {
+        case .low, .medium:
+            return [.deviceOperator]
+        case .high:
+            return [.deviceOperator, .organizationAuthority]
+        case .critical:
+            return [.deviceOperator, .organizationAuthority, .emergencyOverride]
+        }
+    }
+
+    /// Returns the required number of signers for a given risk tier.
+    public static func requiredSignerCount(for riskTier: RiskTier) -> Int {
+        requiredSignerTypes(for: riskTier).count
+    }
+
+    /// Validate that collected signatures meet quorum policy for a risk tier.
+    /// Returns nil on success, or the missing signer types on failure.
+    public static func validateQuorum(
+        signatures: [CollectedSignature],
+        riskTier: RiskTier
+    ) -> [CollectedSignature.SignerType]? {
+        let required = requiredSignerTypes(for: riskTier)
+        let present = Set(signatures.map(\.signerType))
+        let missing = required.filter { !present.contains($0) }
+        return missing.isEmpty ? nil : missing
     }
     
-    // MARK: - Signing Key (file-private)
+    // MARK: - Signing Key (Keychain-Stored Runtime Secret)
     
-    /// The signing key for token HMAC. fileprivate ensures it cannot leak.
-    fileprivate nonisolated(unsafe) static let tokenSigningKey = SymmetricKey(
-        data: "OperatorKit-Token-Signing-Key-v1".data(using: .utf8)!
-    )
+    /// Keychain service identifier for the token signing key.
+    fileprivate static let keychainService = "com.operatorkit.token-signing-key"
+    fileprivate static let keychainAccount = "token-hmac-v1"
+    
+    /// The signing key for token HMAC.
+    /// - Generated from 256-bit random bytes on first launch.
+    /// - Stored in Keychain with kSecAttrAccessibleWhenUnlockedThisDeviceOnly.
+    /// - Never leaves the device. Never appears in source code.
+    /// - fileprivate: only this file can access.
+    fileprivate nonisolated(unsafe) static let tokenSigningKey: SymmetricKey = {
+        // Attempt to load from Keychain
+        if let existingKey = loadKeyFromKeychain() {
+            return existingKey
+        }
+        // First launch: generate and store
+        let newKey = SymmetricKey(size: .bits256)
+        storeKeyInKeychain(newKey)
+        return newKey
+    }()
+    
+    /// Load signing key from Keychain.
+    fileprivate nonisolated static func loadKeyFromKeychain() -> SymmetricKey? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        
+        guard status == errSecSuccess, let data = result as? Data else {
+            return nil
+        }
+        
+        return SymmetricKey(data: data)
+    }
+    
+    /// Store signing key in Keychain (first launch only).
+    fileprivate nonisolated static func storeKeyInKeychain(_ key: SymmetricKey) {
+        let keyData = key.withUnsafeBytes { Data($0) }
+        
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecValueData as String: keyData,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        ]
+        
+        // Delete any existing entry first (idempotent)
+        SecItemDelete(query as CFDictionary)
+        
+        let status = SecItemAdd(query as CFDictionary, nil)
+        if status != errSecSuccess {
+            // Fallback: log but don't crash — key is already in memory
+            #if DEBUG
+            print("[CapabilityKernel] WARNING: Failed to store signing key in Keychain (status: \(status))")
+            #endif
+        }
+    }
     
     /// Compute the expected HMAC signature for a token.
     /// Used by both issueToken() and AuthorizationToken.verifySignature().
@@ -913,28 +1256,291 @@ extension CapabilityKernel {
         return Data(mac).base64EncodedString()
     }
     
-    // MARK: - Consumed Token Tracking (One-Use Enforcement)
-    
-    /// Set of consumed token IDs. A token can only be used ONCE.
-    /// @MainActor isolation inherited from CapabilityKernel — safe for mutation.
-    private static var consumedTokenIds: Set<UUID> = []
-    
+    // MARK: - Consumed Token Tracking (DURABLE One-Use Enforcement)
+    //
+    // INVARIANT: A consumed token must NEVER become valid again —
+    //            even after crash, restart, or termination.
+    //
+    // Implementation: Stores SHA256(token.id) + expiresAt in an encrypted
+    // file. Auto-prunes expired entries on launch.
+
+    /// In-memory cache backed by persistent file storage.
+    private static var consumedTokenStore = ConsumedTokenStore(filename: "consumed_auth_tokens.json")
+
     /// Check if a token has already been consumed.
     public static func isTokenConsumed(_ token: AuthorizationToken) -> Bool {
-        consumedTokenIds.contains(token.id)
+        consumedTokenStore.contains(tokenId: token.id)
     }
-    
+
     /// Mark a token as consumed. Returns false if already consumed.
+    /// Persists immediately to disk — survives crash/restart.
     @discardableResult
     public static func consumeToken(_ token: AuthorizationToken) -> Bool {
-        let (inserted, _) = consumedTokenIds.insert(token.id)
-        return inserted  // true = first use, false = replay attempt
+        consumedTokenStore.consume(tokenId: token.id, expiresAt: token.expiresAt)
+    }
+}
+
+// MARK: - Durable Consumed Token Store
+
+/// Persistent store for consumed token hashes.
+/// Survives app crash, restart, and reboot.
+/// Auto-prunes expired entries to keep the store lean.
+struct ConsumedTokenStore {
+    private var entries: [ConsumedEntry] = []
+    private let fileURL: URL
+
+    struct ConsumedEntry: Codable {
+        let tokenHash: String   // SHA256 of token UUID — never store raw ID
+        let expiresAt: Date
+    }
+
+    init(filename: String = "consumed_tokens.json") {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let dir = docs.appendingPathComponent("KernelSecurity", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        self.fileURL = dir.appendingPathComponent(filename)
+        loadAndPrune()
+    }
+
+    /// Check if a token ID has been consumed.
+    func contains(tokenId: UUID) -> Bool {
+        let hash = Self.hash(tokenId)
+        return entries.contains { $0.tokenHash == hash }
+    }
+
+    /// Consume a token. Returns true if first use, false if replay.
+    /// Persists to disk immediately.
+    mutating func consume(tokenId: UUID, expiresAt: Date) -> Bool {
+        let hash = Self.hash(tokenId)
+        if entries.contains(where: { $0.tokenHash == hash }) {
+            return false // replay attempt
+        }
+        entries.append(ConsumedEntry(tokenHash: hash, expiresAt: expiresAt))
+        persist()
+        return true
+    }
+
+    /// Load from disk and prune expired entries.
+    private mutating func loadAndPrune() {
+        guard FileManager.default.fileExists(atPath: fileURL.path),
+              let data = try? Data(contentsOf: fileURL),
+              let loaded = try? JSONDecoder().decode([ConsumedEntry].self, from: data) else {
+            entries = []
+            return
+        }
+        let now = Date()
+        // Keep entries that haven't expired yet (add 120s buffer beyond TTL)
+        entries = loaded.filter { $0.expiresAt.addingTimeInterval(120) > now }
+        persist()
+    }
+
+    /// Persist to disk atomically.
+    private func persist() {
+        guard let data = try? JSONEncoder().encode(entries) else { return }
+        try? data.write(to: fileURL, options: .atomic)
+    }
+
+    /// SHA256 hash of a UUID string — never store raw token IDs.
+    private static func hash(_ id: UUID) -> String {
+        let data = id.uuidString.data(using: .utf8)!
+        let digest = SHA256.hash(data: data)
+        return digest.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 
 /// Public typealias for backward compatibility.
 /// All new code should use CapabilityKernel.AuthorizationToken directly.
 public typealias KernelAuthorizationToken = CapabilityKernel.AuthorizationToken
+
+// ============================================================================
+// MODEL CALL TOKEN — Governed Intelligence Token
+//
+// Mirrors AuthorizationToken pattern for model call governance.
+// fileprivate init: ONLY CapabilityKernel.swift can create.
+// 60-second expiry. One-use. HMAC-signed.
+// ============================================================================
+
+extension CapabilityKernel {
+
+    public struct ModelCallToken: Identifiable, Sendable {
+        public let id: UUID
+        public let requestId: UUID
+        public let provider: ModelProvider
+        public let issuedAt: Date
+        public let expiresAt: Date
+        public let signature: String
+
+        /// fileprivate: ONLY CapabilityKernel.swift can create tokens.
+        fileprivate init(
+            requestId: UUID,
+            provider: ModelProvider,
+            issuedAt: Date = Date(),
+            expiresAt: Date,
+            signature: String
+        ) {
+            self.id = UUID()
+            self.requestId = requestId
+            self.provider = provider
+            self.issuedAt = issuedAt
+            self.expiresAt = expiresAt
+            self.signature = signature
+        }
+
+        public var isValid: Bool {
+            Date() < expiresAt && !signature.isEmpty
+        }
+
+        public func verifySignature() -> Bool {
+            guard isValid else { return false }
+            let expected = CapabilityKernel.computeModelCallSignature(
+                requestId: requestId,
+                provider: provider,
+                issuedAt: issuedAt,
+                expiresAt: expiresAt
+            )
+            return signature == expected
+        }
+    }
+
+    // MARK: - Model Call Token Signing
+
+    fileprivate nonisolated static func computeModelCallSignature(
+        requestId: UUID,
+        provider: ModelProvider,
+        issuedAt: Date,
+        expiresAt: Date
+    ) -> String {
+        let payload = "MCT|\(requestId.uuidString)|\(provider.rawValue)|\(issuedAt.timeIntervalSince1970)|\(expiresAt.timeIntervalSince1970)"
+        let payloadData = payload.data(using: .utf8)!
+        let mac = HMAC<SHA256>.authenticationCode(for: payloadData, using: tokenSigningKey)
+        return Data(mac).base64EncodedString()
+    }
+
+    // MARK: - Model Call Token Consumption (DURABLE One-Use)
+
+    /// Durable store for model call tokens — same pattern as AuthorizationToken.
+    private static var consumedModelCallTokenStore = ConsumedTokenStore(filename: "consumed_model_tokens.json")
+
+    public static func isModelCallTokenConsumed(_ token: ModelCallToken) -> Bool {
+        consumedModelCallTokenStore.contains(tokenId: token.id)
+    }
+
+    @discardableResult
+    public static func consumeModelCallToken(_ token: ModelCallToken) -> Bool {
+        consumedModelCallTokenStore.consume(tokenId: token.id, expiresAt: token.expiresAt)
+    }
+
+    // MARK: - Evaluate Model Call Eligibility
+
+    /// Kernel-owned policy decision for model calls.
+    /// Decides: allowed?, which provider, human approval needed?
+    public func evaluateModelCallEligibility(
+        request: ModelCallRequest
+    ) -> ModelCallDecision {
+        // 1. On-device is always allowed
+        if request.requestedProvider == .onDevice || request.requestedProvider == nil {
+            if !IntelligenceFeatureFlags.anyCloudProviderEnabled {
+                return .onDeviceOnly(requestId: request.id, reason: "Cloud disabled; on-device default")
+            }
+        }
+
+        // 2. Check cloud feature flags
+        guard IntelligenceFeatureFlags.cloudModelsEnabled else {
+            return .onDeviceOnly(requestId: request.id, reason: "Cloud models feature flag OFF")
+        }
+
+        // 3. Determine provider preference
+        let provider: ModelProvider
+        if let requested = request.requestedProvider, requested.isCloud {
+            // Validate specific provider flag
+            switch requested {
+            case .cloudOpenAI:
+                guard IntelligenceFeatureFlags.openAIEnabled else {
+                    return .onDeviceOnly(requestId: request.id, reason: "OpenAI provider disabled")
+                }
+                provider = .cloudOpenAI
+            case .cloudAnthropic:
+                guard IntelligenceFeatureFlags.anthropicEnabled else {
+                    return .onDeviceOnly(requestId: request.id, reason: "Anthropic provider disabled")
+                }
+                provider = .cloudAnthropic
+            default:
+                provider = .onDevice
+            }
+        } else {
+            // Auto-select: prefer OpenAI if enabled, else Anthropic
+            if IntelligenceFeatureFlags.openAIEnabled {
+                provider = .cloudOpenAI
+            } else if IntelligenceFeatureFlags.anthropicEnabled {
+                provider = .cloudAnthropic
+            } else {
+                return .onDeviceOnly(requestId: request.id, reason: "No cloud provider enabled")
+            }
+        }
+
+        // 4. Risk-based gating
+        let riskTierStr = request.riskTierHint ?? "low"
+        let isHighRisk = riskTierStr == "high" || riskTierStr == "critical"
+
+        if isHighRisk {
+            // High risk: require human approval before cloud call
+            return ModelCallDecision(
+                allowed: true,
+                provider: provider,
+                requiresHumanApproval: true,
+                riskTier: riskTierStr,
+                reason: "High-risk intent requires human approval for cloud model call",
+                requestId: request.id
+            )
+        }
+
+        // 5. Allowed — issue token downstream
+        return ModelCallDecision(
+            allowed: true,
+            provider: provider,
+            requiresHumanApproval: false,
+            riskTier: riskTierStr,
+            reason: "Cloud model call approved by kernel policy",
+            requestId: request.id
+        )
+    }
+
+    // MARK: - Issue Model Call Token
+
+    /// Issues a signed, short-lived, one-use token for a cloud model call.
+    /// ONLY callable after evaluateModelCallEligibility returns allowed + no pending approval.
+    public func issueModelCallToken(
+        requestId: UUID,
+        provider: ModelProvider
+    ) -> ModelCallToken {
+        let issuedAt = Date()
+        let expiresAt = issuedAt.addingTimeInterval(60) // 60-second TTL
+
+        let signature = CapabilityKernel.computeModelCallSignature(
+            requestId: requestId,
+            provider: provider,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt
+        )
+
+        let token = ModelCallToken(
+            requestId: requestId,
+            provider: provider,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt,
+            signature: signature
+        )
+
+        // Log token issuance to evidence
+        try? evidenceEngine.logGenericArtifact(
+            type: "model_call_token_issued",
+            planId: requestId,
+            jsonString: "{\"tokenId\":\"\(token.id)\",\"provider\":\"\(provider.rawValue)\",\"expiresAt\":\"\(expiresAt)\"}"
+        )
+
+        return token
+    }
+}
 
 // MARK: - Kernel Authorization Decision
 
@@ -1073,6 +1679,7 @@ public enum SensitivityLevel: Int, Comparable {
 
 public enum KernelPhase: String, Codable {
     case idle = "idle"
+    case halted = "halted"
     case intake = "intake"
     case classify = "classify"
     case riskScore = "risk_score"

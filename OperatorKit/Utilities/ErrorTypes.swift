@@ -228,7 +228,7 @@ struct ErrorCalloutView: View {
             HStack {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 18))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text(error.title)
                     .font(.headline)
@@ -240,7 +240,7 @@ struct ErrorCalloutView: View {
                     Button(action: onDismiss) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 20))
-                            .foregroundColor(.gray.opacity(0.5))
+                            .foregroundColor(OKColor.textMuted.opacity(0.5))
                     }
                 }
             }
@@ -248,7 +248,7 @@ struct ErrorCalloutView: View {
             // Message
             Text(error.message)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             
             // Recovery Actions
@@ -265,13 +265,13 @@ struct ErrorCalloutView: View {
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                             }
-                            .foregroundColor(action == error.recoveryActions.first ? .white : .blue)
+                            .foregroundColor(action == error.recoveryActions.first ? OKColor.textPrimary : OKColor.actionPrimary)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
                             .background(
                                 action == error.recoveryActions.first
-                                    ? Color.blue
-                                    : Color.blue.opacity(0.1)
+                                    ? OKColor.actionPrimary
+                                    : OKColor.actionPrimary.opacity(0.1)
                             )
                             .cornerRadius(8)
                         }
@@ -282,11 +282,11 @@ struct ErrorCalloutView: View {
             }
         }
         .padding(16)
-        .background(Color.orange.opacity(0.05))
+        .background(OKColor.riskWarning.opacity(0.05))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(OKColor.riskWarning.opacity(0.3), lineWidth: 1)
         )
     }
 }

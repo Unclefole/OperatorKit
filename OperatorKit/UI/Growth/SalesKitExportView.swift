@@ -39,8 +39,13 @@ struct SalesKitExportView: View {
                 exportSection
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Sales Kit Export")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -70,13 +75,13 @@ struct SalesKitExportView: View {
                 HStack {
                     ProgressView()
                     Text("Building sales kit...")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else if let packet = packet {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "briefcase.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         
                         Text("Sales Kit Ready")
                             .font(.headline)
@@ -84,12 +89,12 @@ struct SalesKitExportView: View {
                     
                     Text("\(packet.availableSections.count) sections available")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     if !packet.unavailableSections.isEmpty {
                         Text("\(packet.unavailableSections.count) sections unavailable")
                             .font(.caption)
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                     }
                 }
                 .padding(.vertical, 4)
@@ -231,7 +236,7 @@ private struct StatusRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
@@ -246,7 +251,7 @@ private struct StatusRow: View {
                     .font(.caption)
             } else {
                 Image(systemName: isAvailable ? "checkmark.circle.fill" : "xmark.circle")
-                    .foregroundColor(isAvailable ? .green : .gray)
+                    .foregroundColor(isAvailable ? OKColor.riskNominal : OKColor.textMuted)
                     .font(.caption)
             }
         }
@@ -254,9 +259,9 @@ private struct StatusRow: View {
     
     private func statusColor(for status: PricingValidationStatus) -> Color {
         switch status {
-        case .pass: return .green
-        case .warn: return .orange
-        case .fail: return .red
+        case .pass: return OKColor.riskNominal
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
         }
     }
 }

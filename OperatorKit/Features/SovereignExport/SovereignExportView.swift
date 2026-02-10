@@ -47,6 +47,8 @@ public struct SovereignExportView: View {
         }
         .navigationTitle("Sovereign Export")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .sheet(isPresented: $showingExportFlow) {
             SovereignExportFlowView()
         }
@@ -68,7 +70,7 @@ public struct SovereignExportView: View {
                 HStack {
                     Image(systemName: "lock.doc.fill")
                         .font(.title)
-                        .foregroundColor(.purple)
+                        .foregroundColor(OKColor.riskExtreme)
                     
                     Text("Your Data, Your Control")
                         .font(.headline)
@@ -76,7 +78,7 @@ public struct SovereignExportView: View {
                 
                 Text("Export your configuration as an encrypted, portable file that you own completely.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -147,38 +149,38 @@ public struct SovereignExportView: View {
         Section {
             HStack {
                 Image(systemName: "lock.shield.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 
                 Text("Encryption")
                 
                 Spacer()
                 
                 Text("AES-256-GCM")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Image(systemName: "key.fill")
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("Key Storage")
                 
                 Spacer()
                 
                 Text("None (ephemeral)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Image(systemName: "network.slash")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Network Access")
                 
                 Spacer()
                 
                 Text("None")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Security")
@@ -193,14 +195,14 @@ public struct SovereignExportView: View {
         VStack(spacing: 16) {
             Image(systemName: "lock.fill")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Sovereign Export")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -220,7 +222,7 @@ private struct ExportItemRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(included ? .green : .red)
+                .foregroundColor(included ? OKColor.riskNominal : OKColor.riskCritical)
                 .frame(width: 24)
             
             Text(item)
@@ -229,7 +231,7 @@ private struct ExportItemRow: View {
             Spacer()
             
             Image(systemName: included ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(included ? .green : .red)
+                .foregroundColor(included ? OKColor.riskNominal : OKColor.riskCritical)
         }
     }
 }

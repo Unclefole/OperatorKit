@@ -456,9 +456,13 @@ public final class SupabaseClient: ObservableObject {
     // MARK: - Network Helpers
     
     /// Performs a network request with error handling
-    /// INVARIANT: Only method that actually calls URLSession
+    /// INVARIANT: All requests pass through NetworkPolicyEnforcer
     private func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
         do {
+            // Validate via NetworkPolicyEnforcer first, then use configured session
+            if let url = request.url {
+                try NetworkPolicyEnforcer.shared.validate(url)
+            }
             return try await urlSession.data(for: request)
         } catch let error as URLError {
             if error.code == .timedOut {

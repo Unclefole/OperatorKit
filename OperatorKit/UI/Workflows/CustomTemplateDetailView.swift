@@ -17,7 +17,7 @@ struct CustomTemplateDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -58,11 +58,11 @@ struct CustomTemplateDetailView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 48))
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
 
                         Text("Template not found")
                             .font(.headline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -96,7 +96,7 @@ struct CustomTemplateDetailView: View {
             }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -130,7 +130,7 @@ struct CustomTemplateDetailView: View {
             Text(template.name)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
 
             // Badge
             HStack(spacing: 6) {
@@ -141,7 +141,7 @@ struct CustomTemplateDetailView: View {
                     .font(.caption)
                     .fontWeight(.medium)
             }
-            .foregroundColor(.white)
+            .foregroundColor(OKColor.textPrimary)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .background(template.color.swiftUIColor)
@@ -149,9 +149,9 @@ struct CustomTemplateDetailView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Details Section
@@ -166,19 +166,19 @@ struct CustomTemplateDetailView: View {
                 if let description = template.description, !description.isEmpty {
                     Text(description)
                         .font(.body)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                 } else {
                     Text("No description provided")
                         .font(.body)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .italic()
                 }
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 
@@ -196,15 +196,15 @@ struct CustomTemplateDetailView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "checklist")
                             .font(.system(size: 32))
-                            .foregroundColor(.gray.opacity(0.5))
+                            .foregroundColor(OKColor.textMuted.opacity(0.5))
 
                         Text("No steps defined")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
 
                         Text("Workflow steps will appear here")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                     .padding(24)
                     .frame(maxWidth: .infinity)
@@ -219,9 +219,9 @@ struct CustomTemplateDetailView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 
@@ -237,19 +237,19 @@ struct CustomTemplateDetailView: View {
                 Text("\(index)")
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(step.title)
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
 
                 if !step.instructions.isEmpty {
                     Text(step.instructions)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                         .lineLimit(2)
                 }
             }
@@ -258,7 +258,7 @@ struct CustomTemplateDetailView: View {
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.gray.opacity(0.4))
+                .foregroundColor(OKColor.textMuted.opacity(0.4))
         }
         .padding(16)
     }
@@ -285,13 +285,13 @@ struct CustomTemplateDetailView: View {
                 HStack {
                     Text("Steps Count")
                         .font(.body)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
 
                     Spacer()
 
                     Text("\(template.steps.count)")
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(16)
 
@@ -301,19 +301,19 @@ struct CustomTemplateDetailView: View {
                 HStack {
                     Text("Schema Version")
                         .font(.body)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
 
                     Spacer()
 
                     Text("v\(template.schemaVersion)")
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(16)
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 
@@ -321,13 +321,13 @@ struct CustomTemplateDetailView: View {
         HStack {
             Text(label)
                 .font(.body)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
 
             Spacer()
 
             Text(formatDate(date))
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(16)
     }
@@ -351,10 +351,10 @@ struct CustomTemplateDetailView: View {
                 Text("Delete Template")
             }
             .font(.body)
-            .foregroundColor(.red)
+            .foregroundColor(OKColor.riskCritical)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.red.opacity(0.1))
+            .background(OKColor.riskCritical.opacity(0.1))
             .cornerRadius(12)
         }
     }
@@ -378,7 +378,7 @@ struct CustomTemplateDetailView: View {
             }
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(.white)
+            .foregroundColor(OKColor.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
             .background(template.color.swiftUIColor)
@@ -387,8 +387,8 @@ struct CustomTemplateDetailView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color(UIColor.systemGroupedBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.backgroundPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
 }
@@ -402,7 +402,7 @@ struct CustomTemplateDetailView_Previews: PreviewProvider {
             name: "Sample Template",
             description: "This is a sample custom workflow template for preview purposes.",
             icon: "star.fill",
-            color: .purple,
+            color: OKColor.riskExtreme,
             steps: [
                 TemplateStep(order: 1, title: "First Step", instructions: "Do the first thing"),
                 TemplateStep(order: 2, title: "Second Step", instructions: "Then do this")

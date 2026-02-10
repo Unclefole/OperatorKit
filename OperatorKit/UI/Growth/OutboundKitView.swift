@@ -50,6 +50,8 @@ struct OutboundKitView: View {
             }
             .navigationTitle("Outbound Kit")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -73,7 +75,7 @@ struct OutboundKitView: View {
                 
                 Text("Ready-to-use templates with placeholders. Copy to clipboard or open in Mail.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -87,14 +89,14 @@ struct OutboundKitView: View {
                 Text("Templates Copied")
                 Spacer()
                 Text("\(ledger.totalCopies)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Text("Emails Opened")
                 Spacer()
                 Text("\(ledger.totalMailOpens)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             if let mostUsed = ledger.mostUsedTemplateId(),
@@ -103,7 +105,7 @@ struct OutboundKitView: View {
                     Text("Most Used")
                     Spacer()
                     Text(template.templateName)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -126,11 +128,11 @@ private struct TemplateRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(template.templateName)
                         .font(.subheadline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                     
                     Text(template.subjectTemplate)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .lineLimit(1)
                 }
                 
@@ -138,7 +140,7 @@ private struct TemplateRow: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -188,7 +190,7 @@ private struct TemplateDetailView: View {
                             if copied {
                                 Text("Copied!")
                                     .font(.caption)
-                                    .foregroundColor(.green)
+                                    .foregroundColor(OKColor.riskNominal)
                             }
                         }
                     }
@@ -204,6 +206,8 @@ private struct TemplateDetailView: View {
             }
             .navigationTitle(template.templateName)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }

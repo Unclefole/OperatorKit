@@ -81,8 +81,13 @@ struct QualityAndTrustView: View {
                 // Data Control Section
                 dataControlSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Quality & Trust")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -149,14 +154,14 @@ struct QualityAndTrustView: View {
             if goldenCaseStore.cases.isEmpty {
                 HStack {
                     Image(systemName: "pin.slash")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("No golden cases pinned yet")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Text("Pin memory items as golden cases from the Memory detail view to use for quality evaluation.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             } else {
                 // List of golden cases
                 ForEach(goldenCaseStore.cases) { goldenCase in
@@ -168,7 +173,7 @@ struct QualityAndTrustView: View {
                             
                             Text(goldenCase.createdAt.formatted(date: .abbreviated, time: .omitted))
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                         
                         Spacer()
@@ -179,7 +184,7 @@ struct QualityAndTrustView: View {
                             editingGoldenCase = goldenCase
                         } label: {
                             Image(systemName: "pencil")
-                                .foregroundColor(.blue)
+                                .foregroundColor(OKColor.actionPrimary)
                         }
                         .buttonStyle(.plain)
                     }
@@ -301,7 +306,7 @@ struct QualityAndTrustView: View {
                                     .fontWeight(.medium)
                                 Text(suggestion.suggestion)
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(OKColor.textSecondary)
                             }
                         }
                         .padding(.vertical, 2)
@@ -318,10 +323,10 @@ struct QualityAndTrustView: View {
             Spacer()
             Text("\(dimension.coveragePercent)%")
                 .font(.caption)
-                .foregroundColor(dimension.isFullyCovered ? .green : .orange)
+                .foregroundColor(dimension.isFullyCovered ? OKColor.riskNominal : OKColor.riskWarning)
             Text("(\(dimension.coveredCategories.count)/\(dimension.categories.count))")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -332,9 +337,9 @@ struct QualityAndTrustView: View {
     }
     
     private func coverageColor(score: Int) -> Color {
-        if score >= 80 { return .green }
-        else if score >= 50 { return .orange }
-        else { return .red }
+        if score >= 80 { return OKColor.riskNominal }
+        else if score >= 50 { return OKColor.riskWarning }
+        else { return OKColor.riskCritical }
     }
     
     private func suggestionIcon(priority: CoverageSuggestion.Priority) -> String {
@@ -347,8 +352,8 @@ struct QualityAndTrustView: View {
     
     private func suggestionColor(priority: CoverageSuggestion.Priority) -> Color {
         switch priority {
-        case .high: return .red
-        case .medium: return .orange
+        case .high: return OKColor.riskCritical
+        case .medium: return OKColor.riskWarning
         case .low: return .secondary
         }
     }
@@ -362,10 +367,10 @@ struct QualityAndTrustView: View {
             if trend.dataPoints < 3 {
                 HStack {
                     Image(systemName: "chart.line.uptrend.xyaxis")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text("Run more evaluations to see trends")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 // Pass rate trend
@@ -395,14 +400,14 @@ struct QualityAndTrustView: View {
                 // Freshness
                 HStack {
                     Image(systemName: trend.isFresh ? "clock.badge.checkmark" : "clock.badge.exclamationmark")
-                        .foregroundColor(trend.isFresh ? .green : .orange)
+                        .foregroundColor(trend.isFresh ? OKColor.riskNominal : OKColor.riskWarning)
                     Text("Data Freshness")
                         .font(.subheadline)
                     Spacer()
                     if let days = trend.daysSinceLastEval {
                         Text(days == 0 ? "Today" : "\(days) days ago")
                             .font(.caption)
-                            .foregroundColor(trend.isFresh ? .secondary : .orange)
+                            .foregroundColor(trend.isFresh ? .secondary : OKColor.riskWarning)
                     }
                 }
                 
@@ -410,13 +415,13 @@ struct QualityAndTrustView: View {
                 if trend.passingStreak > 1 {
                     HStack {
                         Image(systemName: "flame.fill")
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                         Text("Passing Streak")
                             .font(.subheadline)
                         Spacer()
                         Text("\(trend.passingStreak) runs")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
                 
@@ -424,7 +429,7 @@ struct QualityAndTrustView: View {
                 HStack {
                     Text("Avg Pass Rate (30d)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Spacer()
                     Text(String(format: "%.0f%%", trend.averagePassRate * 100))
                         .font(.caption)
@@ -436,10 +441,10 @@ struct QualityAndTrustView: View {
     
     private func trendColor(direction: TrendDirection) -> Color {
         switch direction {
-        case .improving: return .green
-        case .stable: return .blue
-        case .degrading: return .red
-        case .insufficient: return .gray
+        case .improving: return OKColor.riskNominal
+        case .stable: return OKColor.actionPrimary
+        case .degrading: return OKColor.riskCritical
+        case .insufficient: return OKColor.textMuted
         }
     }
     
@@ -457,10 +462,10 @@ struct QualityAndTrustView: View {
             if recommendations.isEmpty {
                 HStack {
                     Image(systemName: "checkmark.circle")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("No recommendations at this time")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 ForEach(recommendations) { rec in
@@ -469,7 +474,7 @@ struct QualityAndTrustView: View {
                 
                 Text("Recommendations are advisory only and do not affect app behavior.")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .padding(.top, 4)
             }
         }
@@ -489,7 +494,7 @@ struct QualityAndTrustView: View {
                     
                     Text(rec.message)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -499,10 +504,10 @@ struct QualityAndTrustView: View {
                         HStack(alignment: .top, spacing: 8) {
                             Text("•")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                             Text(rec.suggestedNextSteps[index])
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -514,9 +519,9 @@ struct QualityAndTrustView: View {
     
     private func recommendationColor(_ severity: RecommendationSeverity) -> Color {
         switch severity {
-        case .info: return .blue
-        case .caution: return .orange
-        case .action: return .red
+        case .info: return OKColor.actionPrimary
+        case .caution: return OKColor.riskWarning
+        case .action: return OKColor.riskCritical
         }
     }
     
@@ -528,25 +533,25 @@ struct QualityAndTrustView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "hand.thumbsup.circle")
                         .font(.title2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Local-Only Feedback")
                         .font(.headline)
                 }
                 
                 Text("Your feedback helps calibrate OperatorKit for your use. All feedback is stored locally on your device and is never transmitted.")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 // Privacy guarantee
                 HStack(spacing: 8) {
                     Image(systemName: "lock.shield")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("No data leaves your device")
                         .font(.caption)
                         .fontWeight(.medium)
                 }
                 .padding(8)
-                .background(Color.green.opacity(0.1))
+                .background(OKColor.riskNominal.opacity(0.1))
                 .cornerRadius(6)
             }
             .padding(.vertical, 4)
@@ -561,28 +566,28 @@ struct QualityAndTrustView: View {
                 Text("Total Ratings")
                 Spacer()
                 Text("\(summary.totalEntries)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
                 Text("Helpful")
                 Spacer()
                 Text("\(summary.helpfulCount)")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
             }
             
             HStack {
                 Text("Not Helpful")
                 Spacer()
                 Text("\(summary.notHelpfulCount)")
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
             }
             
             HStack {
                 Text("Mixed")
                 Spacer()
                 Text("\(summary.mixedCount)")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             HStack {
@@ -599,10 +604,10 @@ struct QualityAndTrustView: View {
     
     private var trustLevelColor: Color {
         switch summary.overallTrustLevel {
-        case .insufficient: return .gray
-        case .needsImprovement: return .orange
-        case .moderate: return .blue
-        case .high: return .green
+        case .insufficient: return OKColor.textMuted
+        case .needsImprovement: return OKColor.riskWarning
+        case .moderate: return OKColor.actionPrimary
+        case .high: return OKColor.riskNominal
         }
     }
     
@@ -616,7 +621,7 @@ struct QualityAndTrustView: View {
                     Text(band.displayName)
                     Spacer()
                     Text(String(format: "%.0f%% helpful", rate * 100))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -629,7 +634,7 @@ struct QualityAndTrustView: View {
             if let tip = recommendations.generalTip {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "lightbulb")
-                        .foregroundColor(.yellow)
+                        .foregroundColor(OKColor.riskWarning)
                     Text(tip)
                         .font(.subheadline)
                 }
@@ -638,7 +643,7 @@ struct QualityAndTrustView: View {
             if let contextRec = recommendations.contextRecommendation {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "doc.text.magnifyingglass")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text(contextRec)
                         .font(.subheadline)
                 }
@@ -647,7 +652,7 @@ struct QualityAndTrustView: View {
             if let confidenceRec = recommendations.confidenceRecommendation {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "gauge.medium")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     Text(confidenceRec)
                         .font(.subheadline)
                 }
@@ -664,7 +669,7 @@ struct QualityAndTrustView: View {
                     Text(item.tag.displayName)
                     Spacer()
                     Text("\(item.count)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -699,10 +704,10 @@ struct QualityAndTrustView: View {
             // Info row
             HStack {
                 Image(systemName: "info.circle")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text("Feedback contains only ratings and tags, never your actual content.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }

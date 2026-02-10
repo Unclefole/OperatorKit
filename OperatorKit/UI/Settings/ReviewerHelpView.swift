@@ -36,9 +36,12 @@ struct ReviewerHelpView: View {
                 }
                 .padding(20)
             }
-            .background(Color(UIColor.systemGroupedBackground))
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Reviewer Help")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -59,7 +62,7 @@ struct ReviewerHelpView: View {
             HStack(spacing: 10) {
                 Image(systemName: "person.badge.shield.checkmark")
                     .font(.system(size: 24))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("For App Reviewers")
                     .font(.title2)
@@ -68,19 +71,19 @@ struct ReviewerHelpView: View {
             
             Text("OperatorKit is an on-device task assistant. It helps users draft emails, create reminders, and manage calendar events. All processing happens locally—nothing is sent to external servers.")
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             
             // Key point callout
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.shield")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 Text("No action is taken without explicit user approval")
                     .font(.subheadline)
                     .fontWeight(.medium)
             }
             .padding(12)
-            .background(Color.green.opacity(0.1))
+            .background(OKColor.riskNominal.opacity(0.1))
             .cornerRadius(8)
         }
     }
@@ -258,7 +261,7 @@ struct ReviewerHelpView: View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             Text(title)
                 .font(.headline)
@@ -271,12 +274,12 @@ struct ReviewerHelpView: View {
             HStack {
                 ZStack {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(OKColor.actionPrimary)
                         .frame(width: 28, height: 28)
                     
                     Text("\(number)")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
                 
                 Text(title)
@@ -287,10 +290,10 @@ struct ReviewerHelpView: View {
                 
                 Text(duration)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.gray.opacity(0.1))
+                    .background(OKColor.textMuted.opacity(0.1))
                     .cornerRadius(4)
             }
             
@@ -298,10 +301,10 @@ struct ReviewerHelpView: View {
                 ForEach(steps, id: \.self) { step in
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                         Text(step)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -311,16 +314,16 @@ struct ReviewerHelpView: View {
             HStack(spacing: 6) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 Text("Expected: \(expected)")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
             }
             .padding(.leading, 36)
         }
         .padding(12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(10)
     }
     
@@ -328,7 +331,7 @@ struct ReviewerHelpView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -338,7 +341,7 @@ struct ReviewerHelpView: View {
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -352,11 +355,11 @@ struct ReviewerHelpView: View {
             
             Text(answer)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(8)
     }
     
@@ -364,30 +367,30 @@ struct ReviewerHelpView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 40, height: 40)
-                .background(Color.blue.opacity(0.1))
+                .background(OKColor.actionPrimary.opacity(0.1))
                 .cornerRadius(8)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
             
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
         }
         .padding(12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(10)
     }
 }

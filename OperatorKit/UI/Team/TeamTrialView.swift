@@ -45,6 +45,8 @@ struct TeamTrialView: View {
             }
             .navigationTitle("Team Trial")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -73,7 +75,7 @@ struct TeamTrialView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                             .font(.title2)
                         
                         VStack(alignment: .leading) {
@@ -81,12 +83,12 @@ struct TeamTrialView: View {
                                 .font(.headline)
                             Text(trialStore.statusMessage)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                     
                     ProgressView(value: trialStore.trialProgress)
-                        .tint(.green)
+                        .tint(OKColor.riskNominal)
                 }
                 .padding(.vertical, 8)
             } else if trialStore.canStartTrial() {
@@ -94,7 +96,7 @@ struct TeamTrialView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "gift")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                             .font(.title2)
                         
                         VStack(alignment: .leading) {
@@ -102,7 +104,7 @@ struct TeamTrialView: View {
                                 .font(.headline)
                             Text("Explore team governance features")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -112,7 +114,7 @@ struct TeamTrialView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "exclamationmark.circle")
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                             .font(.title2)
                         
                         VStack(alignment: .leading) {
@@ -120,7 +122,7 @@ struct TeamTrialView: View {
                                 .font(.headline)
                             Text("Subscribe to Team tier for full access")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(OKColor.textSecondary)
                         }
                     }
                 }
@@ -176,7 +178,7 @@ struct TeamTrialView: View {
                 
                 Text(TeamTrialAcknowledgement.summary)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Safety Guarantees")
@@ -286,7 +288,7 @@ private struct TeamTrialFeatureRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -296,7 +298,7 @@ private struct TeamTrialFeatureRow: View {
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
     }
@@ -319,7 +321,7 @@ private struct TrialAcknowledgementSheet: View {
                 VStack(spacing: 12) {
                     Image(systemName: "info.circle.fill")
                         .font(.system(size: 50))
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     Text("Before You Start")
                         .font(.title2)
@@ -327,7 +329,7 @@ private struct TrialAcknowledgementSheet: View {
                     
                     Text("Please review the trial terms")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(.top, 20)
                 
@@ -336,7 +338,7 @@ private struct TrialAcknowledgementSheet: View {
                     ForEach(TeamTrialAcknowledgement.terms, id: \.self) { term in
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: "checkmark.circle")
-                                .foregroundColor(.green)
+                                .foregroundColor(OKColor.riskNominal)
                             
                             Text(term)
                                 .font(.subheadline)
@@ -381,6 +383,8 @@ private struct TrialAcknowledgementSheet: View {
             .padding()
             .navigationTitle("Trial Terms")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { onDecline() }

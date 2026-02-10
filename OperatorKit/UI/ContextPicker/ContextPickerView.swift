@@ -7,7 +7,7 @@ struct ContextPickerView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var nav: AppNavigationState
     @StateObject private var contextAssembler = ContextAssembler.shared
-    @StateObject private var calendarService = CalendarService.shared
+    @StateObject private var calendarService = CalendarService.shared  // Read-only access only (CalendarReadAccess)
 
     // User selections (using String IDs for calendar events from EventKit)
     @State private var selectedCalendarEventIds: Set<String> = []
@@ -25,7 +25,7 @@ struct ContextPickerView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -91,7 +91,7 @@ struct ContextPickerView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -103,12 +103,12 @@ struct ContextPickerView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Intent Summary Card
@@ -116,12 +116,12 @@ struct ContextPickerView: View {
         HStack(spacing: 12) {
             Image(systemName: "sparkles")
                 .font(.system(size: 20))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("Request")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 Text(intent.rawText)
                     .font(.body)
@@ -132,7 +132,7 @@ struct ContextPickerView: View {
             Spacer()
         }
         .padding(16)
-        .background(Color.blue.opacity(0.08))
+        .background(OKColor.actionPrimary.opacity(0.08))
         .cornerRadius(12)
     }
     
@@ -146,12 +146,12 @@ struct ContextPickerView: View {
             ContextSection(
                 title: "Email",
                 icon: "envelope.fill",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             ) {
                 ForEach(contextAssembler.availableEmails) { item in
                     ContextItemRow(
                         icon: "envelope.fill",
-                        iconColor: .blue,
+                        iconColor: OKColor.actionPrimary,
                         title: item.subject,
                         subtitle: "From: \(item.sender)",
                         isSelected: selectedEmailIds.contains(item.id),
@@ -166,12 +166,12 @@ struct ContextPickerView: View {
             ContextSection(
                 title: "Files",
                 icon: "doc.fill",
-                iconColor: .orange
+                iconColor: OKColor.riskWarning
             ) {
                 ForEach(contextAssembler.availableFiles) { item in
                     ContextItemRow(
                         icon: fileIcon(for: item.fileType),
-                        iconColor: .orange,
+                        iconColor: OKColor.riskWarning,
                         title: item.name,
                         subtitle: item.fileType.uppercased(),
                         isSelected: selectedFileIds.contains(item.id),
@@ -190,7 +190,7 @@ struct ContextPickerView: View {
             HStack(spacing: 8) {
                 Image(systemName: "calendar")
                     .font(.system(size: 16))
-                    .foregroundColor(.red)
+                    .foregroundColor(OKColor.riskCritical)
                 
                 Text("Calendar")
                     .font(.headline)
@@ -206,7 +206,7 @@ struct ContextPickerView: View {
                         Text("Connected")
                             .font(.caption)
                     }
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
                 } else {
                     Button(action: {
                         showingCalendarPermissionAlert = true
@@ -217,7 +217,7 @@ struct ContextPickerView: View {
                             Text("Grant Access")
                                 .font(.caption)
                         }
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     }
                 }
             }
@@ -229,7 +229,7 @@ struct ContextPickerView: View {
                         HStack {
                             Text("No events found in the last 7 days")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(OKColor.textMuted)
                             Spacer()
                         }
                         .padding(16)
@@ -249,23 +249,23 @@ struct ContextPickerView: View {
                         }
                     }
                 }
-                .background(Color.white)
+                .background(OKColor.backgroundPrimary)
                 .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
             } else {
                 // Show permission request card
                 VStack(spacing: 12) {
                     Image(systemName: "calendar.badge.exclamationmark")
                         .font(.system(size: 32))
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     
                     Text("Calendar access not granted")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     
                     Text("Grant access to select calendar events as context")
                         .font(.caption)
-                        .foregroundColor(.gray.opacity(0.8))
+                        .foregroundColor(OKColor.textMuted.opacity(0.8))
                         .multilineTextAlignment(.center)
                     
                     Button(action: {
@@ -274,19 +274,19 @@ struct ContextPickerView: View {
                         Text("Grant Calendar Access")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.white)
+                            .foregroundColor(OKColor.textPrimary)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
-                            .background(Color.blue)
+                            .background(OKColor.actionPrimary)
                             .cornerRadius(8)
                     }
                     .disabled(isRequestingCalendarAccess)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(24)
-                .background(Color.white)
+                .background(OKColor.backgroundPrimary)
                 .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
             }
         }
     }
@@ -332,7 +332,7 @@ struct ContextPickerView: View {
                     Text("Select at least one item to continue")
                         .font(.caption)
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .padding(.horizontal, 20)
             }
             
@@ -344,7 +344,7 @@ struct ContextPickerView: View {
                     Text("Calendar access is off. Allow access above to select events.")
                         .font(.caption)
                 }
-                .foregroundColor(.orange)
+                .foregroundColor(OKColor.riskWarning)
                 .padding(.horizontal, 20)
             }
             
@@ -355,10 +355,10 @@ struct ContextPickerView: View {
                 Text("Continue with \(totalSelectedCount) item\(totalSelectedCount == 1 ? "" : "s")")
                     .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(totalSelectedCount == 0 ? Color.gray.opacity(0.4) : Color.blue)
+                    .background(totalSelectedCount == 0 ? OKColor.textMuted.opacity(0.4) : OKColor.actionPrimary)
                     .cornerRadius(12)
             }
             .disabled(totalSelectedCount == 0)
@@ -368,15 +368,15 @@ struct ContextPickerView: View {
         }
         .padding(.vertical, 16)
         .background(
-            Color.white
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.textPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
     // MARK: - Loading Overlay
     private var loadingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.3)
+            OKColor.shadow.opacity(0.3)
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
@@ -384,10 +384,10 @@ struct ContextPickerView: View {
                     .scaleEffect(1.5)
                 Text("Loading events...")
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
             }
             .padding(32)
-            .background(Color(UIColor.systemBackground))
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(16)
         }
     }
@@ -494,17 +494,17 @@ struct CalendarEventRow: View {
                     Text(event.title)
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .lineLimit(1)
                     
                     Text(event.formattedDateRange)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                     
                     if !event.participants.isEmpty {
                         Text("\(event.participants.count) participant\(event.participants.count > 1 ? "s" : "")")
                             .font(.caption2)
-                            .foregroundColor(.gray.opacity(0.8))
+                            .foregroundColor(OKColor.textMuted.opacity(0.8))
                     }
                 }
                 
@@ -512,7 +512,7 @@ struct CalendarEventRow: View {
                 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
-                    .foregroundColor(isSelected ? .blue : .gray.opacity(0.3))
+                    .foregroundColor(isSelected ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.3))
             }
             .padding(16)
         }
@@ -522,7 +522,7 @@ struct CalendarEventRow: View {
         if let hex = event.calendarColor {
             return Color(hex: hex)
         }
-        return .red
+        return OKColor.riskCritical
     }
 }
 
@@ -548,9 +548,9 @@ struct ContextSection<Content: View>: View {
             VStack(spacing: 0) {
                 content
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
 }
@@ -576,19 +576,19 @@ struct ContextItemRow: View {
                     Text(title)
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .lineLimit(1)
                     
                     Text(subtitle)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 
                 Spacer()
                 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
-                    .foregroundColor(isSelected ? .blue : .gray.opacity(0.3))
+                    .foregroundColor(isSelected ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.3))
             }
             .padding(16)
         }
@@ -613,13 +613,13 @@ struct ContextChip: View {
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color.blue.opacity(0.1))
-        .foregroundColor(.blue)
+        .background(OKColor.actionPrimary.opacity(0.1))
+        .foregroundColor(OKColor.actionPrimary)
         .cornerRadius(20)
     }
 }

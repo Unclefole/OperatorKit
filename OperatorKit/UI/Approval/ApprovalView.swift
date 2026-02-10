@@ -69,7 +69,7 @@ struct ApprovalView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -186,7 +186,7 @@ struct ApprovalView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -198,12 +198,12 @@ struct ApprovalView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
 
     // MARK: - Warning Banner
@@ -211,7 +211,7 @@ struct ApprovalView: View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.shield.fill")
                 .font(.system(size: 24))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("Review Before Continuing")
@@ -220,13 +220,13 @@ struct ApprovalView: View {
                 
                 Text("Nothing happens until you approve. Review each action below.")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             Spacer()
         }
         .padding(16)
-        .background(Color.blue.opacity(0.1))
+        .background(OKColor.actionPrimary.opacity(0.1))
         .cornerRadius(12)
     }
     
@@ -236,7 +236,7 @@ struct ApprovalView: View {
             HStack(spacing: 8) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("Permissions Needed")
                     .font(.headline)
@@ -245,13 +245,13 @@ struct ApprovalView: View {
             
             Text("OperatorKit needs access to complete these actions. Grant permissions in Settings.")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             VStack(spacing: 8) {
                 ForEach(check.missingPermissions, id: \.self) { permission in
                     HStack(spacing: 12) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                         
                         Text(permission.rawValue)
                             .font(.body)
@@ -260,25 +260,25 @@ struct ApprovalView: View {
                         
                         Text("Not Granted")
                             .font(.caption)
-                            .foregroundColor(.red)
+                            .foregroundColor(OKColor.riskCritical)
                     }
                     .padding(12)
-                    .background(Color.red.opacity(0.05))
+                    .background(OKColor.riskCritical.opacity(0.05))
                     .cornerRadius(8)
                 }
             }
             
             Text("You can grant permissions in Settings, then return here to continue.")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                .stroke(OKColor.riskCritical.opacity(0.3), lineWidth: 1)
         )
     }
     
@@ -297,7 +297,7 @@ struct ApprovalView: View {
                 }) {
                     Text("Edit")
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
 
@@ -309,7 +309,7 @@ struct ApprovalView: View {
                     HStack {
                         Text("To:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text(draft.content.recipient ?? "")
                             .font(.subheadline)
                         Spacer()
@@ -317,7 +317,7 @@ struct ApprovalView: View {
                     HStack {
                         Text("Subject:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text(draft.content.subject ?? "")
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -334,7 +334,7 @@ struct ApprovalView: View {
                     HStack {
                         Text("Title:")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Text(draft.title)
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -348,19 +348,19 @@ struct ApprovalView: View {
             // Content preview
             Text(draft.content.body)
                 .font(.body)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
                 .lineLimit(6)
             
             if draft.content.body.count > 300 {
                 Text("...")
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Reminder Write Option Card
@@ -369,7 +369,7 @@ struct ApprovalView: View {
             HStack(spacing: 8) {
                 Image(systemName: "bell.badge.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Create Real Reminder?")
                     .font(.headline)
@@ -380,7 +380,7 @@ struct ApprovalView: View {
             
             Text("By default, OperatorKit only shows a preview. Enable below to create a real reminder in your Reminders app.")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             // Check if createReminder already exists
             let hasCreateReminder = sideEffects.contains { $0.type == .createReminder }
@@ -393,23 +393,23 @@ struct ApprovalView: View {
                     }
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(12)
                     .frame(maxWidth: .infinity)
-                    .background(Color.blue.opacity(0.1))
+                    .background(OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(8)
                 }
             } else {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text("Create Reminder option available")
                         .font(.subheadline)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity)
-                .background(Color.green.opacity(0.1))
+                .background(OKColor.riskNominal.opacity(0.1))
                 .cornerRadius(8)
             }
             
@@ -420,12 +420,12 @@ struct ApprovalView: View {
                 Text("You'll confirm the exact details before anything is created.")
                     .font(.caption)
             }
-            .foregroundColor(.blue)
+            .foregroundColor(OKColor.actionPrimary)
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Calendar Write Option Card (Phase 3C)
@@ -440,7 +440,7 @@ struct ApprovalView: View {
             HStack(spacing: 8) {
                 Image(systemName: "calendar.badge.plus")
                     .font(.system(size: 20))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("Create Calendar Event?")
                     .font(.headline)
@@ -451,7 +451,7 @@ struct ApprovalView: View {
             
             Text("By default, OperatorKit only shows a preview. Enable below to create a real event in your Calendar app.")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             // Check if createCalendarEvent already exists
             let hasCreateCalendar = sideEffects.contains { $0.type == .createCalendarEvent || $0.type == .updateCalendarEvent }
@@ -467,24 +467,24 @@ struct ApprovalView: View {
                     }
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(12)
                     .frame(maxWidth: .infinity)
-                    .background(Color.blue.opacity(0.1))
+                    .background(OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(8)
                 }
             } else {
                 let isUpdate = sideEffects.contains { $0.type == .updateCalendarEvent }
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     Text(isUpdate ? "Update Event option available" : "Create Event option available")
                         .font(.subheadline)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity)
-                .background(Color.green.opacity(0.1))
+                .background(OKColor.riskNominal.opacity(0.1))
                 .cornerRadius(8)
             }
             
@@ -495,12 +495,12 @@ struct ApprovalView: View {
                 Text("You'll confirm the exact details before anything is created.")
                     .font(.caption)
             }
-            .foregroundColor(.blue)
+            .foregroundColor(OKColor.actionPrimary)
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
     }
     
     // MARK: - Side Effects Section
@@ -509,7 +509,7 @@ struct ApprovalView: View {
             HStack {
                 Image(systemName: "list.bullet.clipboard")
                     .font(.system(size: 16))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text("What Will Happen")
                     .font(.headline)
@@ -520,7 +520,7 @@ struct ApprovalView: View {
                 // Show count
                 Text("\(sideEffects.filter { $0.isEnabled }.count) action\(sideEffects.filter { $0.isEnabled }.count == 1 ? "" : "s")")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
             
             VStack(spacing: 0) {
@@ -544,9 +544,9 @@ struct ApprovalView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
     
@@ -561,7 +561,7 @@ struct ApprovalView: View {
                     Text(reason)
                         .font(.caption)
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             }
             
             // Two-key warning
@@ -572,7 +572,7 @@ struct ApprovalView: View {
                     Text("Write actions require one more confirmation step")
                         .font(.caption)
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             }
             
             // Approve Button
@@ -595,10 +595,10 @@ struct ApprovalView: View {
                             .fontWeight(.semibold)
                     }
                 }
-                .foregroundColor(.white)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
-                .background(canExecute ? Color.green : Color.gray.opacity(0.4))
+                .background(canExecute ? OKColor.riskNominal : OKColor.textMuted.opacity(0.4))
                 .cornerRadius(14)
             }
             .accessibilityLabel(approveButtonAccessibilityLabel)
@@ -611,14 +611,14 @@ struct ApprovalView: View {
             }) {
                 Text("Cancel")
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color.white
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.textPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
@@ -802,7 +802,7 @@ struct ApprovalView: View {
         //
         // Execution without kernel is IMPOSSIBLE.
         // ═══════════════════════════════════════════════════════════════════
-        Task {
+        let executionTask = Task {
             let executionTimeout: UInt64 = 8_000_000_000 // 8 seconds in nanoseconds
 
             // STEP 1: Issue KernelAuthorizationToken via KernelBridge
@@ -910,6 +910,8 @@ struct ApprovalView: View {
                 nav.navigate(to: .execution)
             }
         }
+        // Wire execution task to kernel so Emergency Stop can cancel it
+        CapabilityKernel.shared.activeExecutionTask = executionTask
     }
 }
 
@@ -931,7 +933,7 @@ struct SideEffectRow: View {
                 HStack(spacing: 8) {
                     Text(effect.description)
                         .font(.body)
-                        .foregroundColor(effect.isEnabled ? .primary : .gray)
+                        .foregroundColor(effect.isEnabled ? .primary : OKColor.textMuted)
                     
                     // Permission indicator
                     if let permission = effect.requiresPermission {
@@ -941,17 +943,17 @@ struct SideEffectRow: View {
                             Text(permission.rawValue)
                                 .font(.caption2)
                         }
-                        .foregroundColor(permissionGranted ? .green : .red)
+                        .foregroundColor(permissionGranted ? OKColor.riskNominal : OKColor.riskCritical)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background((permissionGranted ? Color.green : Color.red).opacity(0.1))
+                        .background((permissionGranted ? OKColor.riskNominal : OKColor.riskCritical).opacity(0.1))
                         .cornerRadius(4)
                     }
                 }
                 
                 Text(effect.type.displayName)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                 
                 // Two-key confirmation badge
                 if effect.type.requiresTwoKeyConfirmation && effect.isEnabled {
@@ -961,10 +963,10 @@ struct SideEffectRow: View {
                         Text("You'll confirm details before this happens")
                             .font(.caption2)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.1))
+                    .background(OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(6)
                     .padding(.top, 4)
                 }
@@ -977,10 +979,10 @@ struct SideEffectRow: View {
                         Text(userActionDescription(for: effect.type))
                             .font(.caption2)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.1))
+                    .background(OKColor.actionPrimary.opacity(0.1))
                     .cornerRadius(6)
                     .padding(.top, 4)
                 }
@@ -993,10 +995,10 @@ struct SideEffectRow: View {
                         Text("Creates data on your device")
                             .font(.caption2)
                     }
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.orange.opacity(0.1))
+                    .background(OKColor.riskWarning.opacity(0.1))
                     .cornerRadius(6)
                     .padding(.top, 4)
                 }
@@ -1010,7 +1012,7 @@ struct SideEffectRow: View {
                             Text("Tap to confirm you've reviewed this")
                                 .font(.caption2)
                         }
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     }
                     .padding(.top, 4)
                 }
@@ -1035,12 +1037,12 @@ struct SideEffectRow: View {
     
     private var iconColor: Color {
         if !effect.isEnabled {
-            return .gray
+            return OKColor.textMuted
         }
         if effect.type.isWriteOperation {
-            return .red
+            return OKColor.riskCritical
         }
-        return .blue
+        return OKColor.actionPrimary
     }
     
     private func userActionDescription(for type: SideEffect.SideEffectType) -> String {

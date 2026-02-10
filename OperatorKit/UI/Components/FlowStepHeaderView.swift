@@ -54,7 +54,7 @@ struct FlowStepHeaderView: View {
             HStack(spacing: 8) {
                 Image(systemName: step.icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text(step.title)
                     .font(.headline)
@@ -65,7 +65,7 @@ struct FlowStepHeaderView: View {
                 // Step counter
                 Text("Step \(step.rawValue) of \(FlowStep.totalSteps)")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(step.title), step \(step.rawValue) of \(FlowStep.totalSteps)")
@@ -74,14 +74,14 @@ struct FlowStepHeaderView: View {
             if let subtitle = subtitle {
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Progress Indicator
@@ -90,13 +90,13 @@ struct FlowStepHeaderView: View {
             ZStack(alignment: .leading) {
                 // Background track
                 Rectangle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(OKColor.textMuted.opacity(0.2))
                     .frame(height: 3)
                     .cornerRadius(1.5)
                 
                 // Progress fill
                 Rectangle()
-                    .fill(Color.blue)
+                    .fill(OKColor.actionPrimary)
                     .frame(width: progressWidth(in: geometry.size.width), height: 3)
                     .cornerRadius(1.5)
                     .animation(.easeInOut(duration: 0.3), value: step)
@@ -123,5 +123,5 @@ struct FlowStepHeaderView: View {
         FlowStepHeaderView(step: .approval)
         FlowStepHeaderView(step: .complete)
     }
-    .background(Color.gray.opacity(0.1))
+    .background(OKColor.textMuted.opacity(0.1))
 }

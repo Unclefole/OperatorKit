@@ -12,7 +12,7 @@ struct PlanPreviewView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -87,7 +87,7 @@ struct PlanPreviewView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -99,12 +99,12 @@ struct PlanPreviewView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Plan Steps Card
@@ -121,11 +121,11 @@ struct PlanPreviewView: View {
                 Text("\(Int(plan.overallConfidence * 100))% confident")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(plan.isHighConfidence ? .green : .orange)
+                    .foregroundColor(plan.isHighConfidence ? OKColor.riskNominal : OKColor.riskWarning)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(
-                        (plan.isHighConfidence ? Color.green : Color.orange)
+                        (plan.isHighConfidence ? OKColor.riskNominal : OKColor.riskWarning)
                             .opacity(0.15)
                     )
                     .cornerRadius(12)
@@ -138,9 +138,9 @@ struct PlanPreviewView: View {
             }
         }
         .padding(20)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     // MARK: - Permissions Card
@@ -149,7 +149,7 @@ struct PlanPreviewView: View {
             HStack(spacing: 8) {
                 Image(systemName: "lock.shield")
                     .font(.system(size: 16))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text("Permissions Required")
                     .font(.headline)
@@ -161,7 +161,7 @@ struct PlanPreviewView: View {
                     HStack(spacing: 12) {
                         Image(systemName: permissionIcon(for: permission))
                             .font(.system(size: 16))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                             .frame(width: 24)
                         
                         Text(permission.rawValue)
@@ -171,14 +171,14 @@ struct PlanPreviewView: View {
                         
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 18))
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                     }
                     .padding(.vertical, 8)
                 }
             }
         }
         .padding(16)
-        .background(Color.orange.opacity(0.08))
+        .background(OKColor.riskWarning.opacity(0.08))
         .cornerRadius(12)
     }
     
@@ -187,7 +187,7 @@ struct PlanPreviewView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Using Context")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             FlowLayout(spacing: 8) {
                 ForEach(context.calendarItems) { item in
@@ -216,12 +216,12 @@ struct PlanPreviewView: View {
                 }
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.white)
+                .background(OKColor.backgroundPrimary)
                 .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                .shadow(color: OKColor.shadow.opacity(0.04), radius: 4, x: 0, y: 2)
             }
             
             if isGenerating {
@@ -237,10 +237,10 @@ struct PlanPreviewView: View {
                             .font(.body)
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.orange)
+                    .background(OKColor.riskWarning)
                     .cornerRadius(12)
                 }
             } else {
@@ -254,10 +254,10 @@ struct PlanPreviewView: View {
                     }
                     .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.blue)
+                    .background(OKColor.actionPrimary)
                     .cornerRadius(12)
                 }
             }
@@ -265,8 +265,8 @@ struct PlanPreviewView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 20)
         .background(
-            Color(UIColor.systemGroupedBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+            OKColor.backgroundPrimary
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
     
@@ -365,18 +365,18 @@ struct PlanStepRow: View {
             VStack {
                 ZStack {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(OKColor.actionPrimary)
                         .frame(width: 28, height: 28)
                     
                     Text("\(step.stepNumber)")
                         .font(.caption)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
                 
                 if !isLast {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(OKColor.textMuted.opacity(0.3))
                         .frame(width: 2)
                         .frame(minHeight: 40)
                 }
@@ -390,7 +390,7 @@ struct PlanStepRow: View {
                 
                 Text(step.description)
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.bottom, isLast ? 0 : 16)
@@ -416,8 +416,8 @@ struct ContextDisplayChip: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(Color.gray.opacity(0.1))
-        .foregroundColor(.primary)
+        .background(OKColor.textMuted.opacity(0.1))
+        .foregroundColor(OKColor.textPrimary)
         .cornerRadius(16)
     }
 }

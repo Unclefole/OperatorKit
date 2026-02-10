@@ -35,6 +35,8 @@ public struct AuditVaultEventDetailView: View {
         }
         .navigationTitle("Event Detail")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
     
     // MARK: - Event Section
@@ -76,7 +78,7 @@ public struct AuditVaultEventDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Procedure Hash")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     Text(procHash)
                         .font(.system(.caption, design: .monospaced))
                 }
@@ -85,7 +87,7 @@ public struct AuditVaultEventDetailView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Lineage Hash")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 Text(lineage.deterministicHash)
                     .font(.system(.caption, design: .monospaced))
             }
@@ -118,7 +120,7 @@ public struct AuditVaultEventDetailView: View {
                 
                 Text("This event contains only hashes, enum values, counts, and day-rounded timestamps. No user text, drafts, emails, or personal data is stored or displayed.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -141,7 +143,7 @@ private struct DetailRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.indigo)
+                .foregroundColor(OKColor.riskExtreme)
                 .frame(width: 24)
             
             Text(label)
@@ -151,7 +153,7 @@ private struct DetailRow: View {
             
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }

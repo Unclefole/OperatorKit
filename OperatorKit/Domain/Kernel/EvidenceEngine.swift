@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import Security
 
 // ============================================================================
 // EVIDENCE ENGINE — PHASE 1 CAPABILITY KERNEL
@@ -39,7 +40,12 @@ public final class EvidenceEngine: ObservableObject {
     private let decoder = JSONDecoder()
     
     @Published private(set) var entryCount: Int = 0
-    
+    @Published private(set) var chainIntegrityValid: Bool = true
+    @Published private(set) var lastIntegrityReport: ChainIntegrityReport?
+
+    /// The hash of the last appended entry — used for hash chaining.
+    private var lastEntryHash: String = "GENESIS"
+
     private var evidenceDirectory: URL {
         let docs = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return docs.appendingPathComponent("EvidenceChain", isDirectory: true)
@@ -67,6 +73,27 @@ public final class EvidenceEngine: ObservableObject {
         try? fileManager.createDirectory(at: evidenceDirectory, withIntermediateDirectories: true)
     }
     
+    /// Call on app launch to verify evidence chain integrity.
+    /// If broken, sets chainIntegrityValid = false and publishes the report.
+    /// UI should surface this prominently — tampered evidence is a SEV-0.
+    public func verifyOnLaunch() {
+        do {
+            let report = try verifyChainIntegrity()
+            lastIntegrityReport = report
+            if !report.overallValid {
+                logError("[EVIDENCE] INTEGRITY VIOLATION DETECTED ON LAUNCH: \(report.violations.count) issue(s)")
+                try? logViolation(PolicyViolation(
+                    violationType: .dataCorruption,
+                    description: "Evidence chain integrity failed on launch: \(report.violations.count) violation(s)",
+                    severity: .critical
+                ), planId: UUID())
+            }
+        } catch {
+            logError("[EVIDENCE] Failed to verify chain integrity: \(error)")
+            chainIntegrityValid = false
+        }
+    }
+
     private func loadEntryCount() {
         guard let data = try? Data(contentsOf: indexFile),
               let index = try? decoder.decode(EvidenceIndex.self, from: data) else {
@@ -74,6 +101,11 @@ public final class EvidenceEngine: ObservableObject {
             return
         }
         entryCount = index.totalEntries
+
+        // Restore last entry hash for chain continuity
+        if let entries = try? loadAllEntries(), let last = entries.last {
+            lastEntryHash = last.currentHash
+        }
     }
     
     // MARK: - Public API
@@ -262,6 +294,50 @@ public final class EvidenceEngine: ObservableObject {
         entryCount += 1
     }
     
+    // ════════════════════════════════════════════════════════════════
+    // MARK: - Model Call Evidence Logging
+    // ════════════════════════════════════════════════════════════════
+
+    /// Log a generic artifact by type (used for model call governance).
+    public func logGenericArtifact(type: String, planId: UUID, jsonString: String) throws {
+        let artifact = EvidenceArtifact(
+            artifactType: .toolPlan, // reuse existing artifact type
+            planId: planId,
+            data: jsonString.data(using: .utf8) ?? Data(),
+            timestamp: Date()
+        )
+
+        let entry = EvidenceEntry(
+            id: UUID(),
+            chainId: planId,
+            type: .systemEvent,
+            payload: artifact,
+            signature: signArtifact(artifact),
+            createdAt: Date()
+        )
+
+        try appendEntry(entry)
+        entryCount += 1
+    }
+
+    /// Log a model call decision from CapabilityKernel.
+    public func logModelCallDecision(_ decision: ModelCallDecision) throws {
+        let json = "{\"type\":\"model_call_decision\",\"requestId\":\"\(decision.requestId)\",\"allowed\":\(decision.allowed),\"provider\":\"\(decision.provider.rawValue)\",\"requiresApproval\":\(decision.requiresHumanApproval),\"riskTier\":\"\(decision.riskTier)\",\"reason\":\"\(decision.reason)\"}"
+        try logGenericArtifact(type: "model_call_decision", planId: decision.requestId, jsonString: json)
+    }
+
+    /// Log a model call request (redacted payload).
+    public func logModelCallRequest(_ request: ModelCallRequest, provider: ModelProvider) throws {
+        let json = "{\"type\":\"model_call_request\",\"requestId\":\"\(request.id)\",\"intentType\":\"\(request.intentType)\",\"provider\":\"\(provider.rawValue)\",\"contextSummary\":\"\(request.contextSummaryRedacted)\"}"
+        try logGenericArtifact(type: "model_call_request", planId: request.id, jsonString: json)
+    }
+
+    /// Log a model call response (redacted — no raw output).
+    public func logModelCallResponse(_ response: ModelCallResponseRecord) throws {
+        let json = "{\"type\":\"model_call_response\",\"requestId\":\"\(response.requestId)\",\"provider\":\"\(response.provider.rawValue)\",\"success\":\(response.success),\"latencyMs\":\(response.latencyMs),\"outputLengthChars\":\(response.outputLengthChars),\"confidence\":\(response.confidence ?? -1)}"
+        try logGenericArtifact(type: "model_call_response", planId: response.requestId, jsonString: json)
+    }
+
     /// Query evidence by chain ID
     public func queryByChainId(_ chainId: UUID) throws -> [EvidenceEntry<AnyCodable>] {
         let entries = try loadAllEntries()
@@ -298,35 +374,76 @@ public final class EvidenceEngine: ObservableObject {
         )
     }
     
-    /// Verify chain integrity
+    /// Verify chain integrity — validates hash chain link-by-link.
+    /// If any entry's previousHash does not match the prior entry's currentHash,
+    /// or if currentHash recomputation fails, an integrity violation is raised.
     public func verifyChainIntegrity() throws -> ChainIntegrityReport {
         let entries = try loadAllEntries()
         var violations: [IntegrityViolation] = []
-        
-        for entry in entries {
-            // Verify signature
-            if !verifyEntrySignature(entry) {
+        var expectedPreviousHash = "GENESIS"
+
+        for (index, entry) in entries.enumerated() {
+            // Verify signature is non-empty
+            if entry.signature.isEmpty {
                 violations.append(IntegrityViolation(
                     entryId: entry.id,
                     type: .signatureMismatch,
-                    description: "Entry signature does not match payload"
+                    description: "Entry \(index) has empty signature"
                 ))
             }
+
+            // Verify hash chain link
+            if entry.previousHash != expectedPreviousHash {
+                violations.append(IntegrityViolation(
+                    entryId: entry.id,
+                    type: .sequenceGap,
+                    description: "Entry \(index) previousHash mismatch — expected '\(expectedPreviousHash.prefix(16))...' got '\(entry.previousHash.prefix(16))...'"
+                ))
+            }
+
+            // Verify currentHash recomputation
+            let material = "\(entry.id.uuidString)|\(entry.chainId.uuidString)|\(entry.type.rawValue)|\(entry.signature)|\(entry.createdAt.timeIntervalSince1970)|\(entry.previousHash)"
+            let digest = SHA256.hash(data: material.data(using: .utf8)!)
+            let recomputed = digest.compactMap { String(format: "%02x", $0) }.joined()
+
+            if entry.currentHash != recomputed {
+                violations.append(IntegrityViolation(
+                    entryId: entry.id,
+                    type: .dataCorruption,
+                    description: "Entry \(index) currentHash recomputation failed — data tampered"
+                ))
+            }
+
+            expectedPreviousHash = entry.currentHash
         }
-        
+
+        let valid = violations.isEmpty
+        chainIntegrityValid = valid
+
         return ChainIntegrityReport(
             checkedAt: Date(),
             totalEntries: entries.count,
             validEntries: entries.count - violations.count,
             violations: violations,
-            overallValid: violations.isEmpty
+            overallValid: valid
         )
     }
     
     // MARK: - Internal Operations
     
     private func appendEntry<T: Codable>(_ entry: EvidenceEntry<T>) throws {
-        let data = try encoder.encode(entry)
+        // Hash-chain: create a new entry that includes the previous hash
+        let chainedEntry = EvidenceEntry(
+            id: entry.id,
+            chainId: entry.chainId,
+            type: entry.type,
+            payload: entry.payload,
+            signature: entry.signature,
+            createdAt: entry.createdAt,
+            previousHash: lastEntryHash
+        )
+
+        let data = try encoder.encode(chainedEntry)
         let line = data + Data("\n".utf8)
         
         // Atomic append
@@ -338,6 +455,9 @@ public final class EvidenceEngine: ObservableObject {
         } else {
             try line.write(to: currentChainFile)
         }
+
+        // Advance the chain
+        lastEntryHash = chainedEntry.currentHash
     }
     
     private func updateIndex(with entry: EvidenceEntry<ExecutionEvidenceChain>) throws {
@@ -385,12 +505,52 @@ public final class EvidenceEngine: ObservableObject {
         return entries
     }
     
-    // MARK: - Signing
-    
+    // MARK: - Signing (Keychain-Backed)
+    //
+    // INVARIANT: Evidence signing key is generated on first launch, stored in Keychain,
+    // and NEVER exported. Same pattern as CapabilityKernel token signing key.
+    // INVARIANT: Key never appears in source code.
+
+    private static let evidenceKeychainService = "com.operatorkit.evidence-signing-key"
+    private static let evidenceKeychainAccount = "evidence-hmac-v1"
+
     private let signingKey: SymmetricKey = {
-        let keyData = "OperatorKit-Evidence-Signing-Key-v1".data(using: .utf8)!
-        return SymmetricKey(data: keyData)
+        // Attempt to load from Keychain
+        if let existing = EvidenceEngine.loadEvidenceKey() {
+            return existing
+        }
+        // First launch: generate and store
+        let newKey = SymmetricKey(size: .bits256)
+        EvidenceEngine.storeEvidenceKey(newKey)
+        return newKey
     }()
+
+    private nonisolated static func loadEvidenceKey() -> SymmetricKey? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: evidenceKeychainService,
+            kSecAttrAccount as String: evidenceKeychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess, let data = result as? Data else { return nil }
+        return SymmetricKey(data: data)
+    }
+
+    private nonisolated static func storeEvidenceKey(_ key: SymmetricKey) {
+        let keyData = key.withUnsafeBytes { Data($0) }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: evidenceKeychainService,
+            kSecAttrAccount as String: evidenceKeychainAccount,
+            kSecValueData as String: keyData,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        ]
+        SecItemDelete(query as CFDictionary)
+        SecItemAdd(query as CFDictionary, nil)
+    }
     
     private func signEntry(_ chain: ExecutionEvidenceChain) -> String {
         let payload = "\(chain.id.uuidString)|\(chain.planId.uuidString)|\(chain.createdAt.timeIntervalSince1970)"
@@ -435,6 +595,12 @@ public struct EvidenceEntry<T: Codable>: Codable, Identifiable {
     public let payload: T
     public let signature: String
     public let createdAt: Date
+
+    // HASH-CHAIN FIELDS — tamper-evident ledger
+    /// SHA256 of the previous entry's currentHash. Genesis entry uses "GENESIS".
+    public let previousHash: String
+    /// SHA256(id + chainId + type + signature + createdAt + previousHash)
+    public let currentHash: String
     
     public init(
         id: UUID,
@@ -442,7 +608,9 @@ public struct EvidenceEntry<T: Codable>: Codable, Identifiable {
         type: EvidenceEntryType,
         payload: T,
         signature: String,
-        createdAt: Date
+        createdAt: Date,
+        previousHash: String = "GENESIS",
+        currentHash: String = ""
     ) {
         self.id = id
         self.chainId = chainId
@@ -450,6 +618,33 @@ public struct EvidenceEntry<T: Codable>: Codable, Identifiable {
         self.payload = payload
         self.signature = signature
         self.createdAt = createdAt
+        self.previousHash = previousHash
+        // Compute current hash if not provided
+        if currentHash.isEmpty {
+            let material = "\(id.uuidString)|\(chainId.uuidString)|\(type.rawValue)|\(signature)|\(createdAt.timeIntervalSince1970)|\(previousHash)"
+            let digest = SHA256.hash(data: material.data(using: .utf8)!)
+            self.currentHash = digest.compactMap { String(format: "%02x", $0) }.joined()
+        } else {
+            self.currentHash = currentHash
+        }
+    }
+
+    // Custom Decodable: handles legacy entries that don't have hash chain fields
+    enum CodingKeys: String, CodingKey {
+        case id, chainId, type, payload, signature, createdAt, previousHash, currentHash
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        chainId = try container.decode(UUID.self, forKey: .chainId)
+        type = try container.decode(EvidenceEntryType.self, forKey: .type)
+        payload = try container.decode(T.self, forKey: .payload)
+        signature = try container.decode(String.self, forKey: .signature)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        // Legacy entries may not have these fields
+        previousHash = (try? container.decode(String.self, forKey: .previousHash)) ?? "GENESIS"
+        currentHash = (try? container.decode(String.self, forKey: .currentHash)) ?? ""
     }
 }
 
@@ -545,15 +740,80 @@ public enum ArtifactType: String, Codable {
 
 // MARK: - Approval Record
 
+// MARK: - Cryptographic Approver Principal
+//
+// INVARIANT: Approvals are PROVABLE, not asserted.
+// An ApproverPrincipal binds to a real cryptographic identity —
+// not a string label. Ready for quorum-based multi-signer authority.
+
+public struct ApproverPrincipal: Codable {
+    /// SHA256 fingerprint of the approver's public key
+    public let publicKeyFingerprint: String
+    /// Unique device identifier (derived from SE public key hash)
+    public let deviceId: String
+    /// Attestation type: how the principal was verified
+    public let attestation: AttestationType
+
+    public enum AttestationType: String, Codable {
+        case secureEnclave = "secure_enclave"   // Hardware-backed (Face ID / Touch ID)
+        case keychain = "keychain"               // Software-backed fallback
+        case kernelAuto = "kernel_auto"          // Automatic low-risk (no human)
+        case legacy = "legacy"                   // Pre-SE migration compatibility
+    }
+
+    /// Build from the current device's Secure Enclave identity.
+    /// nonisolated: SecureEnclaveApprover.deviceFingerprint is nonisolated.
+    public static func fromCurrentDevice() -> ApproverPrincipal {
+        let fingerprint = SecureEnclaveApprover.shared.deviceFingerprint ?? "unknown" // nonisolated property
+        return ApproverPrincipal(
+            publicKeyFingerprint: fingerprint,
+            deviceId: fingerprint,
+            attestation: fingerprint != "unknown" ? .secureEnclave : .legacy
+        )
+    }
+
+    /// Build for kernel auto-approval (low-risk actions).
+    public static var kernelAutomatic: ApproverPrincipal {
+        ApproverPrincipal(
+            publicKeyFingerprint: "KERNEL_AUTO",
+            deviceId: "local",
+            attestation: .kernelAuto
+        )
+    }
+
+    /// Legacy compatibility — converts a string identifier into a principal.
+    public static func legacy(_ identifier: String) -> ApproverPrincipal {
+        ApproverPrincipal(
+            publicKeyFingerprint: identifier,
+            deviceId: "local",
+            attestation: .legacy
+        )
+    }
+}
+
 public struct ApprovalRecord: Codable, Identifiable {
     public let id: UUID
     public let planId: UUID
     public let approved: Bool
     public let approvalType: ApprovalType
+    /// Legacy string-based approver identifier — kept for backward compatibility.
     public let approverIdentifier: String
+    /// Cryptographic approver principal — provable identity.
+    public let approverPrincipal: ApproverPrincipal?
     public let reason: String?
     public let approvedAt: Date
     public let expiresAt: Date?
+
+    // SECURE ENCLAVE ROOT AUTHORITY — Phase 11
+    /// ECDSA signature from Secure Enclave over the plan hash.
+    /// The signature IS the authority artifact. Biometric presence alone is insufficient.
+    public let humanSignature: Data?
+    /// Public key fingerprint of the signer (SHA256 of SE public key).
+    public let signerPublicKeyFingerprint: String?
+    /// Trust epoch at the time of approval.
+    public let trustEpoch: Int?
+    /// Key version at the time of approval.
+    public let keyVersion: Int?
     
     public init(
         id: UUID = UUID(),
@@ -561,18 +821,28 @@ public struct ApprovalRecord: Codable, Identifiable {
         approved: Bool,
         approvalType: ApprovalType,
         approverIdentifier: String,
+        approverPrincipal: ApproverPrincipal? = nil,
         reason: String? = nil,
         approvedAt: Date = Date(),
-        expiresAt: Date? = nil
+        expiresAt: Date? = nil,
+        humanSignature: Data? = nil,
+        signerPublicKeyFingerprint: String? = nil,
+        trustEpoch: Int? = nil,
+        keyVersion: Int? = nil
     ) {
         self.id = id
         self.planId = planId
         self.approved = approved
         self.approvalType = approvalType
         self.approverIdentifier = approverIdentifier
+        self.approverPrincipal = approverPrincipal ?? .legacy(approverIdentifier)
         self.reason = reason
         self.approvedAt = approvedAt
         self.expiresAt = expiresAt
+        self.humanSignature = humanSignature
+        self.signerPublicKeyFingerprint = signerPublicKeyFingerprint
+        self.trustEpoch = trustEpoch
+        self.keyVersion = keyVersion
     }
 }
 

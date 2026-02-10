@@ -247,7 +247,7 @@ struct IntentInputView: View {
             }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -264,12 +264,12 @@ struct IntentInputView: View {
             }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
 
     /// Header title based on context
@@ -285,7 +285,7 @@ struct IntentInputView: View {
                 ZStack {
                     Circle()
                         .fill(LinearGradient(
-                            colors: [Color.blue, Color.purple],
+                            colors: [OKColor.actionPrimary, OKColor.riskExtreme],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ))
@@ -293,7 +293,7 @@ struct IntentInputView: View {
 
                     Image(systemName: "mic.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -303,7 +303,7 @@ struct IntentInputView: View {
 
                     Text("Check that this is what you intended")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
 
                 Spacer()
@@ -312,11 +312,11 @@ struct IntentInputView: View {
             HStack(spacing: 8) {
                 Image(systemName: "shield.checkered")
                     .font(.system(size: 14))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
 
                 Text("Siri can only open OperatorKit. You decide what happens next.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
 
                 Spacer()
             }
@@ -335,18 +335,18 @@ struct IntentInputView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .padding(.top, 4)
                 }
             } else {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
 
                     Text("Reviewed — ready to continue")
                         .font(.subheadline)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                 }
                 .padding(.top, 4)
             }
@@ -354,7 +354,7 @@ struct IntentInputView: View {
         .padding(16)
         .background(
             LinearGradient(
-                colors: [Color.blue.opacity(0.08), Color.purple.opacity(0.05)],
+                colors: [OKColor.actionPrimary.opacity(0.08), OKColor.riskExtreme.opacity(0.05)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -362,7 +362,7 @@ struct IntentInputView: View {
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                .stroke(OKColor.actionPrimary.opacity(0.2), lineWidth: 1)
         )
     }
 
@@ -378,7 +378,7 @@ struct IntentInputView: View {
 
                     Image(systemName: "sparkles")
                         .font(.system(size: 20))
-                        .foregroundColor(.white)
+                        .foregroundColor(OKColor.textPrimary)
                 }
 
                 Text("OperatorKit")
@@ -394,7 +394,7 @@ struct IntentInputView: View {
                         Text("Siri")
                             .font(OKTypography.caption())
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .padding(.horizontal, OKSpacing.sm)
                     .padding(.vertical, OKSpacing.xs)
                     .background(OKColors.operatorGradient)
@@ -444,7 +444,7 @@ struct IntentInputView: View {
         HStack(spacing: 3) {
             ForEach(0..<30, id: \.self) { index in
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.blue.opacity(0.6))
+                    .fill(OKColor.actionPrimary.opacity(0.6))
                     .frame(width: 4, height: CGFloat.random(in: 8...40))
             }
         }
@@ -479,13 +479,13 @@ struct IntentInputView: View {
                 } label: {
                     ZStack {
                         Circle()
-                            .fill(speech.isRecording ? AnyShapeStyle(Color.red.opacity(0.12)) : AnyShapeStyle(OKColors.operatorGradientSoft))
+                            .fill(speech.isRecording ? AnyShapeStyle(OKColor.riskCritical.opacity(0.12)) : AnyShapeStyle(OKColors.operatorGradientSoft))
                             .frame(width: 56, height: 56)
-                            .shadow(color: speech.isRecording ? Color.red.opacity(0.2) : OKShadow.glow, radius: 16, x: 0, y: 0)
+                            .shadow(color: speech.isRecording ? OKColor.riskCritical.opacity(0.2) : OKShadow.glow, radius: 16, x: 0, y: 0)
 
                         Image(systemName: speech.isRecording ? "stop.circle.fill" : "mic.fill")
                             .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(speech.isRecording ? AnyShapeStyle(Color.red) : AnyShapeStyle(OKColors.operatorGradient))
+                            .foregroundStyle(speech.isRecording ? AnyShapeStyle(OKColor.riskCritical) : AnyShapeStyle(OKColors.operatorGradient))
                     }
                 }
             }
@@ -530,7 +530,7 @@ struct IntentInputView: View {
                             }
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, OKSpacing.lg)
                     .background(continueButtonEnabled && !isProcessing ? OKColors.operatorGradient : LinearGradient(colors: [OKColors.iconMuted], startPoint: .leading, endPoint: .trailing))
@@ -555,7 +555,7 @@ struct IntentInputView: View {
         .padding(.vertical, OKSpacing.xl)
         .background(
             OKColors.backgroundPrimary
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: -5)
+                .shadow(color: OKColor.shadow.opacity(0.05), radius: 10, x: 0, y: -5)
         )
     }
 

@@ -67,11 +67,11 @@ public enum IntelligenceMode: String, Codable, Equatable, CaseIterable {
     public var tintColor: Color {
         switch self {
         case .deterministicTemplates:
-            return .blue
+            return OKColor.actionPrimary
         case .localLLMAvailable:
-            return .green
+            return OKColor.riskNominal
         case .localLLMUnavailable:
-            return .gray
+            return OKColor.textMuted
         }
     }
 
@@ -265,9 +265,9 @@ public enum ExecutionTier: Int, Codable, Equatable, CaseIterable, Comparable {
 
     public var tintColor: Color {
         switch self {
-        case .observe: return .blue
-        case .reversible: return .orange
-        case .irreversible: return .red
+        case .observe: return OKColor.actionPrimary
+        case .reversible: return OKColor.riskWarning
+        case .irreversible: return OKColor.riskCritical
         }
     }
 

@@ -48,6 +48,8 @@ struct ProcedureImportView: View {
             }
             .navigationTitle("Import Procedure")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -83,7 +85,7 @@ struct ProcedureImportView: View {
         Section {
             HStack(spacing: 12) {
                 Image(systemName: "shield.checkered")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .font(.title2)
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -93,7 +95,7 @@ struct ProcedureImportView: View {
                     
                     Text("Imported procedures are validated against forbidden content patterns before being accepted.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             .padding(.vertical, 4)
@@ -110,7 +112,7 @@ struct ProcedureImportView: View {
                 Text("3. Confirm to add to your library")
             }
             .font(.subheadline)
-            .foregroundColor(.secondary)
+            .foregroundColor(OKColor.textSecondary)
         } header: {
             Text("How to Import")
         }
@@ -138,7 +140,7 @@ struct ProcedureImportView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Image(systemName: procedure.category.icon)
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         
                         Text(procedure.name)
                             .font(.subheadline)
@@ -147,12 +149,12 @@ struct ProcedureImportView: View {
                         Spacer()
                         
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                     }
                     
                     Text("Category: \(procedure.category.displayName)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 .padding(.vertical, 4)
             }
@@ -166,7 +168,7 @@ struct ProcedureImportView: View {
         } footer: {
             if store.remainingCapacity < importedProcedures.count {
                 Text("Not enough capacity. Delete some procedures first.")
-                    .foregroundColor(.red)
+                    .foregroundColor(OKColor.riskCritical)
             } else {
                 Text("Procedures validated successfully. Tap to confirm.")
             }
@@ -179,11 +181,11 @@ struct ProcedureImportView: View {
         Section {
             HStack {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(OKColor.riskCritical)
                 
                 Text(error)
                     .font(.subheadline)
-                    .foregroundColor(.red)
+                    .foregroundColor(OKColor.riskCritical)
             }
         } header: {
             Text("Import Error")

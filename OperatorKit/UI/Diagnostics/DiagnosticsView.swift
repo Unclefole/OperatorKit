@@ -52,6 +52,8 @@ struct DiagnosticsView: View {
             }
             .navigationTitle("Diagnostics")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -87,7 +89,7 @@ struct DiagnosticsView: View {
                 title: "Executions This Week",
                 value: "\(executionSnapshot.executionsLast7Days)",
                 icon: "arrow.right.circle",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             )
             
             // Executions today
@@ -95,7 +97,7 @@ struct DiagnosticsView: View {
                 title: "Executions Today",
                 value: "\(executionSnapshot.executionsToday)",
                 icon: "sun.max",
-                iconColor: .orange
+                iconColor: OKColor.riskWarning
             )
             
             // Last execution
@@ -103,7 +105,7 @@ struct DiagnosticsView: View {
                 title: "Last Execution",
                 value: executionSnapshot.formattedLastExecution,
                 icon: "clock",
-                iconColor: .gray
+                iconColor: OKColor.textMuted
             )
             
             // Last outcome
@@ -120,7 +122,7 @@ struct DiagnosticsView: View {
                 
                 Text(executionSnapshot.lastExecutionOutcome.displayText)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         } header: {
@@ -138,7 +140,7 @@ struct DiagnosticsView: View {
             HStack(spacing: 12) {
                 Image(systemName: usageSnapshot.subscriptionTier == .pro ? "star.fill" : "person.fill")
                     .font(.system(size: 16))
-                    .foregroundColor(usageSnapshot.subscriptionTier == .pro ? .blue : .gray)
+                    .foregroundColor(usageSnapshot.subscriptionTier == .pro ? OKColor.actionPrimary : OKColor.textMuted)
                     .frame(width: 24)
                 
                 Text("Plan")
@@ -158,14 +160,14 @@ struct DiagnosticsView: View {
                     title: "Weekly Executions",
                     value: "\(used)/\(limit)",
                     icon: "number",
-                    iconColor: remaining == 0 ? .red : (remaining <= 2 ? .orange : .green)
+                    iconColor: remaining == 0 ? OKColor.riskCritical : (remaining <= 2 ? OKColor.riskWarning : OKColor.riskNominal)
                 )
             } else {
                 DiagnosticsRow(
                     title: "Weekly Executions",
                     value: "Unlimited",
                     icon: "infinity",
-                    iconColor: .green
+                    iconColor: OKColor.riskNominal
                 )
             }
             
@@ -175,14 +177,14 @@ struct DiagnosticsView: View {
                     title: "Saved Items",
                     value: "\(usageSnapshot.memoryItemCount)/\(limit)",
                     icon: "folder",
-                    iconColor: usageSnapshot.isMemoryLimitReached ? .red : (usageSnapshot.isMemoryLimitApproaching ? .orange : .green)
+                    iconColor: usageSnapshot.isMemoryLimitReached ? OKColor.riskCritical : (usageSnapshot.isMemoryLimitApproaching ? OKColor.riskWarning : OKColor.riskNominal)
                 )
             } else {
                 DiagnosticsRow(
                     title: "Saved Items",
                     value: "\(usageSnapshot.memoryItemCount)",
                     icon: "folder",
-                    iconColor: .green
+                    iconColor: OKColor.riskNominal
                 )
             }
             
@@ -192,7 +194,7 @@ struct DiagnosticsView: View {
                     title: "Limits Reset",
                     value: resetTime,
                     icon: "arrow.clockwise",
-                    iconColor: .blue
+                    iconColor: OKColor.actionPrimary
                 )
             }
         } header: {
@@ -209,7 +211,7 @@ struct DiagnosticsView: View {
                 title: "Fallback Used Recently",
                 value: executionSnapshot.fallbackUsedRecently ? "Yes" : "No",
                 icon: executionSnapshot.fallbackUsedRecently ? "arrow.uturn.down.circle" : "checkmark.circle",
-                iconColor: executionSnapshot.fallbackUsedRecently ? .orange : .green
+                iconColor: executionSnapshot.fallbackUsedRecently ? OKColor.riskWarning : OKColor.riskNominal
             )
             
             // Last failure (if any)
@@ -218,7 +220,7 @@ struct DiagnosticsView: View {
                     title: "Last Issue",
                     value: failure.displayText,
                     icon: "exclamationmark.triangle",
-                    iconColor: .orange
+                    iconColor: OKColor.riskWarning
                 )
             }
         } header: {
@@ -289,7 +291,7 @@ struct DiagnosticsView: View {
                 title: "Paywall Shown",
                 value: "\(conversionLedger.summary.paywallShownCount)",
                 icon: "rectangle.portrait.on.rectangle.portrait",
-                iconColor: .purple
+                iconColor: OKColor.riskExtreme
             )
             
             // Upgrade tap count
@@ -297,7 +299,7 @@ struct DiagnosticsView: View {
                 title: "Upgrade Tapped",
                 value: "\(conversionLedger.summary.upgradeTapCount)",
                 icon: "hand.tap",
-                iconColor: .blue
+                iconColor: OKColor.actionPrimary
             )
             
             // Purchase success count
@@ -305,7 +307,7 @@ struct DiagnosticsView: View {
                 title: "Purchases Completed",
                 value: "\(conversionLedger.summary.purchaseSuccessCount)",
                 icon: "checkmark.circle",
-                iconColor: .green
+                iconColor: OKColor.riskNominal
             )
             
             // Conversion rate
@@ -313,7 +315,7 @@ struct DiagnosticsView: View {
                 title: "Conversion Rate",
                 value: conversionLedger.summary.formattedConversionRate,
                 icon: "percent",
-                iconColor: .orange
+                iconColor: OKColor.riskWarning
             )
             
             // See plans link (Phase 10I)
@@ -324,12 +326,12 @@ struct DiagnosticsView: View {
                 } label: {
                     HStack {
                         Image(systemName: "star")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         Text("See Plans")
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                 }
             }
@@ -353,9 +355,9 @@ struct DiagnosticsView: View {
     
     private var tierColor: Color {
         switch EntitlementManager.shared.currentTier {
-        case .free: return .gray
-        case .pro: return .blue
-        case .team: return .orange
+        case .free: return OKColor.textMuted
+        case .pro: return OKColor.actionPrimary
+        case .team: return OKColor.riskWarning
         }
     }
     
@@ -368,7 +370,7 @@ struct DiagnosticsView: View {
             } label: {
                 HStack {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("Export Diagnostics")
                     Spacer()
                 }
@@ -407,10 +409,10 @@ struct DiagnosticsView: View {
     
     private func outcomeColor(_ outcome: ExecutionOutcome) -> Color {
         switch outcome.colorName {
-        case "green": return .green
-        case "red": return .red
-        case "orange": return .orange
-        default: return .gray
+        case "green": return OKColor.riskNominal
+        case "red": return OKColor.riskCritical
+        case "orange": return OKColor.riskWarning
+        default: return OKColor.textMuted
         }
     }
 }
@@ -437,7 +439,7 @@ private struct DiagnosticsRow: View {
             
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
@@ -459,8 +461,8 @@ private struct GuaranteeRow: View {
         
         var color: Color {
             switch self {
-            case .active: return .green
-            case .inactive: return .gray
+            case .active: return OKColor.riskNominal
+            case .inactive: return OKColor.textMuted
             }
         }
     }
@@ -478,7 +480,7 @@ private struct GuaranteeRow: View {
                 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()

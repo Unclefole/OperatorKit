@@ -63,13 +63,16 @@ private let _deploymentTargetCheck: Void = {
 /// in ways that would enable background execution.
 
 #if canImport(BackgroundTasks)
-// BackgroundTasks is a system framework that may be available
-// We document here that it MUST NOT be used
-// Code review should ensure no BGTaskScheduler usage
+// BackgroundTasks is a system framework used ONLY by Domain/Background/BackgroundScheduler.
+// Phase 19: BG tasks are now allowlisted for Sentinel proposal preparation and audit mirroring.
+// BG tasks must NEVER call ExecutionEngine, write-capable Services, or issue tokens.
 enum BackgroundTasksGuard {
-    /// Assert at compile time that we acknowledge the framework exists but don't use it
-    /// If BGTaskScheduler is used anywhere, code review must reject it
-    static let frameworkAvailableButNotUsed = true
+    /// Allowlisted BG task identifiers — any others must be rejected in code review.
+    static let allowlistedIdentifiers: Set<String> = [
+        "com.operatorkit.bg.prepare-proposals",
+        "com.operatorkit.bg.mirror-attestation",
+        "com.operatorkit.bg.scout"
+    ]
 }
 #endif
 

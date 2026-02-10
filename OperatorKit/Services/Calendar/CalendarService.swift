@@ -8,15 +8,44 @@ import EventKit
 // Changes to calendar access require Safety Contract Change Approval
 // ============================================================================
 
+// MARK: - Calendar Read-Only Protocol
+
+/// Read-only calendar access. Used by UI layers (ContextPicker, ContextAssembler).
+/// Write methods are NOT exposed through this protocol.
+/// This exists so non-execution code cannot access write operations even by accident.
+@MainActor
+protocol CalendarReadAccess: ObservableObject {
+    var isAuthorized: Bool { get }
+    var canWrite: Bool { get }
+    var currentAuthState: AuthorizationState { get }
+    var authorizationState: AuthorizationState { get }
+    var isLoadingEvents: Bool { get }
+    var availableCalendars: [EKCalendar] { get }
+    var defaultCalendar: EKCalendar? { get }
+    func refreshAuthorizationState()
+    func refreshCalendars()
+    func requestAccess() async -> Bool
+    func fetchEventsForSelection(daysBack: Int, daysForward: Int, limit: Int) async -> [CalendarEventModel]
+    func fetchEvent(identifier: String) async -> CalendarEventModel?
+    func fetchSelectedEvents(identifiers: Set<String>) async -> [CalendarEventModel]
+    func registerUserSelectedEvent(identifier: String)
+    func isEventUserSelected(identifier: String) -> Bool
+    func clearUserSelectedEvents()
+}
+
 /// Service for reading and writing calendar events
 /// INVARIANT: No background calendar access
 /// INVARIANT: No bulk reads or writes - only user-selected events
 /// INVARIANT: Write operations require two-key confirmation
 /// INVARIANT: Update only allowed for user-selected events
 @MainActor
-final class CalendarService: ObservableObject {
+final class CalendarService: ObservableObject, CalendarReadAccess {
     
     static let shared = CalendarService()
+    
+    /// Read-only access for UI layers. Exposes ONLY CalendarReadAccess protocol.
+    /// Write operations (createEvent, updateEvent) are NOT accessible through this.
+    static let readOnly: any CalendarReadAccess = CalendarService.shared
     
     // MARK: - Dependencies
     
@@ -214,7 +243,9 @@ final class CalendarService: ObservableObject {
     /// Create a new calendar event
     /// INVARIANT: Only called after two-key confirmation
     /// INVARIANT: Single event per call - no bulk writes
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can construct one.
     func createEvent(
+        accessToken: ServiceAccessToken,
         payload: CalendarEventPayload,
         secondConfirmationTimestamp: Date
     ) async -> CalendarWriteResult {
@@ -301,7 +332,9 @@ final class CalendarService: ObservableObject {
     /// INVARIANT: Only called after two-key confirmation
     /// INVARIANT: originalEventIdentifier must be from user-selected context
     /// INVARIANT: Single event per call - no bulk writes
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can construct one.
     func updateEvent(
+        accessToken: ServiceAccessToken,
         payload: CalendarEventPayload,
         secondConfirmationTimestamp: Date
     ) async -> CalendarWriteResult {
@@ -415,6 +448,24 @@ final class CalendarService: ObservableObject {
             case .eventNotUserSelected(let id):
                 return "Event was not user-selected: \(id)"
             }
+        }
+    }
+
+    // MARK: - Delete (Undo support)
+
+    /// Delete a previously created calendar event by identifier.
+    /// INVARIANT: Requires ServiceAccessToken — only ExecutionEngine.swift can call.
+    func deleteEvent(
+        accessToken: ServiceAccessToken,
+        identifier: String
+    ) async -> Bool {
+        // ServiceAccessToken is access-controlled (fileprivate init) — having it proves authorization
+        guard let event = eventStore.event(withIdentifier: identifier) else { return false }
+        do {
+            try eventStore.remove(event, span: .thisEvent, commit: true)
+            return true
+        } catch {
+            return false
         }
     }
 }

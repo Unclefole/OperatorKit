@@ -70,8 +70,13 @@ struct ExternalReviewReadinessView: View {
                 // Disclaimers
                 disclaimersSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("External Review")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -123,7 +128,7 @@ struct ExternalReviewReadinessView: View {
             OperatorKit is an on-device task assistant that helps draft emails, create reminders, and manage calendar events. All processing happens locally on your device. The app generates drafts for your review—no action is taken without your explicit approval.
             """)
             .font(.subheadline)
-            .foregroundColor(.secondary)
+            .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -161,7 +166,7 @@ struct ExternalReviewReadinessView: View {
             
             Text("Data is processed on-device and not transmitted externally.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -169,7 +174,7 @@ struct ExternalReviewReadinessView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: icon)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                     .frame(width: 24)
                 Text(title)
                     .font(.subheadline)
@@ -178,11 +183,11 @@ struct ExternalReviewReadinessView: View {
             
             Text("When: \(trigger)")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Scope: \(scope)")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 2)
     }
@@ -195,7 +200,7 @@ struct ExternalReviewReadinessView: View {
                 HStack(alignment: .top, spacing: 8) {
                     Text("\(index + 1).")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                         .frame(width: 20, alignment: .leading)
                     
                     Text(DisclaimersRegistry.guaranteeDisclaimers[index])
@@ -205,7 +210,7 @@ struct ExternalReviewReadinessView: View {
             
             Text("These are enforced by code and verified by automated tests.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -224,7 +229,7 @@ struct ExternalReviewReadinessView: View {
             
             Text("These checks run locally on-device. Status is informational only.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
     
@@ -245,11 +250,11 @@ struct ExternalReviewReadinessView: View {
     private func statusColor(_ status: String) -> Color {
         switch status.uppercased() {
         case "PASS", "ALL_CLEAR", "VERIFIED":
-            return .green
+            return OKColor.riskNominal
         case "WARN", "SKIPPED", "MISMATCH":
-            return .orange
+            return OKColor.riskWarning
         case "FAIL", "REGRESSION_DETECTED":
-            return .red
+            return OKColor.riskCritical
         default:
             return .secondary
         }
@@ -270,16 +275,16 @@ struct ExternalReviewReadinessView: View {
                         
                         Text(step.duration)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Text(step.action)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Text("Expected: \(step.expectedResult)")
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
                 .padding(.vertical, 2)
             }
@@ -299,7 +304,7 @@ struct ExternalReviewReadinessView: View {
                         
                         Text("A: \(ReviewerFAQ.items[index].answer)")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     .padding(.vertical, 4)
                 }
@@ -322,7 +327,7 @@ struct ExternalReviewReadinessView: View {
             
             Text("The export contains metadata only—version numbers, check results, and status indicators. It never contains calendar events, email content, or any personal data.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             // Navigation to reviewer checklist
             NavigationLink {
@@ -343,12 +348,12 @@ struct ExternalReviewReadinessView: View {
             ForEach(DisclaimersRegistry.uiDisclaimers.indices, id: \.self) { index in
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                         .font(.caption)
                     
                     Text(DisclaimersRegistry.uiDisclaimers[index])
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }

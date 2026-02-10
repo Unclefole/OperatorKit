@@ -282,6 +282,23 @@ struct SideEffect: Identifiable, Equatable {
             }
         }
         
+        /// The authorization scope required for this side effect.
+        /// Used by ExecutionEngine to verify token.approvedScopes covers each effect.
+        /// Format: "domain.access(detail)" matching PermissionManifest scope strings.
+        var authorizationScope: String {
+            switch self {
+            case .sendEmail:         return "mail.write(send)"
+            case .presentEmailDraft: return "mail.write(draft)"
+            case .saveDraft:         return "memory.write(draft)"
+            case .createReminder:    return "reminders.write(create)"
+            case .previewReminder:   return "reminders.read(preview)"
+            case .previewCalendarEvent: return "calendar.read(preview)"
+            case .createCalendarEvent:  return "calendar.write(create)"
+            case .updateCalendarEvent:  return "calendar.write(update)"
+            case .saveToMemory:      return "memory.write(save)"
+            }
+        }
+
         /// Whether this is a calendar-related type
         var isCalendarOperation: Bool {
             switch self {

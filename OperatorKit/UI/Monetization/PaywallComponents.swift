@@ -35,7 +35,7 @@ struct FeatureRow: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(isIncluded ? .blue : .gray)
+                .foregroundColor(isIncluded ? OKColor.actionPrimary : OKColor.textMuted)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -46,7 +46,7 @@ struct FeatureRow: View {
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Spacer()
@@ -54,7 +54,7 @@ struct FeatureRow: View {
             if isIncluded {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 16))
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
             }
         }
         .padding(.vertical, 8)
@@ -84,10 +84,10 @@ struct PriceBadge: View {
                 Text(badge)
                     .font(.caption2)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.blue)
+                    .background(OKColor.actionPrimary)
                     .cornerRadius(4)
             }
             
@@ -99,7 +99,7 @@ struct PriceBadge: View {
                     
                     Text(product.subscriptionPeriodDescription.capitalized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -107,15 +107,15 @@ struct PriceBadge: View {
                 Text(product.displayPrice)
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.primary)
+                    .foregroundColor(OKColor.textPrimary)
             }
         }
         .padding(16)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color.white)
+        .background(isSelected ? OKColor.actionPrimary.opacity(0.1) : OKColor.textPrimary)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                .stroke(isSelected ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.3), lineWidth: isSelected ? 2 : 1)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(product.displayName), \(product.displayPrice) \(product.subscriptionPeriodDescription). \(badgeText ?? "")")
@@ -152,7 +152,7 @@ struct PurchaseButton: View {
                     .font(.body)
                     .fontWeight(.semibold)
             }
-            .foregroundColor(.white)
+            .foregroundColor(OKColor.textPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(buttonBackground)
@@ -165,9 +165,9 @@ struct PurchaseButton: View {
     
     private var buttonBackground: Color {
         if isLoading || isDisabled {
-            return Color.gray.opacity(0.4)
+            return OKColor.textMuted.opacity(0.4)
         }
-        return Color.blue
+        return OKColor.actionPrimary
     }
 }
 
@@ -192,7 +192,7 @@ struct SecondaryButton: View {
             HStack(spacing: 6) {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                        .progressViewStyle(CircularProgressViewStyle(tint: OKColor.actionPrimary))
                         .scaleEffect(0.7)
                 } else if let icon = icon {
                     Image(systemName: icon)
@@ -203,7 +203,7 @@ struct SecondaryButton: View {
                     .font(.subheadline)
                     .fontWeight(.medium)
             }
-            .foregroundColor(.blue)
+            .foregroundColor(OKColor.actionPrimary)
         }
         .disabled(isLoading)
         .accessibilityLabel(isLoading ? "Restoring purchases" : title)
@@ -222,7 +222,7 @@ struct LimitCalloutView: View {
             HStack(spacing: 12) {
                 Image(systemName: "exclamationmark.circle")
                     .font(.system(size: 20))
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(headerText)
@@ -232,13 +232,13 @@ struct LimitCalloutView: View {
                     if let reason = decision.reason {
                         Text(reason)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     if let resetTime = decision.formattedResetTime {
                         Text("Resets \(resetTime)")
                             .font(.caption)
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                     }
                 }
                 
@@ -249,20 +249,20 @@ struct LimitCalloutView: View {
                 Text("Upgrade to Pro")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(Color.blue)
+                    .background(OKColor.actionPrimary)
                     .cornerRadius(8)
             }
             .accessibilityLabel("Upgrade to Pro for unlimited usage")
         }
         .padding(16)
-        .background(Color.orange.opacity(0.1))
+        .background(OKColor.riskWarning.opacity(0.1))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(OKColor.riskWarning.opacity(0.3), lineWidth: 1)
         )
     }
     
@@ -291,10 +291,10 @@ struct SubscriptionTierBadge: View {
                 .font(.caption2)
                 .fontWeight(.semibold)
         }
-        .foregroundColor(tier == .pro ? .white : .primary)
+        .foregroundColor(tier == .pro ? OKColor.textPrimary : .primary)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(tier == .pro ? Color.blue : Color.gray.opacity(0.2))
+        .background(tier == .pro ? OKColor.actionPrimary : OKColor.textMuted.opacity(0.2))
         .cornerRadius(4)
         .accessibilityLabel("Current plan: \(tier.displayName)")
     }
@@ -308,11 +308,11 @@ struct PrivacyNoteView: View {
         HStack(spacing: 8) {
             Image(systemName: "lock.shield")
                 .font(.system(size: 14))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text("No data leaves your device. Payments processed by Apple.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("No data leaves your device. Payments processed by Apple.")

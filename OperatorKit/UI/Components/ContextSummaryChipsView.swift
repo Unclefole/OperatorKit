@@ -46,19 +46,19 @@ struct ContextSummaryChipsView: View {
             HStack(spacing: 6) {
                 Image(systemName: "doc.text.magnifyingglass")
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Text("Context Included")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                 
                 Spacer()
                 
                 if hasContext {
                     Text("\(totalCount) item\(totalCount == 1 ? "" : "s")")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
             
@@ -70,7 +70,7 @@ struct ContextSummaryChipsView: View {
                             icon: "calendar",
                             label: "Calendar",
                             count: calendarCount,
-                            color: .red
+                            color: OKColor.riskCritical
                         )
                     }
                     
@@ -79,7 +79,7 @@ struct ContextSummaryChipsView: View {
                             icon: "envelope.fill",
                             label: "Email",
                             count: emailCount,
-                            color: .blue
+                            color: OKColor.actionPrimary
                         )
                     }
                     
@@ -88,7 +88,7 @@ struct ContextSummaryChipsView: View {
                             icon: "doc.fill",
                             label: "Files",
                             count: fileCount,
-                            color: .orange
+                            color: OKColor.riskWarning
                         )
                     }
                     
@@ -99,7 +99,7 @@ struct ContextSummaryChipsView: View {
             }
         }
         .padding(12)
-        .background(Color.gray.opacity(0.05))
+        .background(OKColor.textMuted.opacity(0.05))
         .cornerRadius(10)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityDescription)
@@ -110,22 +110,22 @@ struct ContextSummaryChipsView: View {
         HStack(spacing: 6) {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             if hasContext {
                 if calendarCount > 0 {
-                    compactChip(icon: "calendar", count: calendarCount, color: .red)
+                    compactChip(icon: "calendar", count: calendarCount, color: OKColor.riskCritical)
                 }
                 if emailCount > 0 {
-                    compactChip(icon: "envelope.fill", count: emailCount, color: .blue)
+                    compactChip(icon: "envelope.fill", count: emailCount, color: OKColor.actionPrimary)
                 }
                 if fileCount > 0 {
-                    compactChip(icon: "doc.fill", count: fileCount, color: .orange)
+                    compactChip(icon: "doc.fill", count: fileCount, color: OKColor.riskWarning)
                 }
             } else {
                 Text("No context")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         }
         .accessibilityElement(children: .combine)
@@ -172,11 +172,11 @@ struct ContextSummaryChipsView: View {
         HStack(spacing: 6) {
             Image(systemName: "info.circle")
                 .font(.system(size: 12))
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("No context selected")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 4)
     }

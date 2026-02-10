@@ -25,7 +25,7 @@ struct FallbackView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(UIColor.systemGroupedBackground)
+            OKColor.backgroundPrimary
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -68,7 +68,7 @@ struct FallbackView: View {
             Button(action: { nav.goBack() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
 
             Spacer()
@@ -80,12 +80,12 @@ struct FallbackView: View {
             Button(action: { nav.goHome() }) {
                 Image(systemName: "house")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
     }
     
     // MARK: - Warning Card
@@ -94,12 +94,12 @@ struct FallbackView: View {
             // Warning Icon
             ZStack {
                 Circle()
-                    .fill((isBlocked ? Color.red : Color.orange).opacity(0.15))
+                    .fill((isBlocked ? OKColor.riskCritical : OKColor.riskWarning).opacity(0.15))
                     .frame(width: 80, height: 80)
                 
                 Image(systemName: isBlocked ? "xmark.shield.fill" : "exclamationmark.triangle.fill")
                     .font(.system(size: 36))
-                    .foregroundColor(isBlocked ? .red : .orange)
+                    .foregroundColor(isBlocked ? OKColor.riskCritical : OKColor.riskWarning)
             }
             
             // Message
@@ -114,14 +114,14 @@ struct FallbackView: View {
                     : "The request is clear, but some details may require your judgment."
                 )
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundColor(OKColor.textMuted)
                     .multilineTextAlignment(.center)
             }
         }
         .padding(24)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .shadow(color: OKColor.shadow.opacity(0.04), radius: 10, x: 0, y: 4)
     }
     
     // MARK: - Intent Card
@@ -133,10 +133,10 @@ struct FallbackView: View {
             
             Text("\"\(intent.rawText)\"")
                 .font(.body)
-                .foregroundColor(.primary)
+                .foregroundColor(OKColor.textPrimary)
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.gray.opacity(0.05))
+                .background(OKColor.textMuted.opacity(0.05))
                 .cornerRadius(12)
         }
     }
@@ -154,7 +154,7 @@ struct FallbackView: View {
                     HStack {
                         Text("Confidence Level")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Spacer()
                         Text("\(Int(currentConfidence * 100))%")
                             .font(.subheadline)
@@ -166,7 +166,7 @@ struct FallbackView: View {
                         ZStack(alignment: .leading) {
                             // Background bar
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.gray.opacity(0.2))
+                                .fill(OKColor.textMuted.opacity(0.2))
                                 .frame(height: 8)
                             
                             // Threshold markers
@@ -174,7 +174,7 @@ struct FallbackView: View {
                                 Color.clear
                                     .frame(width: geometry.size.width * 0.35)
                                 Rectangle()
-                                    .fill(Color.gray.opacity(0.4))
+                                    .fill(OKColor.textMuted.opacity(0.4))
                                     .frame(width: 2, height: 12)
                                 Spacer()
                             }
@@ -183,7 +183,7 @@ struct FallbackView: View {
                                 Color.clear
                                     .frame(width: geometry.size.width * 0.65)
                                 Rectangle()
-                                    .fill(Color.gray.opacity(0.4))
+                                    .fill(OKColor.textMuted.opacity(0.4))
                                     .frame(width: 2, height: 12)
                                 Spacer()
                             }
@@ -200,15 +200,15 @@ struct FallbackView: View {
                     HStack {
                         Text("Insufficient")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Spacer()
                         Text("Needs review")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         Spacer()
                         Text("High")
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                     }
                 }
                 
@@ -239,19 +239,19 @@ struct FallbackView: View {
                 }
             }
             .padding(16)
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
     
     private var confidenceColor: Color {
         if currentConfidence >= 0.65 {
-            return .green
+            return OKColor.riskNominal
         } else if currentConfidence >= 0.35 {
-            return .orange
+            return OKColor.riskWarning
         } else {
-            return .red
+            return OKColor.riskCritical
         }
     }
     
@@ -267,7 +267,7 @@ struct FallbackView: View {
                     HStack(spacing: 12) {
                         Image(systemName: citation.sourceType.icon)
                             .font(.system(size: 16))
-                            .foregroundColor(.gray)
+                            .foregroundColor(OKColor.textMuted)
                         
                         Text(citation.label)
                             .font(.subheadline)
@@ -276,17 +276,17 @@ struct FallbackView: View {
                         
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                     }
                     .padding(12)
-                    .background(Color.gray.opacity(0.05))
+                    .background(OKColor.textMuted.opacity(0.05))
                     .cornerRadius(8)
                 }
             }
             .padding(16)
-            .background(Color.white)
+            .background(OKColor.backgroundPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         }
     }
     
@@ -301,7 +301,7 @@ struct FallbackView: View {
                 // Add Context Option (Primary)
                 FallbackOptionButton(
                     icon: "folder.badge.plus",
-                    iconColor: .blue,
+                    iconColor: OKColor.actionPrimary,
                     title: "Add more context",
                     description: "Select meetings, emails, or files to improve the draft",
                     isPrimary: true,
@@ -313,7 +313,7 @@ struct FallbackView: View {
                 // Rewrite Intent Option
                 FallbackOptionButton(
                     icon: "pencil.line",
-                    iconColor: .purple,
+                    iconColor: OKColor.riskExtreme,
                     title: "Clarify your request",
                     description: "Reword what you're trying to accomplish",
                     isPrimary: false,
@@ -327,7 +327,7 @@ struct FallbackView: View {
                 if canProceedAnyway {
                     FallbackOptionButton(
                         icon: "arrow.right.circle",
-                        iconColor: .orange,
+                        iconColor: OKColor.riskWarning,
                         title: "Continue with this draft",
                         description: "Review and edit before any action is taken",
                         isPrimary: false,
@@ -341,7 +341,7 @@ struct FallbackView: View {
                 // Cancel Option
                 FallbackOptionButton(
                     icon: "xmark.circle",
-                    iconColor: .gray,
+                    iconColor: OKColor.textMuted,
                     title: "Start over",
                     description: "Return home and begin a new request",
                     isPrimary: false,
@@ -364,9 +364,9 @@ struct IssueRow: View {
         
         var color: Color {
             switch self {
-            case .high: return .red
-            case .medium: return .orange
-            case .low: return .yellow
+            case .high: return OKColor.riskCritical
+            case .medium: return OKColor.riskWarning
+            case .low: return OKColor.riskWarning
             }
         }
         
@@ -387,7 +387,7 @@ struct IssueRow: View {
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(OKColor.textMuted)
             
             Spacer()
         }
@@ -420,27 +420,27 @@ struct FallbackOptionButton: View {
                     Text(title)
                         .font(.body)
                         .fontWeight(isPrimary ? .semibold : .medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                     
                     Text(description)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundColor(OKColor.textMuted.opacity(0.4))
             }
             .padding(16)
-            .background(isPrimary ? Color.blue.opacity(0.05) : Color.white)
+            .background(isPrimary ? OKColor.actionPrimary.opacity(0.05) : OKColor.textPrimary)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
             .overlay(
                 isPrimary ?
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                    .stroke(OKColor.actionPrimary.opacity(0.2), lineWidth: 1)
                 : nil
             )
         }

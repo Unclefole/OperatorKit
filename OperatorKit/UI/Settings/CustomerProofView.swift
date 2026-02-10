@@ -54,8 +54,13 @@ struct CustomerProofView: View {
                 // Data Management
                 dataManagementSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Proof & Trust")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -98,7 +103,7 @@ struct CustomerProofView: View {
         Section {
             HStack {
                 Image(systemName: safetyContractMatch ? "checkmark.shield.fill" : "exclamationmark.shield")
-                    .foregroundColor(safetyContractMatch ? .green : .orange)
+                    .foregroundColor(safetyContractMatch ? OKColor.riskNominal : OKColor.riskWarning)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Safety Contract")
@@ -107,7 +112,7 @@ struct CustomerProofView: View {
                     
                     Text(safetyContractMatch ? "Hash matches expected" : "Verification pending")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -127,7 +132,7 @@ struct CustomerProofView: View {
         Section {
             HStack {
                 Image(systemName: "gauge.with.needle")
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Quality Gate")
@@ -136,7 +141,7 @@ struct CustomerProofView: View {
                     
                     Text(qualityGateStatus)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
                 
                 Spacer()
@@ -144,7 +149,7 @@ struct CustomerProofView: View {
                 Text("\(coverageScore)%")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
             }
         } header: {
             Text("Quality")
@@ -158,7 +163,7 @@ struct CustomerProofView: View {
             ForEach(policyCapabilities, id: \.self) { capability in
                 HStack {
                     Image(systemName: "checkmark.circle")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                         .font(.caption)
                     
                     Text(capability)
@@ -169,7 +174,7 @@ struct CustomerProofView: View {
             if policyCapabilities.isEmpty {
                 Text("Loading policy...")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
         } header: {
             Text("Policy Capabilities")
@@ -186,7 +191,7 @@ struct CustomerProofView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Total Events")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Text("\(auditStore.events.count)")
                         .font(.title2)
@@ -198,12 +203,12 @@ struct CustomerProofView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Last 7 Days")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     Text("\(auditStore.eventsFromLastDays(7).count)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                 }
             }
             
@@ -221,7 +226,7 @@ struct CustomerProofView: View {
                         
                         Text("\(count)")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                 }
             }
@@ -330,9 +335,9 @@ private struct StatusBadge: View {
         
         var color: Color {
             switch self {
-            case .passing: return .green
-            case .warning: return .orange
-            case .failing: return .red
+            case .passing: return OKColor.riskNominal
+            case .warning: return OKColor.riskWarning
+            case .failing: return OKColor.riskCritical
             }
         }
     }
@@ -346,7 +351,7 @@ private struct StatusBadge: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(status.color)
-            .foregroundColor(.white)
+            .foregroundColor(OKColor.textPrimary)
             .cornerRadius(4)
     }
 }

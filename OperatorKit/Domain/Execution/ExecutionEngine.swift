@@ -27,6 +27,18 @@ import MessageUI
 // ║  Changes to execution logic require Safety Contract Change Approval       ║
 // ╚═══════════════════════════════════════════════════════════════════════════╝
 
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// ║  SERVICE ACCESS TOKEN — COMPILER-ENFORCED WRITE ISOLATION                ║
+// ╠═══════════════════════════════════════════════════════════════════════════╣
+// ║  fileprivate init: ONLY this file (ExecutionEngine.swift) can create.    ║
+// ║  All service write methods require this token as a parameter.            ║
+// ║  Other files can see the TYPE but cannot CONSTRUCT an instance.          ║
+// ║  This makes direct service writes impossible from any other file.        ║
+// ╚═══════════════════════════════════════════════════════════════════════════╝
+public struct ServiceAccessToken {
+    fileprivate init() {}
+}
+
 /// DUMB ACTUATOR — Executes side effects ONLY with a valid KernelAuthorizationToken.
 ///
 /// ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -48,6 +60,10 @@ import MessageUI
 final class ExecutionEngine: ObservableObject {
     
     static let shared = ExecutionEngine()
+    
+    /// Service access token — only constructable in this file.
+    /// Passed to service write methods to prove caller is ExecutionEngine.
+    private let serviceAccess = ServiceAccessToken()
     
     // MARK: - Dependencies
     
@@ -87,6 +103,29 @@ final class ExecutionEngine: ObservableObject {
         log("  → Token valid: \(token.isValid)")
         log("  → Side effects count: \(sideEffects.count)")
         log("  → Enabled side effects: \(sideEffects.filter { $0.isEnabled }.map { $0.type.rawValue }.joined(separator: ", "))")
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 0: Kernel Integrity Lockdown.
+        // If the kernel has detected its own compromise, ALL execution is blocked.
+        // No silent recovery. No degraded path. FAIL CLOSED.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard !KernelIntegrityGuard.shared.isLocked else {
+            logError("HARD FAIL: System in EXECUTION LOCKDOWN — kernel integrity compromised. ALL execution blocked.")
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "EXECUTION LOCKDOWN — kernel integrity compromised. Contact administrator.",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
 
         // ═══════════════════════════════════════════════════════════════════════
         // HARD GATE 1: Token must not be expired and must have a signature.
@@ -172,6 +211,184 @@ final class ExecutionEngine: ObservableObject {
             )
         }
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 4: Key version + epoch binding.
+        // Token must be signed with the ACTIVE key version in the CURRENT epoch.
+        // Rotated/revoked keys = HARD FAIL. No grace window. FAIL CLOSED.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard TrustEpochManager.shared.validateTokenBinding(
+            keyVersion: token.keyVersion,
+            epoch: token.epoch
+        ) else {
+            logError("HARD FAIL: Token key version (\(token.keyVersion)) or epoch (\(token.epoch)) does not match active state. Execution denied.")
+            try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                violationType: .signatureMismatch,
+                description: "Token epoch/key mismatch: token(v\(token.keyVersion), e\(token.epoch)) vs active(v\(TrustEpochManager.shared.activeKeyVersion), e\(TrustEpochManager.shared.trustEpoch))",
+                severity: .critical
+            ), planId: token.planId)
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Token epoch/key version mismatch — key may be rotated or revoked",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 5: Trusted Device Registry.
+        // Execution device must be explicitly trusted. Revoked/suspended = HARD FAIL.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard TrustedDeviceRegistry.shared.isCurrentDeviceTrusted else {
+            let state = SecureEnclaveApprover.shared.deviceFingerprint
+                .flatMap { TrustedDeviceRegistry.shared.trustState(for: $0) }?.rawValue ?? "unknown"
+            logError("HARD FAIL: Device trust state is '\(state)'. Execution denied.")
+            try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                violationType: .unauthorizedExecution,
+                description: "Execution attempted from non-trusted device (state: \(state))",
+                severity: .critical
+            ), planId: token.planId)
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Device not trusted — execution denied",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 6: Secure Enclave human signature verification.
+        // The SE signature IS the authority artifact.
+        // No signature → HARD FAIL. No degraded mode. No silent fallback.
+        // Biometric presence alone is insufficient — the cryptographic
+        // signature proves a hardware-backed human decision.
+        //
+        // Exception: auto-approved low-risk tokens (approvalType == .automatic)
+        // are kernel-issued without human interaction and skip SE check.
+        // ═══════════════════════════════════════════════════════════════════════
+        if token.approvalType != .automatic {
+            guard let humanSig = token.humanSignature else {
+                logError("HARD FAIL: No Secure Enclave human signature. Execution denied. The signature is the authority artifact.")
+                try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                    violationType: .signatureMismatch,
+                    description: "Missing SE human signature on non-automatic token \(token.id)",
+                    severity: .critical
+                ), planId: token.planId)
+                return ExecutionResultModel(
+                    draft: draft,
+                    executedSideEffects: [],
+                    status: .failed,
+                    message: "Human signature required — no Secure Enclave signature present",
+                    auditTrail: AuditTrail.build(
+                        intent: intent,
+                        context: context,
+                        draft: draft,
+                        sideEffects: sideEffects,
+                        permissionState: PermissionManager.shared.currentState,
+                        approvalTimestamp: approvalTimestamp
+                    )
+                )
+            }
+            guard !token.planHash.isEmpty,
+                  SecureEnclaveApprover.shared.verifySignature(humanSig, planHash: token.planHash) else {
+                logError("HARD FAIL: Secure Enclave human signature verification failed. Execution denied.")
+                try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                    violationType: .signatureMismatch,
+                    description: "SE human signature verification failed for token \(token.id)",
+                    severity: .critical
+                ), planId: token.planId)
+                return ExecutionResultModel(
+                    draft: draft,
+                    executedSideEffects: [],
+                    status: .failed,
+                    message: "Human approval signature invalid — execution denied",
+                    auditTrail: AuditTrail.build(
+                        intent: intent,
+                        context: context,
+                        draft: draft,
+                        sideEffects: sideEffects,
+                        permissionState: PermissionManager.shared.currentState,
+                        approvalTimestamp: approvalTimestamp
+                    )
+                )
+            }
+            log("✓ Secure Enclave human signature verified — hardware-backed human authority proven")
+        } else {
+            log("✓ Kernel auto-approved token — SE signature not required for low-risk automatic approvals")
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 7: Multi-signer quorum enforcement.
+        // Validates BOTH count AND signer types per risk-tier policy.
+        // LOW: deviceOperator | HIGH: +org | CRITICAL: +org +emergency
+        // No override flags. No bypass. FAIL CLOSED.
+        // ═══════════════════════════════════════════════════════════════════════
+        guard token.quorumMet else {
+            logError("HARD FAIL: Quorum count not met — need \(token.requiredSigners), have \(token.collectedSignatures.count). Execution denied.")
+            try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                violationType: .unauthorizedExecution,
+                description: "Quorum count not met: \(token.collectedSignatures.count)/\(token.requiredSigners) signatures collected",
+                severity: .critical
+            ), planId: token.planId)
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Quorum not met — insufficient approval signatures",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
+        // Validate signer types match risk-tier policy
+        if let missingTypes = CapabilityKernel.validateQuorum(
+            signatures: token.collectedSignatures,
+            riskTier: token.riskTier
+        ) {
+            let missingNames = missingTypes.map(\.rawValue).joined(separator: ", ")
+            logError("HARD FAIL: Quorum signer types missing — \(missingNames). Execution denied.")
+            try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                violationType: .unauthorizedExecution,
+                description: "Quorum type violation for \(token.riskTier.rawValue): missing \(missingNames)",
+                severity: .critical
+            ), planId: token.planId)
+            return ExecutionResultModel(
+                draft: draft,
+                executedSideEffects: [],
+                status: .failed,
+                message: "Quorum policy violation — missing signer type(s): \(missingNames)",
+                auditTrail: AuditTrail.build(
+                    intent: intent,
+                    context: context,
+                    draft: draft,
+                    sideEffects: sideEffects,
+                    permissionState: PermissionManager.shared.currentState,
+                    approvalTimestamp: approvalTimestamp
+                )
+            )
+        }
+
         // INVARIANT: Verify two-key confirmation for write operations
         for effect in sideEffects where effect.isEnabled && effect.type.requiresTwoKeyConfirmation {
             guard effect.secondConfirmationGranted else {
@@ -193,9 +410,69 @@ final class ExecutionEngine: ObservableObject {
             }
         }
         
+        // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 5: Scope enforcement — each enabled side effect must be
+        // covered by the token's approvedScopes. Authorization is not inferred.
+        // If approvedScopes is empty (legacy token), skip check for compatibility.
+        // ═══════════════════════════════════════════════════════════════════════
+        if !token.approvedScopes.isEmpty {
+            for effect in sideEffects where effect.isEnabled {
+                let scope = effect.type.authorizationScope
+                let covered = token.approvedScopes.contains { approvedScope in
+                    // Match exact scope OR wildcard domain match (e.g., "calendar.write" covers "calendar.write(create)")
+                    approvedScope == scope || scope.hasPrefix(approvedScope)
+                }
+                guard covered else {
+                    logError("HARD FAIL: Side effect '\(effect.type.rawValue)' scope '\(scope)' not in approved scopes. Execution denied.")
+                    try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                        violationType: .scopeViolation,
+                        description: "Token scope violation: effect '\(effect.type.rawValue)' requires '\(scope)' but token only approves \(token.approvedScopes)",
+                        severity: .critical
+                    ), planId: token.planId)
+                    return ExecutionResultModel(
+                        draft: draft,
+                        executedSideEffects: [],
+                        status: .failed,
+                        message: "Scope violation — '\(effect.type.displayName)' not authorized by token",
+                        auditTrail: AuditTrail.build(
+                            intent: intent,
+                            context: context,
+                            draft: draft,
+                            sideEffects: sideEffects,
+                            permissionState: PermissionManager.shared.currentState,
+                            approvalTimestamp: approvalTimestamp
+                        )
+                    )
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // EXECUTION RECORD: Persist BEFORE execution begins.
+        // This record survives app crashes and is the source of truth.
+        // ═══════════════════════════════════════════════════════════════════════
+        let primarySideEffect = sideEffects.first(where: { $0.isEnabled })?.type.rawValue ?? "none"
+        let executionRecord = ExecutionRecordStore.shared.createRecord(
+            intentType: intent?.intentType.rawValue ?? "unknown",
+            sideEffectType: primarySideEffect,
+            tokenPlanId: token.planId,
+            summary: draft.title,
+            reversible: sideEffects.contains { $0.type == .createReminder || $0.type == .createCalendarEvent }
+        )
+
+        // Transition: planned → approved (token gates passed)
+        if let record = executionRecord {
+            ExecutionRecordStore.shared.transition(record.id, to: .approved)
+        }
+
         isExecuting = true
         defer { isExecuting = false }
-        
+
+        // Transition: approved → executing (side effects about to run)
+        if let record = executionRecord {
+            ExecutionRecordStore.shared.transition(record.id, to: .executing)
+        }
+
         // Build audit trail BEFORE execution
         var auditTrail = AuditTrail.build(
             intent: intent,
@@ -211,7 +488,7 @@ final class ExecutionEngine: ObservableObject {
         var requiresUserAction: Bool = false
         
         for effect in sideEffects where effect.isEnabled {
-            let executed = await executeSideEffect(effect, draft: draft)
+            let executed = await executeSideEffect(effect, draft: draft, executionRecordId: executionRecord?.id)
             executedEffects.append(executed)
             
             // Update audit trail with reminder write info
@@ -278,6 +555,17 @@ final class ExecutionEngine: ObservableObject {
         let executionDuration = Date().timeIntervalSince(executionStartTime)
         log("[EXECUTION_COMPLETE] Status: \(status.rawValue) - \(message) (Duration: \(String(format: "%.2f", executionDuration))s)")
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // EXECUTION RECORD: Transition to terminal state.
+        // ═══════════════════════════════════════════════════════════════════════
+        if let record = executionRecord {
+            if status == .failed {
+                ExecutionRecordStore.shared.transition(record.id, to: .failed, reason: message)
+            } else {
+                ExecutionRecordStore.shared.transition(record.id, to: .completed)
+            }
+        }
+
         // DONATION: Only donate successful, high-confidence workflows
         // INVARIANT: Never donate drafts, failures, or low-confidence results
         if status == .success, let intentType = intent?.intentType {
@@ -302,7 +590,7 @@ final class ExecutionEngine: ObservableObject {
     
     // MARK: - Side Effect Execution
 
-    private func executeSideEffect(_ effect: SideEffect, draft: Draft) async -> ExecutedSideEffect {
+    private func executeSideEffect(_ effect: SideEffect, draft: Draft, executionRecordId: UUID? = nil) async -> ExecutedSideEffect {
         log("[EXECUTION_STEP] Executing side effect: \(effect.type.rawValue)")
         var resultMessage: String
         var wasExecuted = true
@@ -366,6 +654,7 @@ final class ExecutionEngine: ObservableObject {
             reminderWriteConfirmedAt = confirmationTime
 
             let saveResult = await reminderService.saveReminder(
+                accessToken: serviceAccess,
                 payload: payload,
                 secondConfirmationTimestamp: confirmationTime
             )
@@ -377,6 +666,20 @@ final class ExecutionEngine: ObservableObject {
                 resultMessage = "Reminder created successfully"
                 wasExecuted = true
                 log("[EXECUTION_STEP] Reminder created: \(identifier)")
+                // Record reversible action for Undo (with ExecutionRecord link)
+                let capturedId = identifier
+                await ActionHistory.shared.record(
+                    tool: "ReminderService",
+                    summary: "Created reminder: \(payload.title)",
+                    executionRecordId: executionRecordId,
+                    reversal: { [weak self] in
+                        guard let self = self else { return false }
+                        return await self.reminderService.deleteReminder(
+                            accessToken: self.serviceAccess,
+                            identifier: capturedId
+                        )
+                    }
+                )
             case .blocked(let reason):
                 resultMessage = reason
                 wasExecuted = false
@@ -420,6 +723,7 @@ final class ExecutionEngine: ObservableObject {
             calendarWriteConfirmedAt = confirmationTime
 
             let writeResult = await calendarService.createEvent(
+                accessToken: serviceAccess,
                 payload: payload,
                 secondConfirmationTimestamp: confirmationTime
             )
@@ -432,6 +736,20 @@ final class ExecutionEngine: ObservableObject {
                 resultMessage = "Calendar event created successfully"
                 wasExecuted = true
                 log("[EXECUTION_STEP] Calendar event created: \(identifier)")
+                // Record reversible action for Undo (with ExecutionRecord link)
+                let capturedEventId = identifier
+                await ActionHistory.shared.record(
+                    tool: "CalendarService",
+                    summary: "Created event: \(payload.title)",
+                    executionRecordId: executionRecordId,
+                    reversal: { [weak self] in
+                        guard let self = self else { return false }
+                        return await self.calendarService.deleteEvent(
+                            accessToken: self.serviceAccess,
+                            identifier: capturedEventId
+                        )
+                    }
+                )
             case .blocked(let reason):
                 resultMessage = reason
                 wasExecuted = false
@@ -477,6 +795,7 @@ final class ExecutionEngine: ObservableObject {
             calendarWriteConfirmedAt = confirmationTime
 
             let writeResult = await calendarService.updateEvent(
+                accessToken: serviceAccess,
                 payload: payload,
                 secondConfirmationTimestamp: confirmationTime
             )
@@ -525,7 +844,7 @@ final class ExecutionEngine: ObservableObject {
             return
         }
         
-        mailService.presentComposer(draft: draft) { [weak self] result in
+        mailService.presentComposer(accessToken: serviceAccess, draft: draft) { [weak self] result in
             self?.pendingMailComposer = nil
             completion(result)
         }

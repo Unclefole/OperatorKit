@@ -32,8 +32,12 @@ struct SalesPlaybookView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Sales Playbook")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -79,7 +83,7 @@ struct SalesPlaybookView: View {
             if filteredSections.isEmpty && filteredObjections.isEmpty {
                 Section {
                     Text("No results for \"\(searchText)\"")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else {
                 ForEach(filteredSections) { section in
@@ -160,7 +164,7 @@ private struct ContentRow: View {
         } else {
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .padding(.vertical, 4)
         }
     }
@@ -178,7 +182,7 @@ private struct ContentRow: View {
                 } else if !part.isEmpty {
                     Text(part)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         }
@@ -199,18 +203,18 @@ private struct ObjectionRow: View {
                 Text("Response:")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+                    .foregroundColor(OKColor.actionPrimary)
                 
                 Text(objection.response)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         } label: {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Objection:")
                     .font(.caption)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                 
                 Text(objection.objection)
                     .font(.subheadline)

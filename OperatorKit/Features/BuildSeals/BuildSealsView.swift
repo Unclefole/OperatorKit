@@ -93,7 +93,7 @@ struct BuildSealsSnapshot: Sendable {
         return BuildSealsSnapshot(
             overallStatus: "VERIFIED",
             statusIcon: "checkmark.seal.fill",
-            statusColor: .green,
+            statusColor: OKColor.riskNominal,
             entitlements: entitlements,
             dependencies: dependencies,
             symbols: symbols,
@@ -148,6 +148,8 @@ struct BuildSealsView: View {
         }
         .navigationTitle("Build Seals")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 
     // MARK: - Header Section
@@ -158,7 +160,7 @@ struct BuildSealsView: View {
                 HStack {
                     Image(systemName: "lock.shield")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
 
                     Text("Build Seals")
                         .font(.headline)
@@ -166,12 +168,12 @@ struct BuildSealsView: View {
                     Spacer()
 
                     Image(systemName: "lock.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 Text("Cryptographic proofs generated at build time. Verify source integrity without runtime enforcement.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -246,7 +248,7 @@ struct BuildSealsView: View {
                 Text("Forbidden Symbols")
                 Spacer()
                 Text("\(seal.forbiddenSymbolCount)")
-                    .foregroundColor(seal.forbiddenSymbolCount == 0 ? .green : .red)
+                    .foregroundColor(seal.forbiddenSymbolCount == 0 ? OKColor.riskNominal : OKColor.riskCritical)
             }
             .allowsHitTesting(false)
 
@@ -254,7 +256,7 @@ struct BuildSealsView: View {
                 Text("Forbidden Frameworks")
                 Spacer()
                 Image(systemName: seal.forbiddenFrameworkPresent ? "xmark.circle.fill" : "checkmark.circle.fill")
-                    .foregroundColor(seal.forbiddenFrameworkPresent ? .red : .green)
+                    .foregroundColor(seal.forbiddenFrameworkPresent ? OKColor.riskCritical : OKColor.riskNominal)
             }
             .allowsHitTesting(false)
 
@@ -264,7 +266,7 @@ struct BuildSealsView: View {
                         .font(.caption)
                     Spacer()
                     Image(systemName: check.detected ? "xmark.circle" : "checkmark.circle")
-                        .foregroundColor(check.detected ? .red : .green)
+                        .foregroundColor(check.detected ? OKColor.riskCritical : OKColor.riskNominal)
                         .font(.caption)
                 }
                 .allowsHitTesting(false)
@@ -295,11 +297,11 @@ struct BuildSealsView: View {
         Section {
             HStack {
                 Image(systemName: "shield.checkered")
-                    .foregroundColor(.green)
+                    .foregroundColor(OKColor.riskNominal)
 
                 Text("All proofs verified locally on this device.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .allowsHitTesting(false)
         } footer: {
@@ -314,7 +316,7 @@ struct BuildSealsView: View {
             Text(label)
             Spacer()
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .font(.system(.body, design: .monospaced))
         }
         .allowsHitTesting(false)

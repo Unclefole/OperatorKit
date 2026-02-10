@@ -39,8 +39,13 @@ struct BuyerProofView: View {
                 // Export Section
                 exportSection
             }
+            .scrollContentBackground(.hidden)
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("Buyer Proof")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -70,13 +75,13 @@ struct BuyerProofView: View {
                 HStack {
                     ProgressView()
                     Text("Building proof packet...")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             } else if let packet = packet {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(OKColor.riskNominal)
                         
                         Text("Proof Packet Ready")
                             .font(.headline)
@@ -84,12 +89,12 @@ struct BuyerProofView: View {
                     
                     Text("\(packet.availableSections.count) sections available")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                     
                     if !packet.unavailableSections.isEmpty {
                         Text("\(packet.unavailableSections.count) sections unavailable")
                             .font(.caption)
-                            .foregroundColor(.orange)
+                            .foregroundColor(OKColor.riskWarning)
                     }
                 }
                 .padding(.vertical, 4)
@@ -257,7 +262,7 @@ private struct ProofRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
@@ -286,9 +291,9 @@ private struct ProofRow: View {
     private var statusColor: Color {
         switch status {
         case .none: return .secondary
-        case .pass: return .green
-        case .warn: return .orange
-        case .fail: return .red
+        case .pass: return OKColor.riskNominal
+        case .warn: return OKColor.riskWarning
+        case .fail: return OKColor.riskCritical
         }
     }
 }

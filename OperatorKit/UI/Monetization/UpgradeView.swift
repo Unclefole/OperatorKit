@@ -72,9 +72,12 @@ struct UpgradeView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
             }
-            .background(Color(UIColor.systemGroupedBackground))
+            .background(OKColor.backgroundPrimary)
             .navigationTitle("OperatorKit Pro")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -109,7 +112,7 @@ struct UpgradeView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.blue, Color.purple],
+                            colors: [OKColor.actionPrimary, OKColor.riskExtreme],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -118,7 +121,7 @@ struct UpgradeView: View {
                 
                 Image(systemName: "star.fill")
                     .font(.system(size: 28))
-                    .foregroundColor(.white)
+                    .foregroundColor(OKColor.textPrimary)
             }
             
             Text("OperatorKit Pro")
@@ -127,7 +130,7 @@ struct UpgradeView: View {
             
             Text("Remove limits and get more done")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 8)
         .accessibilityElement(children: .combine)
@@ -161,7 +164,7 @@ struct UpgradeView: View {
             )
         }
         .padding(16)
-        .background(Color.white)
+        .background(OKColor.backgroundPrimary)
         .cornerRadius(12)
     }
     
@@ -203,11 +206,11 @@ struct UpgradeView: View {
         VStack(spacing: 16) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 40))
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
 
             Text("Subscriptions temporarily unavailable.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
 
             Button("Try Again") {
@@ -216,7 +219,7 @@ struct UpgradeView: View {
                 }
             }
             .font(.subheadline)
-            .foregroundColor(.blue)
+            .foregroundColor(OKColor.actionPrimary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
@@ -265,7 +268,7 @@ struct UpgradeView: View {
             Link("Privacy Policy", destination: URL(string: "https://www.apple.com/legal/privacy/")!)
                 .font(.caption)
         }
-        .foregroundColor(.blue)
+        .foregroundColor(OKColor.actionPrimary)
     }
     
     // MARK: - Actions

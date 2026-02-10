@@ -29,7 +29,7 @@ struct KnownLimitationsView: View {
                         
                         Text("This list clarifies what OperatorKit cannot do. These are intentional design decisions, not bugs.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     .padding(.vertical, 4)
                 }
@@ -49,6 +49,8 @@ struct KnownLimitationsView: View {
             }
             .navigationTitle("Known Limitations")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -67,7 +69,7 @@ private struct LimitationRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Image(systemName: limitation.icon)
-                    .foregroundColor(.orange)
+                    .foregroundColor(OKColor.riskWarning)
                     .font(.caption)
                 
                 Text(limitation.statement)
@@ -77,7 +79,7 @@ private struct LimitationRow: View {
             
             Text(limitation.explanation)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 4)
     }

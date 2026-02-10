@@ -85,64 +85,69 @@ struct OperationDetailView: View {
         }
     }
 
-    var body: some View {
-        Group {
-            switch viewState {
-            // ── LOADING STATE ──────────────────────────────
-            case .loading:
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Loading document…")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(OKColors.textSecondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // ── EMPTY STATE ────────────────────────────────
-            case .empty:
-                VStack(spacing: 16) {
-                    Image(systemName: "doc.text.magnifyingglass")
-                        .font(.system(size: 40))
-                        .foregroundColor(OKColors.textTertiary)
-                    Text("This document has no content yet.")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(OKColors.textSecondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // ── ERROR STATE ────────────────────────────────
-            case .error(let message):
-                VStack(spacing: 16) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(OKColors.statusPending)
-                    Text("Unable to load document.")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(OKColors.textPrimary)
-                    Text(message)
-                        .font(.system(size: 13))
-                        .foregroundColor(OKColors.textSecondary)
-                    Button("Retry") {
-                        loadOperation()
-                    }
-                    .font(.system(size: 15, weight: .semibold))
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 10)
-                    .background(OKColors.intelligenceGradient)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // ── LOADED STATE ───────────────────────────────
-            case .loaded:
-                loadedContent
+    @ViewBuilder
+    private var contentForState: some View {
+        switch viewState {
+        // ── LOADING STATE ──────────────────────────────
+        case .loading:
+            VStack(spacing: 16) {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                Text("Loading document…")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(OKColors.textSecondary)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        // ── EMPTY STATE ────────────────────────────────
+        case .empty:
+            VStack(spacing: 16) {
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.system(size: 40))
+                    .foregroundColor(OKColors.textTertiary)
+                Text("This document has no content yet.")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(OKColors.textSecondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        // ── ERROR STATE ────────────────────────────────
+        case .error(let message):
+            VStack(spacing: 16) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(OKColors.statusPending)
+                Text("Unable to load document.")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(OKColors.textPrimary)
+                Text(message)
+                    .font(.system(size: 13))
+                    .foregroundColor(OKColors.textSecondary)
+                Button("Retry") {
+                    loadOperation()
+                }
+                .font(.system(size: 15, weight: .semibold))
+                .padding(.horizontal, 24)
+                .padding(.vertical, 10)
+                .background(OKColors.intelligenceGradient)
+                .foregroundColor(OKColor.textPrimary)
+                .clipShape(Capsule())
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        // ── LOADED STATE ───────────────────────────────
+        case .loaded:
+            loadedContent
         }
-        .background(Color.white.ignoresSafeArea())
+    }
+
+    var body: some View {
+        contentForState
+        .background(OKColor.backgroundPrimary.ignoresSafeArea())
         .navigationTitle("Operation Detail")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         .onAppear {
             logDebug("[OperationDetail] onAppear — title: \(operationTitle), status: \(statusText)", category: .flow)
             loadOperation()
@@ -192,7 +197,7 @@ struct OperationDetailView: View {
                     HStack(spacing: 12) {
                         Text(statusText)
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(OKColor.textPrimary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 5)
                             .background(Capsule().fill(statusColor))
@@ -207,8 +212,8 @@ struct OperationDetailView: View {
                 .padding(.horizontal, 20)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white)
-                        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 3)
+                        .fill(OKColor.textPrimary)
+                        .shadow(color: OKColor.shadow.opacity(0.05), radius: 8, x: 0, y: 3)
                 )
 
                 detailSection(title: "Summary", icon: "text.alignleft", content: summaryText)
@@ -261,8 +266,8 @@ struct OperationDetailView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                .fill(OKColor.textPrimary)
+                .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         )
     }
 }

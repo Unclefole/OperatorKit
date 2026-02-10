@@ -52,6 +52,8 @@ struct HelpCenterView: View {
             }
             .navigationTitle("Help & Support")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
@@ -90,23 +92,23 @@ struct HelpCenterView: View {
             } label: {
                 HStack {
                     Image(systemName: "info.circle")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Known Limitations")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("What OperatorKit does not do")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -123,23 +125,23 @@ struct HelpCenterView: View {
             } label: {
                 HStack {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Export Support Packet")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Share diagnostic info with support")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -158,23 +160,23 @@ struct HelpCenterView: View {
             } label: {
                 HStack {
                     Image(systemName: "arrow.counterclockwise")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Reset Data")
                             .font(.subheadline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(OKColor.textPrimary)
                         
                         Text("Clear local data with confirmation")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(OKColor.textSecondary)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
             }
         } header: {
@@ -293,20 +295,20 @@ private struct FAQRow: View {
                     Text(item.question)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .foregroundColor(OKColor.textPrimary)
                         .multilineTextAlignment(.leading)
                     
                     Spacer()
                     
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .foregroundColor(.gray)
+                        .foregroundColor(OKColor.textMuted)
                 }
             }
             
             if isExpanded {
                 Text(item.answer)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
                     .padding(.top, 4)
             }
         }
@@ -333,7 +335,7 @@ private struct TroubleshootingDetailView: View {
                     HStack(alignment: .top, spacing: 12) {
                         Text("\(steps.firstIndex(of: step)! + 1).")
                             .font(.headline)
-                            .foregroundColor(.blue)
+                            .foregroundColor(OKColor.actionPrimary)
                         
                         Text(step)
                             .font(.subheadline)
@@ -348,6 +350,8 @@ private struct TroubleshootingDetailView: View {
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
     
     private var title: String {
@@ -401,6 +405,8 @@ private struct RefundInstructionsView: View {
         }
         .navigationTitle("Refunds")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 }
 

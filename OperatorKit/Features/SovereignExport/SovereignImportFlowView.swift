@@ -64,6 +64,8 @@ struct SovereignImportFlowView: View {
             }
             .navigationTitle("Import")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -85,7 +87,7 @@ struct SovereignImportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "doc.badge.plus")
                 .font(.system(size: 48))
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
             
             Text("Select Export File")
                 .font(.title2)
@@ -93,7 +95,7 @@ struct SovereignImportFlowView: View {
             
             Text("Choose a previously exported .oksov file")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
@@ -101,8 +103,8 @@ struct SovereignImportFlowView: View {
                 Text("Select File")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(OKColor.actionPrimary)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()
@@ -116,7 +118,7 @@ struct SovereignImportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "key.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.purple)
+                .foregroundColor(OKColor.riskExtreme)
             
             Text("Enter Passphrase")
                 .font(.title2)
@@ -124,7 +126,7 @@ struct SovereignImportFlowView: View {
             
             Text("Enter the passphrase used when exporting")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             SecureField("Passphrase", text: $passphrase)
                 .textFieldStyle(.roundedBorder)
@@ -137,8 +139,8 @@ struct SovereignImportFlowView: View {
                 Text("Decrypt")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(passphrase.isEmpty ? Color.gray : Color.purple)
-                    .foregroundColor(.white)
+                    .background(passphrase.isEmpty ? OKColor.textMuted : OKColor.riskExtreme)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .disabled(passphrase.isEmpty)
@@ -167,7 +169,7 @@ struct SovereignImportFlowView: View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.shield.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text("Import Preview")
                 .font(.title2)
@@ -188,7 +190,7 @@ struct SovereignImportFlowView: View {
             
             Text("Review the contents above. Tap Import to apply.")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             
@@ -196,8 +198,8 @@ struct SovereignImportFlowView: View {
                 Text("Import Configuration")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
+                    .background(OKColor.riskNominal)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()
@@ -225,7 +227,7 @@ struct SovereignImportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.green)
+                .foregroundColor(OKColor.riskNominal)
             
             Text("Import Complete")
                 .font(.title2)
@@ -247,8 +249,8 @@ struct SovereignImportFlowView: View {
                 Text("Done")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(OKColor.actionPrimary)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()
@@ -262,7 +264,7 @@ struct SovereignImportFlowView: View {
         VStack(spacing: 24) {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
             
             Text("Import Failed")
                 .font(.title2)
@@ -270,7 +272,7 @@ struct SovereignImportFlowView: View {
             
             Text(errorMessage ?? "Invalid passphrase or corrupted file")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .multilineTextAlignment(.center)
             
             Spacer()
@@ -279,8 +281,8 @@ struct SovereignImportFlowView: View {
                 Text("Try Again")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(OKColor.actionPrimary)
+                    .foregroundColor(OKColor.textPrimary)
                     .cornerRadius(12)
             }
             .padding()
@@ -396,7 +398,7 @@ private struct PreviewRow: View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Spacer()
             

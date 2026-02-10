@@ -11,6 +11,9 @@ struct OperatorKitApp: App {
     init() {
         // INVARIANT: Siri is routing-only. Never executes business logic.
 
+        // Register background tasks (must happen before app finishes launching)
+        BackgroundScheduler.registerTasks()
+
         #if DEBUG
         // Phase 7A — Startup safety + invariant validation
         ReleaseSafetyConfig.runStartupValidation()
@@ -36,10 +39,38 @@ struct OperatorKitApp: App {
                 .environmentObject(templateStore)
                 .modelContainer(SwiftDataProvider.sharedModelContainer)
                 .launchTrustCalibration()
-                .preferredColorScheme(ColorScheme.light)
-                .background(Color.white)
+                .preferredColorScheme(.dark)
+                .background(OKColor.backgroundPrimary)
                 .onAppear {
                     SiriRoutingBridge.shared.configure(appState: appState, nav: nav)
+
+                    // EXECUTION PERSISTENCE: Configure store + crash recovery
+                    ExecutionRecordStore.shared.configure(with: SwiftDataProvider.sharedModelContainer)
+                    let recovered = ExecutionRecordStore.shared.recoverFromCrash()
+                    if recovered > 0 {
+                        log("[APP LAUNCH] Crash recovery: \(recovered) interrupted execution(s) marked as failed")
+                    }
+
+                    // BACKGROUND QUEUE: Configure persistent task queue
+                    BackgroundTaskQueue.shared.configure(with: SwiftDataProvider.sharedModelContainer)
+
+                    // KERNEL INTEGRITY: Self-integrity check on every launch
+                    KernelIntegrityGuard.shared.performFullCheck()
+
+                    // EVIDENCE CHAIN: Verify hash chain integrity on launch
+                    EvidenceEngine.shared.verifyOnLaunch()
+
+                    // NOTIFICATIONS: Request authorization
+                    Task {
+                        await NotificationBridge.shared.requestAuthorization()
+                    }
+
+                    // BACKGROUND: Schedule periodic tasks
+                    BackgroundScheduler.scheduleProposalPreparation()
+                    BackgroundScheduler.scheduleMirrorAttestation()
+                    if EnterpriseFeatureFlags.scoutModeEnabled {
+                        BackgroundScheduler.scheduleScoutRun()
+                    }
                 }
                 .task {
                     await templateStore.load()

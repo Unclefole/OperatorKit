@@ -64,6 +64,8 @@ struct SecurityManifestView: View {
         }
         .navigationTitle("Security Manifest")
         .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
     
     // MARK: - Header Section
@@ -74,7 +76,7 @@ struct SecurityManifestView: View {
                 HStack {
                     Image(systemName: "lock.shield.fill")
                         .font(.title)
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
                     
                     Text("Security Manifest")
                         .font(.headline)
@@ -82,7 +84,7 @@ struct SecurityManifestView: View {
                 
                 Text("Verifiable security claims backed by automated tests. This is a factual declaration, not a marketing promise.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             .padding(.vertical, 4)
         }
@@ -96,7 +98,7 @@ struct SecurityManifestView: View {
                 claim: "WebKit",
                 status: "Not Linked",
                 icon: "xmark.circle.fill",
-                color: .green,
+                color: OKColor.riskNominal,
                 description: "No WebKit framework imported or used"
             )
             
@@ -104,7 +106,7 @@ struct SecurityManifestView: View {
                 claim: "JavaScript",
                 status: "Not Present",
                 icon: "xmark.circle.fill",
-                color: .green,
+                color: OKColor.riskNominal,
                 description: "No JavaScriptCore, no JS execution"
             )
             
@@ -112,7 +114,7 @@ struct SecurityManifestView: View {
                 claim: "Embedded Browsers",
                 status: "None",
                 icon: "xmark.circle.fill",
-                color: .green,
+                color: OKColor.riskNominal,
                 description: "No WKWebView, no SFSafariViewController"
             )
             
@@ -120,7 +122,7 @@ struct SecurityManifestView: View {
                 claim: "Remote Code Execution",
                 status: "None",
                 icon: "xmark.circle.fill",
-                color: .green,
+                color: OKColor.riskNominal,
                 description: "No dynamic code loading from network"
             )
         } header: {
@@ -231,28 +233,28 @@ struct SecurityManifestView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "shield.checkered")
-                        .foregroundColor(.green)
+                        .foregroundColor(OKColor.riskNominal)
 
                     Text("All proofs verified locally on this device.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(OKColor.textSecondary)
                 }
 
                 HStack {
                     Image(systemName: "doc.text.fill")
-                        .foregroundColor(.blue)
+                        .foregroundColor(OKColor.actionPrimary)
                     Text("See: docs/SECURITY_MANIFEST.md")
                         .font(.caption)
                 }
 
                 HStack {
                     Image(systemName: "testtube.2")
-                        .foregroundColor(.orange)
+                        .foregroundColor(OKColor.riskWarning)
                     Text("Enforced by: SecurityManifestInvariantTests.swift")
                         .font(.caption)
                 }
             }
-            .foregroundColor(.secondary)
+            .foregroundColor(OKColor.textSecondary)
             .padding(.vertical, 4)
         } footer: {
             Text("This is a read-only verification surface. No actions, no network calls.")
@@ -265,14 +267,14 @@ struct SecurityManifestView: View {
         VStack(spacing: 16) {
             Image(systemName: "lock.shield")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
             
             Text("Security Manifest")
                 .font(.headline)
             
             Text("This feature is not enabled.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding()
     }
@@ -312,7 +314,7 @@ private struct GuaranteeRow: View {
             
             Text(description)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
                 .padding(.leading, 32)
         }
         .padding(.vertical, 2)
@@ -336,12 +338,12 @@ private struct TechnicalRow: View {
                 
                 Text(value)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(OKColor.textSecondary)
             }
             
             Text(detail)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
         .padding(.vertical, 2)
     }
@@ -358,12 +360,12 @@ private struct VerificationStep: View {
             Text("\(number).")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.blue)
+                .foregroundColor(OKColor.actionPrimary)
                 .frame(width: 20)
             
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }
@@ -377,12 +379,12 @@ private struct DisclaimerRow: View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: "xmark")
                 .font(.caption)
-                .foregroundColor(.red)
+                .foregroundColor(OKColor.riskCritical)
                 .frame(width: 16)
             
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(OKColor.textSecondary)
         }
     }
 }
