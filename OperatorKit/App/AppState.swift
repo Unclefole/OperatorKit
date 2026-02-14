@@ -4,6 +4,48 @@ import SwiftUI
 @MainActor
 final class AppState: ObservableObject {
     
+    // MARK: - Appearance Mode
+    
+    /// User-selected appearance mode.
+    /// Persisted to UserDefaults so it survives app restarts.
+    enum AppearanceMode: String, CaseIterable, Identifiable {
+        case system = "System"
+        case light  = "Light"
+        case dark   = "Dark"
+        
+        var id: String { rawValue }
+        
+        var colorScheme: ColorScheme? {
+            switch self {
+            case .system: return nil
+            case .light:  return .light
+            case .dark:   return .dark
+            }
+        }
+        
+        var icon: String {
+            switch self {
+            case .system: return "circle.lefthalf.filled"
+            case .light:  return "sun.max.fill"
+            case .dark:   return "moon.fill"
+            }
+        }
+    }
+    
+    private static let appearanceKey = "com.operatorkit.appearanceMode"
+    
+    @Published var appearanceMode: AppearanceMode = {
+        if let raw = UserDefaults.standard.string(forKey: "com.operatorkit.appearanceMode"),
+           let mode = AppearanceMode(rawValue: raw) {
+            return mode
+        }
+        return .dark
+    }() {
+        didSet {
+            UserDefaults.standard.set(appearanceMode.rawValue, forKey: Self.appearanceKey)
+        }
+    }
+    
     // MARK: - Monetization State (Phase 10A)
     
     /// Current subscription status

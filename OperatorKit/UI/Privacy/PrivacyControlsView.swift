@@ -62,6 +62,9 @@ struct PrivacyControlsView: View {
                         // Privacy Summary
                         privacySummaryCard
                         
+                        // Appearance
+                        appearanceSection
+                        
                         // Last Refresh Info
                         lastRefreshCard
                         
@@ -202,6 +205,64 @@ struct PrivacyControlsView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
         .background(OKColor.backgroundPrimary)
+    }
+    
+    // MARK: - Appearance Section
+    
+    private var appearanceSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            OKSectionHeader("APPEARANCE")
+            
+            VStack(spacing: 0) {
+                ForEach(AppState.AppearanceMode.allCases) { mode in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            appState.appearanceMode = mode
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: mode.icon)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(appState.appearanceMode == mode ? OKColor.actionPrimary : OKColor.textSecondary)
+                                .frame(width: 24)
+                            
+                            Text(mode.rawValue)
+                                .font(OKTypography.body())
+                                .foregroundColor(OKColor.textPrimary)
+                            
+                            Spacer()
+                            
+                            if appState.appearanceMode == mode {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(OKColor.actionPrimary)
+                            }
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        .background(
+                            appState.appearanceMode == mode
+                                ? OKColor.actionPrimary.opacity(0.08)
+                                : Color.clear
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    
+                    if mode != AppState.AppearanceMode.allCases.last {
+                        Divider()
+                            .background(OKColor.borderSubtle)
+                            .padding(.leading, 52)
+                    }
+                }
+            }
+            .background(OKColor.backgroundSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: OKRadius.card))
+            .overlay(
+                RoundedRectangle(cornerRadius: OKRadius.card)
+                    .strokeBorder(OKColor.borderSubtle, lineWidth: 1)
+            )
+        }
+        .padding(.horizontal, 20)
     }
     
     // MARK: - Privacy Summary Card

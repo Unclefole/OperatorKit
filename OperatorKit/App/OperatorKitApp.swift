@@ -47,6 +47,7 @@ struct OperatorKitApp: App {
                 .environmentObject(templateStore)
                 .modelContainer(SwiftDataProvider.sharedModelContainer)
                 .launchTrustCalibration()
+                .preferredColorScheme(appState.appearanceMode.colorScheme)
                 .background(OKColor.backgroundPrimary)
                 .onAppear {
                     SiriRoutingBridge.shared.configure(appState: appState, nav: nav)
