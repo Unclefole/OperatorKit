@@ -679,13 +679,35 @@ struct IntentInputView: View {
             try? await Task.sleep(nanoseconds: 300_000_000)
 
             await MainActor.run {
-                // Use trimmed input for processing
-                let resolution = IntentResolver.shared.resolve(rawInput: trimmedInput)
+                // ════════════════════════════════════════════════════
+                // DUAL-LAYER INTENT CLASSIFICATION
+                // ════════════════════════════════════════════════════
+                //
+                // Layer 1: IntentResolver (keyword matching — fast, deterministic)
+                // Layer 2: Rule-based risk escalation (high-risk verb detection,
+                //          confidence gating, scope analysis)
+                //
+                // IntentClassifier wraps IntentResolver — the original resolver
+                // is called internally and its result is enriched with risk data.
+                // ════════════════════════════════════════════════════
+                let classified = IntentClassifier.classify(rawInput: trimmedInput)
+                let resolution = classified.resolution
 
                 isProcessing = false
                 appState.setIdle()
 
                 let intentType = resolution.request.intentType
+
+                // ════════════════════════════════════════════════════
+                // RISK ESCALATION: If the classifier detected high-risk
+                // verbs or critical risk tier, log and potentially block.
+                // ════════════════════════════════════════════════════
+                if classified.requiresEscalation {
+                    log("[CLASSIFIER] Risk escalation triggered: \(classified.escalationReason)")
+                }
+                if let blockReason = classified.blockReason {
+                    log("[CLASSIFIER] Execution blocked: \(blockReason)")
+                }
 
                 // ════════════════════════════════════════════════════
                 // FAILSAFE: DIRECT RESEARCH KEYWORD SCAN
@@ -719,7 +741,7 @@ struct IntentInputView: View {
                 }()
 
                 if isResearchFailsafe && intentType != .researchBrief {
-                    log("[FAILSAFE] IntentResolver classified as .\(intentType) but keyword scan detected research — overriding to .researchBrief")
+                    log("[FAILSAFE] IntentClassifier classified as .\(intentType) but keyword scan detected research — overriding to .researchBrief")
                 }
 
                 let effectiveIsAutonomous = !intentType.requiresOperatorContext || isResearchFailsafe
@@ -739,6 +761,9 @@ struct IntentInputView: View {
                 //
                 // Fail-closed checks (feature flags, connectors) happen
                 // INSIDE GovernedExecution, not at routing time.
+                //
+                // CLASSIFIER GATE: If execution is blocked by low confidence
+                // or critical risk, force draft-only mode.
                 // ════════════════════════════════════════════════════
                 if effectiveIsAutonomous {
                     let skillId = intentType.defaultSkillId ?? "web_research"

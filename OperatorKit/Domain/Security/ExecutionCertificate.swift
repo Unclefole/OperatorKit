@@ -52,9 +52,54 @@ public struct ExecutionCertificate: Sendable, Identifiable, Codable {
     public let signature: Data                   // ECDSA-P256 signature over canonical payload
     public let signerPublicKey: Data             // Public key that produced the signature
 
+    // ── Enclave Backing ──────────────────────────────
+    /// Whether the signing key is backed by Secure Enclave hardware.
+    /// `false` on simulator or devices without SE (logged as enclave_unavailable_simulator).
+    public let enclaveBacked: Bool
+
     // ── Hash Chain ────────────────────────────────────
     public let certificateHash: String           // SHA256 of this certificate's content
     public let previousCertificateHash: String   // SHA256 of the previous certificate (chain link)
+
+    // MARK: - Memberwise Init
+
+    public init(
+        id: UUID,
+        timestamp: Date,
+        intentHash: String,
+        proposalHash: String,
+        authorizationTokenHash: String,
+        approverIdHash: String,
+        deviceKeyId: String,
+        connectorId: String?,
+        connectorVersion: String?,
+        riskTier: RiskTier,
+        policySnapshotHash: String,
+        resultHash: String,
+        signature: Data,
+        signerPublicKey: Data,
+        enclaveBacked: Bool = false,
+        certificateHash: String,
+        previousCertificateHash: String
+    ) {
+        self.id = id
+        self.timestamp = timestamp
+        self.intentHash = intentHash
+        self.proposalHash = proposalHash
+        self.authorizationTokenHash = authorizationTokenHash
+        self.approverIdHash = approverIdHash
+        self.deviceKeyId = deviceKeyId
+        self.connectorId = connectorId
+        self.connectorVersion = connectorVersion
+        self.riskTier = riskTier
+        self.policySnapshotHash = policySnapshotHash
+        self.resultHash = resultHash
+        self.signature = signature
+        self.signerPublicKey = signerPublicKey
+        self.enclaveBacked = enclaveBacked
+        self.certificateHash = certificateHash
+        self.previousCertificateHash = previousCertificateHash
+    }
 
     // ── Computed Properties ───────────────────────────
 
@@ -136,6 +181,40 @@ public struct ExecutionCertificate: Sendable, Identifiable, Codable {
         SHA256.hash(data: data)
             .compactMap { String(format: "%02x", $0) }
             .joined()
+    }
+
+    // MARK: - Codable (backward-compatible with pre-enclaveBacked certificates)
+
+    private enum CodingKeys: String, CodingKey {
+        case id, timestamp, intentHash, proposalHash
+        case authorizationTokenHash, approverIdHash, deviceKeyId
+        case connectorId, connectorVersion
+        case riskTier, policySnapshotHash, resultHash
+        case signature, signerPublicKey
+        case enclaveBacked
+        case certificateHash, previousCertificateHash
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        intentHash = try container.decode(String.self, forKey: .intentHash)
+        proposalHash = try container.decode(String.self, forKey: .proposalHash)
+        authorizationTokenHash = try container.decode(String.self, forKey: .authorizationTokenHash)
+        approverIdHash = try container.decode(String.self, forKey: .approverIdHash)
+        deviceKeyId = try container.decode(String.self, forKey: .deviceKeyId)
+        connectorId = try container.decodeIfPresent(String.self, forKey: .connectorId)
+        connectorVersion = try container.decodeIfPresent(String.self, forKey: .connectorVersion)
+        riskTier = try container.decode(RiskTier.self, forKey: .riskTier)
+        policySnapshotHash = try container.decode(String.self, forKey: .policySnapshotHash)
+        resultHash = try container.decode(String.self, forKey: .resultHash)
+        signature = try container.decode(Data.self, forKey: .signature)
+        signerPublicKey = try container.decode(Data.self, forKey: .signerPublicKey)
+        // Backward compatible: defaults to false for pre-existing certificates
+        enclaveBacked = try container.decodeIfPresent(Bool.self, forKey: .enclaveBacked) ?? false
+        certificateHash = try container.decode(String.self, forKey: .certificateHash)
+        previousCertificateHash = try container.decode(String.self, forKey: .previousCertificateHash)
     }
 }
 

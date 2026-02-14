@@ -604,6 +604,22 @@ public final class CapabilityKernel: ObservableObject {
         // Quorum policy: required signers determined by risk tier
         let requiredCount = CapabilityKernel.requiredSignerCount(for: session.riskTier)
 
+        // POLICY-AS-CODE: Evaluate proposal against active ExecutionPolicy
+        let policyDecision = PolicyCodeEngine.evaluate(
+            toolPlan: proposal.toolPlan,
+            proposal: proposal
+        )
+        guard policyDecision.isAllowed, let evaluatedPolicyHash = policyDecision.policyHash else {
+            let reason = policyDecision.denyReason ?? "Policy evaluation failed"
+            logError("[KERNEL] Cannot issue token — PolicyCodeEngine denied: \(reason)")
+            SecurityTelemetry.shared.record(
+                category: .tokenReject,
+                detail: "Token denied by PolicyCodeEngine: \(reason)",
+                outcome: .denied
+            )
+            return nil
+        }
+
         let token = AuthorizationToken(
             planId: planId,
             riskTier: session.riskTier,
@@ -618,6 +634,7 @@ public final class CapabilityKernel: ObservableObject {
             humanSignature: humanSignature,
             requiredSigners: requiredCount,
             collectedSignatures: collectedSigs,
+            policyHash: evaluatedPolicyHash,
             keyVersion: currentKeyVersion,
             epoch: currentEpoch
         )
@@ -631,7 +648,7 @@ public final class CapabilityKernel: ObservableObject {
             type: "hardened_token_issued",
             planId: planId,
             jsonString: """
-            {"tokenId":"\(token.id)","planId":"\(planId)","sessionId":"\(session.id)","riskTier":"\(session.riskTier.rawValue)","scopeCount":\(scopes.count),"expiresAt":"\(expiresAt)","planHash":"\(planHash.prefix(16))...","secureEnclaveAttested":\(hasSE),"quorumMet":\(token.quorumMet),"keyVersion":\(currentKeyVersion),"epoch":\(currentEpoch)}
+            {"tokenId":"\(token.id)","planId":"\(planId)","sessionId":"\(session.id)","riskTier":"\(session.riskTier.rawValue)","scopeCount":\(scopes.count),"expiresAt":"\(expiresAt)","planHash":"\(planHash.prefix(16))...","policyHash":"\(evaluatedPolicyHash.prefix(16))...","secureEnclaveAttested":\(hasSE),"quorumMet":\(token.quorumMet),"keyVersion":\(currentKeyVersion),"epoch":\(currentEpoch)}
             """
         )
 
@@ -1080,6 +1097,12 @@ extension CapabilityKernel {
         /// Collected cryptographic signatures from authorized principals.
         public let collectedSignatures: [CollectedSignature]
 
+        // POLICY-AS-CODE — formal governance hash
+        /// SHA256 hash of the ExecutionPolicy that was evaluated before token issuance.
+        /// ExecutionEngine verifies this matches the active policy at execution time.
+        /// nil only for legacy tokens issued before Policy-as-Code integration.
+        public let policyHash: String?
+
         // KEY LIFECYCLE — epoch-bound, version-tracked
         /// The signing key version used to produce this token's HMAC.
         /// ExecutionEngine HARD FAILs if this != TrustEpochManager.activeKeyVersion.
@@ -1104,6 +1127,7 @@ extension CapabilityKernel {
             humanSignature: Data? = nil,
             requiredSigners: Int = 1,
             collectedSignatures: [CollectedSignature] = [],
+            policyHash: String? = nil,
             keyVersion: Int = 1,
             epoch: Int = 1
         ) {
@@ -1121,6 +1145,7 @@ extension CapabilityKernel {
             self.humanSignature = humanSignature
             self.requiredSigners = requiredSigners
             self.collectedSignatures = collectedSignatures
+            self.policyHash = policyHash
             self.keyVersion = keyVersion
             self.epoch = epoch
         }

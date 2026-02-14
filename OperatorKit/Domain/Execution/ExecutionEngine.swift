@@ -140,6 +140,37 @@ final class ExecutionEngine: ObservableObject {
         }
 
         // ═══════════════════════════════════════════════════════════════════════
+        // HARD GATE 0.5: Policy-as-Code Evaluation.
+        // The active ExecutionPolicy MUST allow this execution.
+        // PolicyCodeEngine evaluates scope, risk ceiling, reversibility,
+        // cost cap, and time window. FAIL CLOSED on deny.
+        // ═══════════════════════════════════════════════════════════════════════
+        if let policyHash = token.policyHash, !policyHash.isEmpty {
+            // Token carries a policy hash — verify it matches the active policy
+            let activePolicyHash = PolicyCodeEngine.activePolicy.policyHash
+            if policyHash != activePolicyHash {
+                logError("HARD FAIL: Token policyHash mismatch. Token=\(policyHash.prefix(16)), Active=\(activePolicyHash.prefix(16)). Policy may have changed since token issuance.")
+                return ExecutionResultModel(
+                    draft: draft,
+                    executedSideEffects: [],
+                    status: .failed,
+                    message: "Policy changed since approval — re-approve required",
+                    auditTrail: AuditTrail.build(
+                        intent: intent,
+                        context: context,
+                        draft: draft,
+                        sideEffects: sideEffects,
+                        permissionState: PermissionManager.shared.currentState,
+                        approvalTimestamp: approvalTimestamp
+                    )
+                )
+            }
+            log("[EXECUTION] PolicyCodeEngine gate PASSED — policyHash=\(policyHash.prefix(16))")
+        } else {
+            log("[EXECUTION] Token has no policyHash — legacy token, skipping policy gate")
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
         // HARD GATE 1: Token must not be expired and must have a signature.
         // ═══════════════════════════════════════════════════════════════════════
         guard token.isValid else {
@@ -597,12 +628,30 @@ final class ExecutionEngine: ObservableObject {
                 connectorId: nil,
                 connectorVersion: nil,
                 resultSummary: message,
-                resultStatus: status.rawValue
+                resultStatus: status.rawValue,
+                formalPolicyHash: token.policyHash
             )
 
             do {
                 let certificate = try ExecutionCertificateBuilder.buildCertificate(input: certInput)
                 log("[EXECUTION_CERT] Certificate created: \(certificate.id) (chain: \(certificate.previousCertificateHash.prefix(8))…)")
+
+                // ── EXECUTION TRACE: Build machine-verifiable trace ──
+                let executionDurationMs = Int(Date().timeIntervalSince(executionStartTime) * 1000)
+                let trace = ExecutionTraceBuilder.build(
+                    intentAction: intent?.rawText ?? draft.title,
+                    intentTarget: intent?.intentType.rawValue,
+                    policyHash: token.policyHash ?? PolicyCodeEngine.activePolicy.policyHash,
+                    approvalSessionId: token.approvalSessionId,
+                    tokenId: token.id,
+                    tokenPlanId: token.planId,
+                    tokenSignature: token.signature,
+                    connectorId: nil,
+                    certificate: certificate,
+                    executionDurationMs: executionDurationMs
+                )
+                ExecutionTraceStore.shared.append(trace)
+                log("[EXECUTION_TRACE] Trace created: \(trace.id) (traceHash: \(trace.traceHash.prefix(16))…)")
             } catch {
                 // FAIL CLOSED: Certificate generation failure on successful execution
                 // is a critical incident. The execution happened but is uncertified.

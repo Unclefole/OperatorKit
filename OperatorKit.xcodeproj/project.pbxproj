@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		GOV001A2B3C4D5E6F7890AB01 /* ExecutionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOV001A2B3C4D5E6F7890AB02 /* ExecutionPolicy.swift */; };
+		GOV002A2B3C4D5E6F7890AB01 /* PolicyCodeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOV002A2B3C4D5E6F7890AB02 /* PolicyCodeEngine.swift */; };
+		GOV003A2B3C4D5E6F7890AB01 /* ExecutionTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOV003A2B3C4D5E6F7890AB02 /* ExecutionTrace.swift */; };
+		SEC001A2B3C4D5E6F7890AB01 /* SecureExecutionSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = SEC001A2B3C4D5E6F7890AB02 /* SecureExecutionSigner.swift */; };
+		SEC002A2B3C4D5E6F7890AB01 /* CertificateVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = SEC002A2B3C4D5E6F7890AB02 /* CertificateVerifier.swift */; };
+		INT001A2B3C4D5E6F7890AB01 /* IntentClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = INT001A2B3C4D5E6F7890AB02 /* IntentClassifier.swift */; };
 		A1B2C3D4E5F6A7B8C9D00041 /* TamperDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D00040 /* TamperDetection.swift */; };
 		A1B2C3D4E5F6A7B8C9D00031 /* CertificatePinning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D00030 /* CertificatePinning.swift */; };
 		A1B2C3D4E5F6A7B8C9D00021 /* AppAttestVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D00020 /* AppAttestVerifier.swift */; };
@@ -329,6 +335,12 @@
 		AA33BB44CC55DD66EE77FF88 /* ExecutionCertificateBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA33BB44CC55DD66EE77FF89 /* ExecutionCertificateBuilder.swift */; };
 		FF22AA33BB44CC55DD66EE77 /* ExecutionSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22AA33BB44CC55DD66EE78 /* ExecutionSigner.swift */; };
 		EE11FF22AA33BB44CC55DD66 /* ExecutionCertificate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11FF22AA33BB44CC55DD67 /* ExecutionCertificate.swift */; };
+		GOVPOL01A2B3C4D5E6F70001 /* ExecutionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOVPOL01A2B3C4D5E6F70002 /* ExecutionPolicy.swift */; };
+		GOVPCE01A2B3C4D5E6F70001 /* PolicyCodeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOVPCE01A2B3C4D5E6F70002 /* PolicyCodeEngine.swift */; };
+		GOVTRC01A2B3C4D5E6F70001 /* ExecutionTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOVTRC01A2B3C4D5E6F70002 /* ExecutionTrace.swift */; };
+		SECSES01A2B3C4D5E6F70001 /* SecureExecutionSigner.swift in Sources */ = {isa = PBXBuildFile; fileRef = SECSES01A2B3C4D5E6F70002 /* SecureExecutionSigner.swift */; };
+		SECCVR01A2B3C4D5E6F70001 /* CertificateVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = SECCVR01A2B3C4D5E6F70002 /* CertificateVerifier.swift */; };
+		INTCLS01A2B3C4D5E6F70001 /* IntentClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = INTCLS01A2B3C4D5E6F70002 /* IntentClassifier.swift */; };
 		C1D7BEC4A59EB360E0BF4800 /* OfflineCertificationPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C46A5274AC4A05F2C5421E /* OfflineCertificationPacket.swift */; };
 		C32270F8216953D3333CB225 /* KnownLimitations.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDBBC645024F36EF1E8FD25 /* KnownLimitations.swift */; };
 		C3BA2935D690A5BBCEFD6EF1 /* EnterpriseReadinessBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B30F913ECB0E821E8DFAB3 /* EnterpriseReadinessBuilder.swift */; };
@@ -463,6 +475,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		GOV001A2B3C4D5E6F7890AB02 /* ExecutionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionPolicy.swift; sourceTree = "<group>"; };
+		GOV002A2B3C4D5E6F7890AB02 /* PolicyCodeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicyCodeEngine.swift; sourceTree = "<group>"; };
+		GOV003A2B3C4D5E6F7890AB02 /* ExecutionTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionTrace.swift; sourceTree = "<group>"; };
+		SEC001A2B3C4D5E6F7890AB02 /* SecureExecutionSigner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureExecutionSigner.swift; sourceTree = "<group>"; };
+		SEC002A2B3C4D5E6F7890AB02 /* CertificateVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CertificateVerifier.swift; sourceTree = "<group>"; };
+		INT001A2B3C4D5E6F7890AB02 /* IntentClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentClassifier.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D00040 /* TamperDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TamperDetection.swift; path = OperatorKit/Domain/Security/TamperDetection.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D00030 /* CertificatePinning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CertificatePinning.swift; path = OperatorKit/Domain/Security/CertificatePinning.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D00020 /* AppAttestVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppAttestVerifier.swift; path = OperatorKit/Domain/Security/AppAttestVerifier.swift; sourceTree = "<group>"; };
@@ -1131,6 +1149,7 @@
 				664D9C6C497BDC25C88E020F /* IntentRequest.swift */,
 				ECDEAB50F958D2C9692B9702 /* IntentResolution.swift */,
 				9F5DDD2AFAA518687B008B69 /* IntentResolver.swift */,
+				INT001A2B3C4D5E6F7890AB02 /* IntentClassifier.swift */,
 			);
 			path = Intent;
 			sourceTree = "<group>";
@@ -1234,6 +1253,8 @@
 				AA33BB44CC55DD66EE77FF89 /* ExecutionCertificateBuilder.swift */,
 				FF22AA33BB44CC55DD66EE78 /* ExecutionSigner.swift */,
 				EE11FF22AA33BB44CC55DD67 /* ExecutionCertificate.swift */,
+				SEC001A2B3C4D5E6F7890AB02 /* SecureExecutionSigner.swift */,
+				SEC002A2B3C4D5E6F7890AB02 /* CertificateVerifier.swift */,
 			);
 			name = Security;
 			path = Security;
@@ -1840,6 +1861,16 @@
 			path = Agent;
 			sourceTree = "<group>";
 		};
+		GOVGRP001A2B3C4D5E6F7890 /* Governance */ = {
+			isa = PBXGroup;
+			children = (
+				GOV001A2B3C4D5E6F7890AB02 /* ExecutionPolicy.swift */,
+				GOV002A2B3C4D5E6F7890AB02 /* PolicyCodeEngine.swift */,
+				GOV003A2B3C4D5E6F7890AB02 /* ExecutionTrace.swift */,
+			);
+			path = Governance;
+			sourceTree = "<group>";
+		};
 		C120260DE1725E6BCEE58625 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
@@ -1849,6 +1880,7 @@
 				B97B45D636DA76C51ABBA977 /* Drafts */,
 				E46A04AD896BADB3C6561300 /* Eval */,
 				C9B1FEDB724B548102967CE0 /* Execution */,
+				GOVGRP001A2B3C4D5E6F7890 /* Governance */,
 				35E972309477D9B37B41F7DB /* Intent */,
 				KERNELGRP0A2B3C4D5E6F0001 /* Kernel */,
 				45C36A12CA94D3A61FDACB15 /* Memory */,
@@ -2853,6 +2885,12 @@
 				AA33BB44CC55DD66EE77FF88 /* ExecutionCertificateBuilder.swift in Sources */,
 				FF22AA33BB44CC55DD66EE77 /* ExecutionSigner.swift in Sources */,
 				EE11FF22AA33BB44CC55DD66 /* ExecutionCertificate.swift in Sources */,
+				GOV001A2B3C4D5E6F7890AB01 /* ExecutionPolicy.swift in Sources */,
+				GOV002A2B3C4D5E6F7890AB01 /* PolicyCodeEngine.swift in Sources */,
+				GOV003A2B3C4D5E6F7890AB01 /* ExecutionTrace.swift in Sources */,
+				SEC001A2B3C4D5E6F7890AB01 /* SecureExecutionSigner.swift in Sources */,
+				SEC002A2B3C4D5E6F7890AB01 /* CertificateVerifier.swift in Sources */,
+				INT001A2B3C4D5E6F7890AB01 /* IntentClassifier.swift in Sources */,
 				BB22CC33DD44EE55FF667788 /* ConnectorGate.swift in Sources */,
 				AA11BB22CC33DD44EE55FF66 /* ConnectorManifest.swift in Sources */,
 				24210AE898616E85D1F37984 /* WebResearchSkill.swift in Sources */,

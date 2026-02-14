@@ -490,6 +490,29 @@ public final class GovernedAgentLoop: ObservableObject {
                 )
             }
 
+            // ── DEFENSE-IN-DEPTH: Explicit ConnectorGate enforcement at orchestration level ──
+            // Connectors self-enforce internally, but this redundant check ensures
+            // the orchestration layer ALSO validates before any connector call.
+            do {
+                let searchRequest = ConnectorRequest(
+                    connectorId: "brave_search",
+                    targetURL: URL(string: "https://api.search.brave.com/res/v1/web/search")!,
+                    httpMethod: "GET",
+                    payloadSize: 0
+                )
+                try ConnectorGate.enforce(request: searchRequest, manifest: ConnectorManifestRegistry.braveSearch)
+                logEvidence("agent_loop_connector_gate_enforced", detail: "brave_search PRE-FLIGHT passed")
+            } catch {
+                logEvidence("agent_loop_connector_gate_denied", detail: "brave_search PRE-FLIGHT denied: \(error.localizedDescription)")
+                return AgentToolResult(
+                    toolCall: call,
+                    success: false,
+                    output: "ConnectorGate denied search at orchestration level: \(error.localizedDescription)",
+                    evidenceTag: "agent_loop_connector_gate_denied",
+                    durationMs: Int(Date().timeIntervalSince(start) * 1000)
+                )
+            }
+
             phase = .searching
             statusMessage = "Searching: \(query.prefix(60))..."
             emit("SEARCH", detail: query, icon: "magnifyingglass", color: .blue, type: .toolCall)
@@ -548,6 +571,27 @@ public final class GovernedAgentLoop: ObservableObject {
                     output: "Invalid or non-HTTPS URL rejected",
                     evidenceTag: "agent_fetch_rejected_non_https",
                     durationMs: 0
+                )
+            }
+
+            // ── DEFENSE-IN-DEPTH: Explicit ConnectorGate enforcement at orchestration level ──
+            do {
+                let fetchRequest = ConnectorRequest(
+                    connectorId: "web_fetcher",
+                    targetURL: url,
+                    httpMethod: "GET",
+                    payloadSize: 0
+                )
+                try ConnectorGate.enforce(request: fetchRequest, manifest: ConnectorManifestRegistry.webFetcher)
+                logEvidence("agent_loop_connector_gate_enforced", detail: "web_fetcher PRE-FLIGHT passed for \(url.host ?? "unknown")")
+            } catch {
+                logEvidence("agent_loop_connector_gate_denied", detail: "web_fetcher PRE-FLIGHT denied: \(error.localizedDescription)")
+                return AgentToolResult(
+                    toolCall: call,
+                    success: false,
+                    output: "ConnectorGate denied fetch at orchestration level: \(error.localizedDescription)",
+                    evidenceTag: "agent_loop_connector_gate_denied",
+                    durationMs: Int(Date().timeIntervalSince(start) * 1000)
                 )
             }
 

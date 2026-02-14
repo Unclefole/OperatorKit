@@ -54,6 +54,10 @@ public struct CertificateInput: Sendable {
     public let resultSummary: String         // Will be hashed
     public let resultStatus: String
 
+    /// Formal policy hash from PolicyCodeEngine evaluation.
+    /// If nil, falls back to feature-flag snapshot hash (legacy).
+    public let formalPolicyHash: String?
+
     public init(
         intentAction: String,
         intentTarget: String?,
@@ -67,7 +71,8 @@ public struct CertificateInput: Sendable {
         connectorId: String? = nil,
         connectorVersion: String? = nil,
         resultSummary: String,
-        resultStatus: String
+        resultStatus: String,
+        formalPolicyHash: String? = nil
     ) {
         self.intentAction = intentAction
         self.intentTarget = intentTarget
@@ -82,6 +87,7 @@ public struct CertificateInput: Sendable {
         self.connectorVersion = connectorVersion
         self.resultSummary = resultSummary
         self.resultStatus = resultStatus
+        self.formalPolicyHash = formalPolicyHash
     }
 }
 
@@ -103,10 +109,22 @@ public enum ExecutionCertificateBuilder {
     public static func buildCertificate(
         input: CertificateInput
     ) throws -> ExecutionCertificate {
-        let signer = ExecutionSigner.shared
+        let seSigner = SecureExecutionSigner.shared
+        let legacySigner = ExecutionSigner.shared
 
-        // Ensure signing key exists (FAIL CLOSED)
-        try signer.generateKeyIfNeeded()
+        // Ensure SE signing key exists (FAIL CLOSED)
+        // Falls back to legacy signer if SE key generation fails
+        let useSecureEnclave: Bool
+        do {
+            try seSigner.generateKeyIfNeeded()
+            useSecureEnclave = true
+        } catch {
+            // SE key generation failed — fall back to legacy signer
+            try legacySigner.generateKeyIfNeeded()
+            useSecureEnclave = false
+        }
+
+        let enclaveBacked = useSecureEnclave && seSigner.isEnclaveAvailable
 
         // ── 1. Hash all inputs ───────────────────────────
         let intentHash = ExecutionCertificate.sha256Hex(
@@ -123,15 +141,23 @@ public enum ExecutionCertificateBuilder {
             "\(input.resultSummary)|\(input.resultStatus)"
         )
 
-        // Policy snapshot: hash of current feature flag state
-        let policySnapshotHash = ExecutionCertificate.sha256Hex(
-            "cloudKill=\(EnterpriseFeatureFlags.cloudKillSwitch)|execKill=\(EnterpriseFeatureFlags.executionKillSwitch)|webRes=\(EnterpriseFeatureFlags.webResearchFullyEnabled)"
-        )
+        // Policy snapshot: use formal PolicyCodeEngine hash if available,
+        // otherwise fall back to feature flag snapshot (legacy)
+        let policySnapshotHash: String
+        if let formalHash = input.formalPolicyHash, !formalHash.isEmpty {
+            policySnapshotHash = formalHash
+        } else {
+            policySnapshotHash = ExecutionCertificate.sha256Hex(
+                "cloudKill=\(EnterpriseFeatureFlags.cloudKillSwitch)|execKill=\(EnterpriseFeatureFlags.executionKillSwitch)|webRes=\(EnterpriseFeatureFlags.webResearchFullyEnabled)"
+            )
+        }
 
         // Device key ID (public key fingerprint)
         let deviceKeyId: String
         do {
-            deviceKeyId = try signer.publicKeyFingerprint()
+            deviceKeyId = useSecureEnclave
+                ? try seSigner.publicKeyFingerprint()
+                : try legacySigner.publicKeyFingerprint()
         } catch {
             throw CertificateBuilderError.publicKeyUnavailable
         }
@@ -139,7 +165,9 @@ public enum ExecutionCertificateBuilder {
         // Public key data
         let publicKeyData: Data
         do {
-            publicKeyData = try signer.publicKey()
+            publicKeyData = useSecureEnclave
+                ? try seSigner.publicKey()
+                : try legacySigner.publicKey()
         } catch {
             throw CertificateBuilderError.publicKeyUnavailable
         }
@@ -179,10 +207,12 @@ public enum ExecutionCertificateBuilder {
         ].joined(separator: "|")
         let canonicalData = Data(canonical.utf8)
 
-        // ── 5. Sign ──────────────────────────────────────
+        // ── 5. Sign (SE-backed or legacy) ────────────────
         let signature: Data
         do {
-            signature = try signer.sign(canonicalData)
+            signature = useSecureEnclave
+                ? try seSigner.sign(canonicalData)
+                : try legacySigner.sign(canonicalData)
         } catch {
             throw CertificateBuilderError.signingFailed(error.localizedDescription)
         }
@@ -203,6 +233,7 @@ public enum ExecutionCertificateBuilder {
             resultHash: resultHash,
             signature: signature,
             signerPublicKey: publicKeyData,
+            enclaveBacked: enclaveBacked,
             certificateHash: certificateHash,
             previousCertificateHash: previousHash
         )
