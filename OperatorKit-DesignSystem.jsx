@@ -165,15 +165,24 @@ const OperatorKitUI = () => {
           <div style={styles.headerLeft}>
             <div style={styles.logoContainer}>
               <div style={styles.logo}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <defs>
                     <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#5B8CFF" />
-                      <stop offset="100%" stopColor="#7C5CFF" />
+                      <stop offset="0%" stopColor="#7DD3FC" />
+                      <stop offset="50%" stopColor="#60A5FA" />
+                      <stop offset="100%" stopColor="#A78BFA" />
                     </linearGradient>
                   </defs>
-                  <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#logoGrad)" />
-                  <circle cx="12" cy="12" r="4" fill="white" />
+                  {/* Shield shape */}
+                  <path d="M16 2 C16 2 6 6 6 6 C6 6 6 18 6 18 C6 24 16 30 16 30 C16 30 26 24 26 18 C26 18 26 6 26 6 C26 6 16 2 16 2Z" fill="url(#logoGrad)" opacity="0.9" />
+                  {/* Microphone body */}
+                  <rect x="13.5" y="9" width="5" height="8" rx="2.5" fill="white" />
+                  {/* Microphone arc left */}
+                  <path d="M11 17 C11 20 13.2 22 16 22" stroke="white" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+                  {/* Microphone arc right */}
+                  <path d="M21 17 C21 20 18.8 22 16 22" stroke="white" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+                  {/* Microphone stand */}
+                  <line x1="16" y1="22" x2="16" y2="24.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
               </div>
               <span style={styles.logoText}>OperatorKit</span>
