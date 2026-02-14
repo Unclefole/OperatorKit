@@ -174,6 +174,12 @@ public final class VerificationEngine {
             canRollback = context.hasPreviousState
             rollbackMechanism = context.hasPreviousState ? "Restore previous configuration" : nil
             
+        case .webResearch, .reviewDocument:
+            reversibilityClass = .reversible
+            reason = "Read-only web research has no side effects"
+            canRollback = true
+            rollbackMechanism = nil
+
         case .unknown:
             reversibilityClass = .irreversible
             reason = "Unknown action type - assuming irreversible for safety"
@@ -316,6 +322,14 @@ public final class VerificationEngine {
             probes.append(ProbeDefinition(
                 type: .permissionCheck,
                 description: "Check configuration permission",
+                target: target,
+                isRequired: true
+            ))
+
+        case .webResearch, .reviewDocument:
+            probes.append(ProbeDefinition(
+                type: .endpointHealth,
+                description: "Verify target URL is reachable and on allowlist",
                 target: target,
                 isRequired: true
             ))

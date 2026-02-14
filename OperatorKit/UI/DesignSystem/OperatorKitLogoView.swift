@@ -10,6 +10,8 @@ import SwiftUI
 //       OperatorKitLogoView()
 //   }
 //
+// Uses the OperatorKitLogo image from Assets.xcassets (the shield + mic mark).
+// Falls back to the programmatic gradient icon if the asset is missing.
 // ============================================================================
 
 struct OperatorKitLogoView: View {
@@ -18,53 +20,74 @@ struct OperatorKitLogoView: View {
         case small
         case medium
         case large
-        case extraLarge
+        case hero
 
         var dimension: CGFloat {
             switch self {
-            case .small: return 24
-            case .medium: return 32
+            case .small: return 28
+            case .medium: return 36
             case .large: return 48
-            case .extraLarge: return 64
+            case .hero: return 56
             }
         }
 
-        var iconSize: CGFloat {
+        var textSize: CGFloat {
+            switch self {
+            case .small: return 15
+            case .medium: return 17
+            case .large: return 20
+            case .hero: return 22
+            }
+        }
+
+        var fallbackIconSize: CGFloat {
             switch self {
             case .small: return 12
             case .medium: return 16
             case .large: return 24
-            case .extraLarge: return 32
+            case .hero: return 28
             }
         }
     }
 
     let size: Size
     let showText: Bool
+    /// Override text color (useful when logo sits on a colored background)
+    let textColor: Color?
 
-    init(size: Size = .medium, showText: Bool = false) {
+    init(size: Size = .medium, showText: Bool = false, textColor: Color? = nil) {
         self.size = size
         self.showText = showText
+        self.textColor = textColor
     }
 
     var body: some View {
-        HStack(spacing: 8) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(OKColors.operatorGradient)
-                    .frame(width: size.dimension, height: size.dimension)
-
-                Image(systemName: "mic.fill")
-                    .font(.system(size: size.iconSize, weight: .medium))
-                    .foregroundColor(OKColor.textPrimary)
-            }
+        HStack(spacing: 10) {
+            // Logo image from asset catalog
+            Image("OperatorKitLogo")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: size.dimension)
 
             if showText {
                 Text("OperatorKit")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(OKColor.textPrimary)
+                    .font(.system(size: size.textSize, weight: .bold))
+                    .foregroundColor(textColor ?? OKColor.textPrimary)
             }
         }
         .accessibilityLabel("OperatorKit")
     }
+}
+
+#Preview("Light") {
+    OperatorKitLogoView(size: .hero, showText: true)
+        .padding()
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark") {
+    OperatorKitLogoView(size: .hero, showText: true)
+        .padding()
+        .background(OKColor.backgroundPrimary)
+        .preferredColorScheme(.dark)
 }

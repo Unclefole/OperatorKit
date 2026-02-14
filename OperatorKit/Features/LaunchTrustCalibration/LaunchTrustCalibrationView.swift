@@ -84,7 +84,7 @@ public struct LaunchTrustCalibrationView: View {
                     .foregroundColor(OKColor.riskNominal)
             } else {
                 // Calibrating state: OperatorKit logo
-                OperatorKitLogoView(size: .extraLarge, showText: false)
+                OperatorKitLogoView(size: .hero, showText: false)
             }
 
             // Title

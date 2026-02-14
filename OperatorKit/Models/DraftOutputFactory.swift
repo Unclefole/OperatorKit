@@ -262,6 +262,9 @@ final class DraftOutputFactory {
             notes.append("Task priorities and deadlines need your confirmation.")
         case .reminder:
             notes.append("Reminder timing should be reviewed before saving.")
+        case .researchBrief:
+            notes.append("This is a research draft for internal review only — do not distribute externally.")
+            notes.append("All data and statistics should be verified against primary sources before business decisions.")
         }
         
         // Add any process warnings
@@ -310,6 +313,8 @@ final class DraftOutputFactory {
                 return "Reminder: \(meeting.title)"
             }
             return "Reminder"
+        case .researchBrief:
+            return "Executive Market Brief — INTERNAL DRAFT"
         }
     }
     

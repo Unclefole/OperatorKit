@@ -67,11 +67,15 @@ struct HomeView: View {
                     }
                     .overlay(
                         // Hero content positioned over the blue background
-                        VStack(spacing: 16) {
+                        VStack(spacing: 20) {
+                            // Logo at the top (white text over gradient)
+                            OperatorKitLogoView(size: .hero, showText: true, textColor: .white)
+                                .padding(.top, 8)
+
                             heroCardContent
                         }
                         .padding(.horizontal, 20)
-                        .padding(.top, 24)
+                        .padding(.top, 16)
                         .padding(.bottom, 40),
                         alignment: .top
                     )
@@ -93,10 +97,7 @@ struct HomeView: View {
                 }
             }
         }
-        .navigationTitle("OperatorKit")
-        .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+        .navigationBarHidden(true)
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -275,7 +276,7 @@ struct RecentOperationCard: View {
                 // Title
                 Text(title)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(OKColors.textPrimary)
+                    .foregroundColor(OKColor.cardText)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
 
@@ -284,7 +285,7 @@ struct RecentOperationCard: View {
                 // Status tag — rounded capsule
                 Text(statusText)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(OKColor.textPrimary)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)
                     .background(Capsule().fill(statusColor))
@@ -292,7 +293,7 @@ struct RecentOperationCard: View {
             .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(OKColor.textPrimary)
+                    .fill(OKColor.cardSurface)
                     .shadow(color: OKColor.shadow.opacity(0.05), radius: 8, x: 0, y: 3)
             )
         }
@@ -336,7 +337,7 @@ struct HomeActionCard: View {
 
                 Text(label)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(OKColors.textPrimary)
+                    .foregroundColor(OKColor.cardText)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -346,7 +347,7 @@ struct HomeActionCard: View {
             .padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(OKColor.textPrimary)
+                    .fill(OKColor.cardSurface)
                     .shadow(color: OKColor.shadow.opacity(0.06), radius: 8, x: 0, y: 3)
             )
         }

@@ -263,6 +263,7 @@ struct MemoryItemRow: View {
         case .reminder, .createdReminder: return "bell.fill"
         case .documentReview: return "doc.text.magnifyingglass"
         case .calendarEvent, .createdCalendarEvent, .updatedCalendarEvent: return "calendar"
+        case .researchBrief: return "magnifyingglass.circle.fill"
         }
     }
     
@@ -273,6 +274,7 @@ struct MemoryItemRow: View {
         case .actionItems: return OKColor.riskNominal
         case .reminder, .createdReminder: return OKColor.riskExtreme
         case .calendarEvent, .createdCalendarEvent, .updatedCalendarEvent: return OKColor.riskCritical
+        case .researchBrief: return OKColor.actionPrimary
         }
     }
     
@@ -441,7 +443,6 @@ struct MemoryDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {

@@ -66,6 +66,8 @@ struct ModelCapabilities: Equatable, Codable {
             return canExtractActions
         case .reminder:
             return canGenerateReminder
+        case .researchBrief:
+            return canSummarize  // On-device provides basic template; cloud preferred
         }
     }
 }

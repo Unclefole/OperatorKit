@@ -15,6 +15,8 @@ struct EnterpriseKillSwitchesView: View {
     @State private var apns = EnterpriseFeatureFlags.apnsEnabled
     @State private var mirror = EnterpriseFeatureFlags.mirrorEnabled
     @State private var orgCoSign = EnterpriseFeatureFlags.orgCoSignEnabled
+    @State private var webResearch = EnterpriseFeatureFlags.webResearchEnabled
+    @State private var researchAllowlist = EnterpriseFeatureFlags.researchHostAllowlistEnabled
 
     @StateObject private var integrityGuard = KernelIntegrityGuard.shared
 
@@ -83,6 +85,42 @@ struct EnterpriseKillSwitchesView: View {
                 }
                 featureFlagRow(title: "Org Co-Signer (Quorum)", isOn: $orgCoSign) {
                     EnterpriseFeatureFlags.setOrgCoSignEnabled(orgCoSign)
+                }
+
+                // Web Research (Dual-Gate)
+                sectionHeader("WEB RESEARCH (READ-ONLY)")
+
+                featureFlagRow(title: "Web Research Enabled", isOn: $webResearch) {
+                    EnterpriseFeatureFlags.setWebResearchEnabled(webResearch)
+                }
+                featureFlagRow(title: "Research Host Allowlist", isOn: $researchAllowlist) {
+                    EnterpriseFeatureFlags.setResearchHostAllowlistEnabled(researchAllowlist)
+                }
+
+                if webResearch && researchAllowlist {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.shield.fill")
+                            .foregroundStyle(OKColor.riskNominal)
+                        Text("Web Research active — \(NetworkPolicyEnforcer.shared.activeResearchHosts.count) hosts allowlisted")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(OKColor.riskNominal)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(OKColor.riskNominal.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: "xmark.shield.fill")
+                            .foregroundStyle(OKColor.textMuted)
+                        Text("Both flags required. Web Research is OFF.")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(OKColor.textMuted)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(OKColor.backgroundTertiary)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
                 // Recovery

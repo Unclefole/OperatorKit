@@ -8,7 +8,13 @@ import Foundation
 // INVARIANT: Produced by ScoutEngine from read-only data sources.
 // ============================================================================
 
-public struct FindingPack: Codable, Identifiable {
+public struct FindingPack: Codable, Identifiable, Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    public static func == (lhs: FindingPack, rhs: FindingPack) -> Bool {
+        lhs.id == rhs.id
+    }
     public let id: UUID
     public let createdAt: Date
     public let scoutRunId: UUID

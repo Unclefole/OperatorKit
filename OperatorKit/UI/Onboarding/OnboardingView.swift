@@ -560,7 +560,7 @@ private struct OnboardingPageTemplateWithLogo<Content: View>: View {
             Spacer()
 
             // OperatorKit Logo
-            OperatorKitLogoView(size: .extraLarge, showText: true)
+            OperatorKitLogoView(size: .hero, showText: true)
 
             // Text
             VStack(spacing: 8) {

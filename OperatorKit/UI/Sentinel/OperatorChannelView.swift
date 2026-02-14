@@ -52,7 +52,6 @@ struct OperatorChannelView: View {
             .background(OKColor.backgroundPrimary)
             .navigationTitle("Operator Channel")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if channel.channelState == .generatingProposal {
@@ -61,7 +60,6 @@ struct OperatorChannelView: View {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
         }
     }
 
@@ -260,16 +258,39 @@ struct OperatorChannelView: View {
     private func handleDecision(_ decision: ApprovalSession.Decision) {
         channel.recordDecision(decision)
 
-        // If approved, forward to existing kernel pipeline
+        // If approved, forward to existing kernel pipeline with SE signature
         if decision.allowsExecution,
            let proposal = channel.pendingProposal,
            let session = channel.activeSession {
-            // Mint hardened token through kernel
-            if let token = kernel.issueHardenedToken(proposal: proposal, session: session) {
-                log("[OPERATOR_CHANNEL_VIEW] Hardened token minted: \(token.id)")
-                // Token is now available for ExecutionEngine via the existing approval flow
+
+            // The biometric gate in ProposalReviewPanel already verified identity.
+            // Obtain the SE signature for the hardened token.
+            Task {
+                let planMaterial = "\(proposal.toolPlan.id)\(proposal.toolPlan.intent.summary)\(proposal.toolPlan.executionSteps.count)"
+                let signature = await SecureEnclaveApprover.shared.signApproval(planHash: planMaterial)
+
+                // Mint hardened token through kernel WITH human signature
+                if let token = kernel.issueHardenedToken(
+                    proposal: proposal,
+                    session: session,
+                    humanSignature: signature
+                ) {
+                    log("[OPERATOR_CHANNEL_VIEW] Hardened token minted with SE signature: \(token.id)")
+                    SecurityTelemetry.shared.record(
+                        category: .tokenIssuance,
+                        detail: "Token \(token.id) issued with SE signature, plan=\(proposal.toolPlan.id.uuidString.prefix(8))",
+                        outcome: .success
+                    )
+                } else {
+                    log("[OPERATOR_CHANNEL_VIEW] Token issuance FAILED — execution blocked")
+                    SecurityTelemetry.shared.record(
+                        category: .tokenReject,
+                        detail: "Token issuance denied for plan=\(proposal.toolPlan.id.uuidString.prefix(8))",
+                        outcome: .denied
+                    )
+                }
+                channel.reset()
             }
-            channel.reset()
         }
     }
 }

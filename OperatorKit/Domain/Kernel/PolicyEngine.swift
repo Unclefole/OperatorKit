@@ -92,6 +92,10 @@ public final class PolicyEngine {
         // Reminders: Preview
         case .createReminder:
             return ApprovalRequirement.previewRequired
+
+        // Web research + document review: Read-only, auto-approve
+        case .webResearch, .reviewDocument:
+            return ApprovalRequirement.autoApprove
             
         case .unknown:
             // Unknown defaults to biometric

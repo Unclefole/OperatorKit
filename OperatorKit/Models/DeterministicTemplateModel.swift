@@ -153,6 +153,9 @@ final class DeterministicTemplateModel: OnDeviceModel {
             
         case .reminder:
             notes.append("Reminder timing is a suggestion - adjust as needed.")
+        case .researchBrief:
+            notes.append("Research draft for internal review only — do not distribute externally.")
+            notes.append("All data should be verified against primary sources.")
         }
         
         // Context-based warnings
@@ -184,6 +187,8 @@ final class DeterministicTemplateModel: OnDeviceModel {
             return generateTaskList(input: input, citations: citations)
         case .reminder:
             return generateReminder(input: input, citations: citations)
+        case .researchBrief:
+            return generateResearchBriefTemplate(input: input, citations: citations)
         }
     }
     
@@ -430,6 +435,45 @@ final class DeterministicTemplateModel: OnDeviceModel {
         
         actionItems.append("Review reminder timing")
         actionItems.append("Add specific details if needed")
+        
+        return (body, subject, actionItems)
+    }
+    
+    // MARK: - Research Brief Template
+    
+    private func generateResearchBriefTemplate(
+        input: ModelInput,
+        citations: [Citation]
+    ) -> (body: String, subject: String?, actionItems: [String]) {
+        let subject = "Executive Market Brief — INTERNAL DRAFT"
+        var actionItems: [String] = []
+        
+        let body = """
+        # Executive Market Brief
+        **INTERNAL DRAFT — DO NOT DISTRIBUTE**
+        
+        ## Research Request
+        \(input.intentText)
+        
+        ## Executive Summary
+        [Cloud AI model will generate data-driven insights here]
+        
+        ## Key Findings
+        - [Market data and trends]
+        - [Emerging segments]
+        - [Pricing analysis]
+        
+        ## Strategic Recommendations
+        - [Actionable recommendations with rationale]
+        
+        ---
+        *Note: This is a template. For full analysis, enable a cloud AI provider in Intelligence Settings.*
+        *All data should be verified against primary sources before business decisions.*
+        """
+        
+        actionItems.append("Enable cloud AI provider for full research brief generation")
+        actionItems.append("Verify all data against primary sources")
+        actionItems.append("Review before any external distribution")
         
         return (body, subject, actionItems)
     }

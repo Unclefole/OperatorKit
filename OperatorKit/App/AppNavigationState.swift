@@ -67,8 +67,14 @@ enum Route: Hashable {
     case auditStatus
     case pilotRunner
     case killSwitches
+    case intelligenceSettings
     case reviewPack
     case scoutDashboard
+    case skillsDashboard
+    case autopilot
+    case governedExecution(skillId: String, requestText: String)
+    case securityDashboard
+    case vaultRecovery
     case operationDetail(title: String, status: String, colorHex: String)
 
     // Color is not Hashable — we encode as hex string for Hashable conformance
@@ -124,10 +130,22 @@ enum Route: Hashable {
             PilotRunnerView()
         case .killSwitches:
             EnterpriseKillSwitchesView()
+        case .intelligenceSettings:
+            IntelligenceSettingsView()
         case .reviewPack:
             EnterpriseReviewPackView()
         case .scoutDashboard:
             ScoutDashboardView()
+        case .skillsDashboard:
+            OperatorSkillsDashboardView()
+        case .autopilot:
+            AutopilotProgressView()
+        case .governedExecution(let skillId, let requestText):
+            GovernedExecutionView(skillId: skillId, requestText: requestText)
+        case .securityDashboard:
+            SecurityDashboardView()
+        case .vaultRecovery:
+            VaultRecoveryView()
         case .workflowDetail:
             WorkflowDetailView()
         case .customTemplateDetail:

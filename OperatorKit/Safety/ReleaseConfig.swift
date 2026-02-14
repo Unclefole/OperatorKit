@@ -91,9 +91,10 @@ public enum ReleaseSafetyConfig {
     /// OperatorKit must never have network capabilities
     public static let networkEntitlementsEnabled = false
     
-    /// Background modes: DISABLED
-    /// OperatorKit must never run in the background
-    public static let backgroundModesEnabled = false
+    /// Background modes: ENABLED (authorized enterprise processing only)
+    /// Authorized modes: processing, fetch, remote-notification
+    /// Controlled by BackgroundTasksGuard allowlist
+    public static let backgroundModesEnabled = true
     
     /// Push notifications: DISABLED
     /// OperatorKit must never receive push notifications
@@ -144,9 +145,8 @@ public enum ReleaseSafetyConfig {
         if networkEntitlementsEnabled {
             violations.append("VIOLATION: Network entitlements must be disabled")
         }
-        if backgroundModesEnabled {
-            violations.append("VIOLATION: Background modes must be disabled")
-        }
+        // Background modes authorized for enterprise processing (scout, proposals, audit mirror)
+        // Controlled by BackgroundTasksGuard allowlist
         if pushNotificationsEnabled {
             violations.append("VIOLATION: Push notifications must be disabled")
         }

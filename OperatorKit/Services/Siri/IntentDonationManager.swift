@@ -203,7 +203,7 @@ final class IntentDonationManager {
                 confidence: confidence
             )
 
-        case .extractActionItems, .reviewDocument, .createReminder:
+        case .extractActionItems, .reviewDocument, .createReminder, .researchBrief:
             donateGeneralCompletion(
                 requestText: requestText,
                 wasApproved: wasApproved,

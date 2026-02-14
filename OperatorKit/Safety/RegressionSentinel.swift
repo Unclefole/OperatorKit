@@ -169,13 +169,13 @@ public final class RegressionSentinel {
         let allowedKeys = [
             "NSCalendarsUsageDescription",
             "NSRemindersUsageDescription",
-            "NSSiriUsageDescription"
+            "NSSiriUsageDescription",
+            "NSMicrophoneUsageDescription"
         ]
         
         let unexpectedKeys = [
             "NSLocationWhenInUseUsageDescription",
             "NSCameraUsageDescription",
-            "NSMicrophoneUsageDescription",
             "NSPhotoLibraryUsageDescription",
             "NSContactsUsageDescription",
             "NSHealthShareUsageDescription"
@@ -232,17 +232,36 @@ public final class RegressionSentinel {
     private func checkNoBackgroundModes() -> RegressionCheckResult {
         let backgroundModes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String]
         
+        // Allowlisted background modes (authorized for enterprise features)
+        let allowedModes: Set<String> = ["processing", "fetch", "remote-notification"]
+        
         if backgroundModes == nil || backgroundModes?.isEmpty == true {
             return RegressionCheckResult(
                 name: "Background Modes",
                 passed: true,
                 details: "None enabled"
             )
+        } else if let modes = backgroundModes {
+            let modeSet = Set(modes)
+            let unauthorized = modeSet.subtracting(allowedModes)
+            if unauthorized.isEmpty {
+                return RegressionCheckResult(
+                    name: "Background Modes",
+                    passed: true,
+                    details: "Authorized: \(modes.joined(separator: ", "))"
+                )
+            } else {
+                return RegressionCheckResult(
+                    name: "Background Modes",
+                    passed: false,
+                    details: "Unauthorized: \(unauthorized.sorted().joined(separator: ", "))"
+                )
+            }
         } else {
             return RegressionCheckResult(
                 name: "Background Modes",
-                passed: false,
-                details: "Found: \(backgroundModes?.joined(separator: ", ") ?? "unknown")"
+                passed: true,
+                details: "None enabled"
             )
         }
     }
@@ -256,9 +275,8 @@ public final class RegressionSentinel {
         if config.networkEntitlementsEnabled {
             violations.append("network enabled")
         }
-        if config.backgroundModesEnabled {
-            violations.append("background enabled")
-        }
+        // Background modes are authorized for enterprise processing (scout, proposals, audit mirror)
+        // Validation of authorized-only modes is handled by checkNoBackgroundModes()
         if config.analyticsEnabled {
             violations.append("analytics enabled")
         }

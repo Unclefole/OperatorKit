@@ -124,6 +124,7 @@ final class AppState: ObservableObject {
     
     @Published var selectedIntent: IntentRequest?
     @Published var selectedContext: ContextPacket?
+    @Published var lastBlockedReason: String?
     @Published var executionPlan: ExecutionPlan?
     @Published var currentDraft: Draft?
     @Published var approvalGranted: Bool = false

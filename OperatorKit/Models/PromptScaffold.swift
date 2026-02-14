@@ -96,6 +96,15 @@ struct PromptScaffold {
             taskDescription = "Extract and organize action items from the provided context."
         case .reminder:
             taskDescription = "Create a reminder based on the intent and context provided."
+        case .researchBrief:
+            taskDescription = """
+            You are a senior market research analyst. Based on the user's research request, generate a concise, \
+            data-driven 1-page executive market brief. Use your knowledge of recent market data, consumer trends, \
+            industry reports, and cultural dynamics. Structure the brief professionally with clear sections. \
+            Include specific data points, percentages, and dollar figures where possible. \
+            Cite well-known sources (e.g., Statista, NPD Group, Euromonitor, McKinsey, Bureau of Labor Statistics) \
+            where your knowledge allows. This is a draft for internal review only — not for external distribution.
+            """
         }
         
         return """
@@ -181,6 +190,35 @@ struct PromptScaffold {
             - Clear, actionable title
             - Brief note with relevant details
             - Reference source context if applicable
+            """
+        case .researchBrief:
+            formatGuidance = """
+            Structure as a 1-page executive market brief:
+
+            **EXECUTIVE SUMMARY** (2-3 sentences)
+
+            **MARKET OVERVIEW**
+            - Market size and growth rate
+            - Key data points with figures
+
+            **KEY FINDINGS**
+            1. Fastest-growing segments (with % growth)
+            2. Emerging brands and disruptors
+            3. Pricing trends and sweet spots
+            4. Cultural and behavioral drivers
+
+            **COMPETITIVE LANDSCAPE**
+            - Top players and market share shifts
+            - Emerging challengers
+
+            **STRATEGIC RECOMMENDATIONS**
+            - 3-5 actionable recommendations with rationale
+
+            **SOURCES & METHODOLOGY**
+            - List data sources referenced
+
+            IMPORTANT: This is a DRAFT for internal review only. Do NOT distribute externally. \
+            All data should be verified against primary sources before any business decisions.
             """
         }
         

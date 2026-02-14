@@ -107,15 +107,27 @@ final class ExecutionEngine: ObservableObject {
         // ═══════════════════════════════════════════════════════════════════════
         // HARD GATE 0: Kernel Integrity Lockdown.
         // If the kernel has detected its own compromise, ALL execution is blocked.
-        // No silent recovery. No degraded path. FAIL CLOSED.
+        // Attempt ONE recovery before failing — handles transient bootstrap issues.
         // ═══════════════════════════════════════════════════════════════════════
+        if KernelIntegrityGuard.shared.isLocked {
+            log("[EXECUTION] Kernel locked — attempting recovery before failing...")
+            _ = KernelIntegrityGuard.shared.attemptRecovery()
+        }
         guard !KernelIntegrityGuard.shared.isLocked else {
-            logError("HARD FAIL: System in EXECUTION LOCKDOWN — kernel integrity compromised. ALL execution blocked.")
+            // Surface SPECIFIC failure reasons — not a generic "kernel compromised"
+            let failedCheckNames = KernelIntegrityGuard.shared.lastReport?.failedChecks
+                .map { "[\($0.severity.rawValue)] \($0.name): \($0.detail)" }
+                .joined(separator: "\n") ?? "No diagnostic report available"
+            let userMessage = KernelIntegrityGuard.shared.lastReport?.failedChecks
+                .map { $0.name }
+                .joined(separator: ", ") ?? "Unknown"
+
+            logError("HARD FAIL: System in EXECUTION LOCKDOWN — \(failedCheckNames)")
             return ExecutionResultModel(
                 draft: draft,
                 executedSideEffects: [],
                 status: .failed,
-                message: "EXECUTION LOCKDOWN — kernel integrity compromised. Contact administrator.",
+                message: "EXECUTION LOCKDOWN — Failed checks: \(userMessage). Open Config → System Integrity to view details and attempt recovery.",
                 auditTrail: AuditTrail.build(
                     intent: intent,
                     context: context,
@@ -566,6 +578,56 @@ final class ExecutionEngine: ObservableObject {
             }
         }
 
+        // ═══════════════════════════════════════════════════════════════════════
+        // EXECUTION CERTIFICATE: Cryptographic non-repudiation record.
+        // Execution is NOT complete until a certificate is successfully created.
+        // If certificate fails on a successful execution → FAIL CLOSED.
+        // ═══════════════════════════════════════════════════════════════════════
+        if status == .success || status == .partialSuccess {
+            let certInput = CertificateInput(
+                intentAction: intent?.rawText ?? draft.title,
+                intentTarget: intent?.intentType.rawValue,
+                proposalSummary: draft.title,
+                proposalStepCount: sideEffects.filter(\.isEnabled).count,
+                tokenId: token.id,
+                tokenPlanId: token.planId,
+                tokenSignature: token.signature,
+                approverId: token.approvalType.rawValue,
+                riskTier: token.riskTier,
+                connectorId: nil,
+                connectorVersion: nil,
+                resultSummary: message,
+                resultStatus: status.rawValue
+            )
+
+            do {
+                let certificate = try ExecutionCertificateBuilder.buildCertificate(input: certInput)
+                log("[EXECUTION_CERT] Certificate created: \(certificate.id) (chain: \(certificate.previousCertificateHash.prefix(8))…)")
+            } catch {
+                // FAIL CLOSED: Certificate generation failure on successful execution
+                // is a critical incident. The execution happened but is uncertified.
+                logError("[EXECUTION_CERT] FAIL CLOSED: Certificate generation failed after execution: \(error.localizedDescription)")
+                try? EvidenceEngine.shared.logViolation(PolicyViolation(
+                    violationType: .bypassAttempt,
+                    description: "Execution certificate generation failed: \(error.localizedDescription). Execution was successful but uncertified — CRITICAL INCIDENT.",
+                    severity: .critical
+                ), planId: token.planId)
+
+                // If execution was reversible, we should attempt rollback
+                if let record = executionRecord {
+                    ExecutionRecordStore.shared.transition(record.id, to: .failed, reason: "Certificate generation failed — uncertified execution")
+                }
+
+                return ExecutionResultModel(
+                    draft: draft,
+                    executedSideEffects: executedEffects,
+                    status: .failed,
+                    message: "Execution succeeded but certificate generation failed — FAIL CLOSED. Contact administrator.",
+                    auditTrail: auditTrail
+                )
+            }
+        }
+
         // DONATION: Only donate successful, high-confidence workflows
         // INVARIANT: Never donate drafts, failures, or low-confidence results
         if status == .success, let intentType = intent?.intentType {
@@ -894,6 +956,8 @@ final class ExecutionEngine: ObservableObject {
             return "Action items extracted and saved."
         case .documentReview:
             return "Document review complete."
+        case .researchBrief:
+            return "Research brief saved — ready for internal review."
         }
     }
 }

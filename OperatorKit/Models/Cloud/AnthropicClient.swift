@@ -17,10 +17,22 @@ final class AnthropicClient: @unchecked Sendable {
 
     private let baseURL = URL(string: "https://api.anthropic.com/v1/messages")!
 
-    /// Runtime-injected API key. Nil = not configured.
-    private var apiKey: String? {
-        ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
-            ?? UserDefaults.standard.string(forKey: "ok_anthropic_api_key")
+    /// Resolve API key at call time from APIKeyVault (hardware-backed).
+    /// Falls back to environment variable for CI/testing ONLY.
+    ///
+    /// INVARIANT: Never reads from UserDefaults.
+    /// INVARIANT: Never caches the key in memory.
+    /// INVARIANT: Production path is APIKeyVault (biometric-gated).
+    private func resolveKey() throws -> String {
+        // Primary: APIKeyVault (hardware-backed, biometric-gated)
+        if let vaultKey = try? APIKeyVault.shared.retrieveKeyString(for: .cloudAnthropic) {
+            return vaultKey
+        }
+        // Fallback: environment variable (CI / Xcode scheme only)
+        if let envKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+        throw CloudModelError.apiKeyMissing(.cloudAnthropic)
     }
 
     private init() {}
@@ -34,10 +46,8 @@ final class AnthropicClient: @unchecked Sendable {
         userPrompt: String,
         model: String = "claude-sonnet-4-20250514"
     ) async throws -> CloudCompletionResponse {
-        // 1. API key check
-        guard let key = apiKey, !key.isEmpty else {
-            throw CloudModelError.apiKeyMissing(.cloudAnthropic)
-        }
+        // 1. API key check — resolved at call time from vault
+        let key = try resolveKey()
 
         // 2. Domain allowlist check
         try CloudDomainAllowlist.assertAllowed(baseURL)

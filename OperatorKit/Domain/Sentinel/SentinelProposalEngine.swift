@@ -183,6 +183,14 @@ public final class SentinelProposalEngine: ObservableObject {
                 requiresNetwork: false,
                 requiresCloudModel: false
             )
+        case .researchBrief:
+            return IntentClassification(
+                intentRequestType: .researchBrief,
+                toolPlanIntentType: .createDraft,
+                expectedSideEffects: [.saveDraft, .saveToMemory],
+                requiresNetwork: false,  // Uses model's training data, not live web
+                requiresCloudModel: true // Research briefs require cloud quality
+            )
         case .unknown:
             return IntentClassification(
                 intentRequestType: .unknown,
@@ -377,5 +385,21 @@ public final class SentinelProposalEngine: ObservableObject {
         let actionCount = classification.expectedSideEffects.count
         let risk = riskTier.rawValue
         return "Proposal: \(intent.rawText.prefix(80)) — \(actionCount) action(s), \(risk) risk"
+    }
+
+    // MARK: - Convenience (for Autopilot)
+
+    /// Generate a ProposalPack from raw text and an intent type.
+    /// Used by AutopilotOrchestrator as a convenience wrapper.
+    /// INVARIANT: No side effects. Same guarantees as the primary method.
+    func generateProposal(
+        rawText: String,
+        intentType: IntentRequest.IntentType
+    ) async -> ProposalPack {
+        let intent = IntentRequest(
+            rawText: rawText,
+            intentType: intentType
+        )
+        return await generateProposal(intent: intent, context: nil, source: .user)
     }
 }

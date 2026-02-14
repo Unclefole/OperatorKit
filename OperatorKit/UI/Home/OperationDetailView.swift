@@ -191,7 +191,7 @@ struct OperationDetailView: View {
 
                     Text(operationTitle)
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(OKColors.textPrimary)
+                        .foregroundColor(OKColor.cardText)
                         .multilineTextAlignment(.center)
 
                     HStack(spacing: 12) {
@@ -212,7 +212,7 @@ struct OperationDetailView: View {
                 .padding(.horizontal, 20)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(OKColor.textPrimary)
+                        .fill(OKColor.cardSurface)
                         .shadow(color: OKColor.shadow.opacity(0.05), radius: 8, x: 0, y: 3)
                 )
 
@@ -266,7 +266,7 @@ struct OperationDetailView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(OKColor.textPrimary)
+                .fill(OKColor.cardSurface)
                 .shadow(color: OKColor.shadow.opacity(0.04), radius: 6, x: 0, y: 2)
         )
     }

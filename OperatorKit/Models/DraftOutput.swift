@@ -21,6 +21,7 @@ struct DraftOutput: Identifiable, Equatable {
         case documentSummary = "document_summary"
         case taskList = "task_list"
         case reminder = "reminder"
+        case researchBrief = "research_brief"
         
         var displayName: String {
             switch self {
@@ -29,6 +30,7 @@ struct DraftOutput: Identifiable, Equatable {
             case .documentSummary: return "Document Summary"
             case .taskList: return "Task List"
             case .reminder: return "Reminder"
+            case .researchBrief: return "Research Brief"
             }
         }
         
@@ -39,6 +41,7 @@ struct DraftOutput: Identifiable, Equatable {
             case .documentSummary: return "doc.text.fill"
             case .taskList: return "checklist"
             case .reminder: return "bell.fill"
+            case .researchBrief: return "magnifyingglass.circle.fill"
             }
         }
     }

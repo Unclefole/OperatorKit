@@ -1,0 +1,108 @@
+import Foundation
+
+// ============================================================================
+// GROQ CLIENT — Groq Inference Platform
+//
+// Groq provides ultra-fast inference on custom LPU hardware.
+// Supports multiple models (Llama, Mixtral, Gemma). API is OpenAI-compatible.
+//
+// INVARIANT: ONLY referenced by ModelRouter.swift. No other file imports this.
+// INVARIANT: Requires ModelCallToken (verified + consumed before call).
+// INVARIANT: All requests go through CloudDomainAllowlist.
+// INVARIANT: All payloads pass through DataDiode before sending.
+// INVARIANT: API key resolved from APIKeyVault at call time.
+// INVARIANT: Never reads from UserDefaults.
+// INVARIANT: Never caches the key in memory.
+// ============================================================================
+
+/// Internal: only ModelRouter may use this client.
+final class GroqClient: @unchecked Sendable {
+
+    static let shared = GroqClient()
+
+    private let baseURL = URL(string: "https://api.groq.com/openai/v1/chat/completions")!
+
+    /// Resolve API key at call time from APIKeyVault (hardware-backed).
+    /// Falls back to environment variable for CI/testing ONLY.
+    private func resolveKey() throws -> String {
+        // Primary: APIKeyVault (hardware-backed, biometric-gated)
+        if let vaultKey = try? APIKeyVault.shared.retrieveKeyString(for: .cloudGroq) {
+            return vaultKey
+        }
+        // Fallback: environment variable (CI / Xcode scheme only)
+        if let envKey = ProcessInfo.processInfo.environment["GROQ_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+        throw CloudModelError.apiKeyMissing(.cloudGroq)
+    }
+
+    private init() {}
+
+    // MARK: - Generate
+
+    /// Send a governed completion request to Groq (Llama).
+    /// Caller MUST have already verified + consumed a ModelCallToken.
+    func generate(
+        systemPrompt: String,
+        userPrompt: String,
+        model: String = "llama-3.3-70b-versatile"
+    ) async throws -> CloudCompletionResponse {
+        // 1. API key check — resolved at call time from vault
+        let key = try resolveKey()
+
+        // 2. Domain allowlist check
+        try CloudDomainAllowlist.assertAllowed(baseURL)
+
+        // 3. Redact prompts through DataDiode
+        let redactedSystem = DataDiode.redact(systemPrompt)
+        let redactedUser = DataDiode.redact(userPrompt)
+
+        // 4. Build request (OpenAI-compatible format)
+        let body: [String: Any] = [
+            "model": model,
+            "messages": [
+                ["role": "system", "content": redactedSystem],
+                ["role": "user", "content": redactedUser]
+            ],
+            "max_tokens": 2048,
+            "temperature": 0.3
+        ]
+
+        var request = URLRequest(url: baseURL)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.timeoutInterval = 30
+
+        // 5. Execute via NetworkPolicyEnforcer
+        let (data, response) = try await NetworkPolicyEnforcer.shared.execute(request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CloudModelError.requestFailed("No HTTP response")
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let errorBody = String(data: data, encoding: .utf8) ?? "unknown"
+            throw CloudModelError.requestFailed("HTTP \(httpResponse.statusCode): \(errorBody)")
+        }
+
+        // 6. Parse (OpenAI-compatible response format)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let choices = json["choices"] as? [[String: Any]],
+              let first = choices.first,
+              let message = first["message"] as? [String: Any],
+              let content = message["content"] as? String else {
+            throw CloudModelError.responseParseFailed("Invalid Groq response structure")
+        }
+
+        let usage = json["usage"] as? [String: Any]
+        return CloudCompletionResponse(
+            content: content,
+            provider: .cloudGroq,
+            model: model,
+            promptTokens: usage?["prompt_tokens"] as? Int,
+            completionTokens: usage?["completion_tokens"] as? Int
+        )
+    }
+}

@@ -14,6 +14,9 @@ enum CloudDomainAllowlist {
     private static let allowedDomains: Set<String> = [
         "api.openai.com",
         "api.anthropic.com",
+        "generativelanguage.googleapis.com",  // Google Gemini
+        "api.groq.com",                        // Groq
+        "api.together.xyz",                    // Together AI (Meta Llama)
     ]
 
     /// Validate that a URL's host is in the allowlist.

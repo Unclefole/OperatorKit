@@ -17,11 +17,22 @@ final class OpenAIClient: @unchecked Sendable {
 
     private let baseURL = URL(string: "https://api.openai.com/v1/chat/completions")!
 
-    /// Runtime-injected API key. Nil = not configured.
-    /// Set via environment or user configuration at runtime.
-    private var apiKey: String? {
-        ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
-            ?? UserDefaults.standard.string(forKey: "ok_openai_api_key")
+    /// Resolve API key at call time from APIKeyVault (hardware-backed).
+    /// Falls back to environment variable for CI/testing ONLY.
+    ///
+    /// INVARIANT: Never reads from UserDefaults.
+    /// INVARIANT: Never caches the key in memory.
+    /// INVARIANT: Production path is APIKeyVault (biometric-gated).
+    private func resolveKey() throws -> String {
+        // Primary: APIKeyVault (hardware-backed, biometric-gated)
+        if let vaultKey = try? APIKeyVault.shared.retrieveKeyString(for: .cloudOpenAI) {
+            return vaultKey
+        }
+        // Fallback: environment variable (CI / Xcode scheme only)
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+        throw CloudModelError.apiKeyMissing(.cloudOpenAI)
     }
 
     private init() {}
@@ -35,10 +46,8 @@ final class OpenAIClient: @unchecked Sendable {
         userPrompt: String,
         model: String = "gpt-4o-mini"
     ) async throws -> CloudCompletionResponse {
-        // 1. API key check
-        guard let key = apiKey, !key.isEmpty else {
-            throw CloudModelError.apiKeyMissing(.cloudOpenAI)
-        }
+        // 1. API key check — resolved at call time from vault
+        let key = try resolveKey()
 
         // 2. Domain allowlist check
         try CloudDomainAllowlist.assertAllowed(baseURL)

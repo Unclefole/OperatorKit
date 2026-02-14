@@ -191,7 +191,7 @@ public final class KernelBridge: ObservableObject {
             return .sendEmail
         case .reminder:
             return .createReminder
-        case .summary, .actionItems, .documentReview:
+        case .summary, .actionItems, .documentReview, .researchBrief:
             return .createDraft
         }
     }
@@ -288,6 +288,8 @@ extension Draft {
             action = "extract action items"
         case .documentReview:
             action = "review document"
+        case .researchBrief:
+            action = "generate research brief"
         }
         
         return ExecutionIntent(
@@ -346,7 +348,7 @@ extension Draft.DraftType {
             return true  // External communication
         case .reminder:
             return true  // System write
-        case .summary, .actionItems, .documentReview:
+        case .summary, .actionItems, .documentReview, .researchBrief:
             return false  // Internal processing
         }
     }

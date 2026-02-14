@@ -501,6 +501,8 @@ final class CoreMLModelBackend: OnDeviceModel {
             
         case .reminder:
             return "Reminder: \(input.intentText)\n\n[Add reminder details]"
+        case .researchBrief:
+            return "# Executive Market Brief\n**INTERNAL DRAFT**\n\n## Research Request\n\(input.intentText)\n\n*Enable cloud AI for full research analysis.*"
         }
     }
     
@@ -521,6 +523,8 @@ final class CoreMLModelBackend: OnDeviceModel {
             
         case .reminder:
             return "Reminder: \(input.intentText)"
+        case .researchBrief:
+            return "# Executive Market Brief\n**INTERNAL DRAFT**\n\n## Research Request\n\(input.intentText)\n\n*Enable cloud AI for full research analysis.*\n*All data should be verified against primary sources.*"
         }
     }
     

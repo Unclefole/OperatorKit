@@ -39,16 +39,66 @@ public final class NetworkPolicyEnforcer: @unchecked Sendable {
 
     // MARK: - Host Allowlist
 
-    /// Combined allowlist: cloud AI + enterprise endpoints + sync
+    /// Combined allowlist: cloud AI + research domains + enterprise endpoints + sync
     private var hostAllowlist: Set<String> {
         var hosts: Set<String> = [
             // Cloud AI
             "api.openai.com",
             "api.anthropic.com",
         ]
+        // Governed web research domains (public government / legal / reference)
+        // DUAL-GATE: Both webResearchEnabled AND researchHostAllowlistEnabled must be ON.
+        if EnterpriseFeatureFlags.webResearchFullyEnabled {
+            hosts.formUnion(researchHosts)
+        }
         // Enterprise endpoints (added at runtime by configuration)
         hosts.formUnion(enterpriseHosts)
         return hosts
+    }
+
+    // MARK: - Research Host Allowlist
+
+    /// Default public research domains — feature-flag gated.
+    /// These are READ-ONLY, GET-only targets.
+    private static let defaultResearchHosts: Set<String> = [
+        // Brave Search API (connector-level search)
+        "api.search.brave.com",
+        // Government / legal research domains
+        "www.justice.gov",
+        "www.supremecourt.gov",
+        "www.uscourts.gov",
+        "www.sec.gov",
+        "www.ftc.gov",
+        "www.fbi.gov",
+        "www.usa.gov",
+        "www.congress.gov",
+        "www.gpo.gov",
+        "www.govinfo.gov",
+        "www.federalregister.gov",
+    ]
+
+    /// Runtime-configurable research hosts (enterprise can extend)
+    private var researchHosts: Set<String> = NetworkPolicyEnforcer.defaultResearchHosts
+
+    /// Register an additional research host at runtime.
+    public func registerResearchHost(_ host: String) {
+        researchHosts.insert(host.lowercased())
+        log("[NET_POLICY] Research host registered: \(host)")
+    }
+
+    /// Remove a research host.
+    public func removeResearchHost(_ host: String) {
+        researchHosts.remove(host.lowercased())
+    }
+
+    /// Check if web research is active (BOTH flags ON).
+    public var isWebResearchActive: Bool {
+        EnterpriseFeatureFlags.webResearchFullyEnabled
+    }
+
+    /// List currently allowlisted research hosts.
+    public var activeResearchHosts: Set<String> {
+        EnterpriseFeatureFlags.webResearchFullyEnabled ? researchHosts : []
     }
 
     /// Path prefixes allowed per host (optional extra restriction)
@@ -145,12 +195,26 @@ public final class NetworkPolicyEnforcer: @unchecked Sendable {
 
     /// Validate and execute a URLRequest. Returns data + response.
     /// This is the ONLY approved path for outbound HTTP in prod.
+    ///
+    /// PHASE 3: All egress now routes through this single method.
+    /// PHASE 4: Uses pinned URLSession for hosts with certificate pins.
     public func execute(_ request: URLRequest) async throws -> (Data, URLResponse) {
         guard let url = request.url else {
             throw NetworkPolicyError.hostNotAllowed("nil")
         }
         try validate(url)
-        return try await URLSession.shared.data(for: request)
+
+        // Use pinned session for hosts that have certificate pins configured
+        let host = url.host?.lowercased() ?? ""
+        let session: URLSession
+        if CertificatePinningDelegate.isPinned(host) &&
+           SecurityPostureManager.shared.certificatePinningRequired {
+            session = NetworkPolicyEnforcer.pinnedSession
+        } else {
+            session = URLSession.shared
+        }
+
+        return try await session.data(for: request)
     }
 
     // MARK: - Violation Logging

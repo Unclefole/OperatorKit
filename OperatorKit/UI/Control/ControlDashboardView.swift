@@ -65,11 +65,8 @@ struct ControlDashboardView: View {
 
     private var headerView: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("OperatorKit")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(OKColor.textPrimary)
+            VStack(alignment: .leading, spacing: 6) {
+                OperatorKitLogoView(size: .large, showText: true)
 
                 HStack(spacing: 6) {
                     Circle()

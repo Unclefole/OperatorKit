@@ -130,6 +130,8 @@ struct ModelInput: Equatable {
             return .documentSummary
         case .createReminder:
             return .reminder
+        case .researchBrief:
+            return .researchBrief
         case .unknown:
             // Default to meeting summary if context has calendar items
             return .meetingSummary

@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 // ============================================================================
 // ⚠️  AIR-GAP EXCEPTION: SUPABASE CLIENT (Phase 10D)
@@ -170,16 +171,10 @@ public final class SupabaseClient: ObservableObject {
     private let sessionKey = "com.operatorkit.sync.session"
     
     // MARK: - URL Session
-    
-    /// Dedicated URLSession with timeout configuration
-    /// INVARIANT: Only used within this file
-    private lazy var urlSession: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = SyncSafetyConfig.requestTimeoutSeconds
-        config.timeoutIntervalForResource = SyncSafetyConfig.requestTimeoutSeconds * 2
-        config.waitsForConnectivity = false  // Don't wait in background
-        return URLSession(configuration: config)
-    }()
+    //
+    // REMOVED: Private URLSession. ALL network egress now routes through
+    // NetworkPolicyEnforcer.shared.execute() — zero ungoverned egress paths.
+    //
     
     // MARK: - Initialization
     
@@ -456,36 +451,72 @@ public final class SupabaseClient: ObservableObject {
     // MARK: - Network Helpers
     
     /// Performs a network request with error handling
-    /// INVARIANT: All requests pass through NetworkPolicyEnforcer
+    /// INVARIANT: ALL requests pass through NetworkPolicyEnforcer.execute()
+    /// PHASE 3 FIX: Previously used private urlSession after validate().
+    /// Now routes through the sole governed egress path for provability.
     private func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
         do {
-            // Validate via NetworkPolicyEnforcer first, then use configured session
-            if let url = request.url {
-                try NetworkPolicyEnforcer.shared.validate(url)
-            }
-            return try await urlSession.data(for: request)
+            return try await NetworkPolicyEnforcer.shared.execute(request)
         } catch let error as URLError {
             if error.code == .timedOut {
                 throw SyncError.timeout
             }
+            throw SyncError.networkError(error)
+        } catch let error as NetworkPolicyEnforcer.NetworkPolicyError {
+            // Network policy violation — surface as sync error
             throw SyncError.networkError(error)
         } catch {
             throw SyncError.networkError(error)
         }
     }
     
-    // MARK: - Session Persistence
+    // MARK: - Session Persistence (Keychain-backed, NOT UserDefaults)
     
+    /// INVARIANT: Session tokens NEVER touch UserDefaults.
+    /// Stored in Keychain with kSecAttrAccessibleWhenUnlockedThisDeviceOnly.
     private func saveSession() {
-        guard let session = session else { return }
-        if let data = try? JSONEncoder().encode(session) {
-            UserDefaults.standard.set(data, forKey: sessionKey)
+        guard let session = session,
+              let data = try? JSONEncoder().encode(session) else { return }
+        
+        // Delete existing entry first (idempotent)
+        let deleteQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: sessionKey,
+            kSecAttrAccount as String: "supabase_session",
+        ]
+        SecItemDelete(deleteQuery as CFDictionary)
+        
+        // Add new entry
+        let addQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: sessionKey,
+            kSecAttrAccount as String: "supabase_session",
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrSynchronizable as String: kCFBooleanFalse!,
+        ]
+        let status = SecItemAdd(addQuery as CFDictionary, nil)
+        if status != errSecSuccess {
+            log("[SupabaseClient] Failed to save session to Keychain (status: \(status))")
         }
     }
     
     private func loadSession() {
-        guard let data = UserDefaults.standard.data(forKey: sessionKey),
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: sessionKey,
+            kSecAttrAccount as String: "supabase_session",
+            kSecReturnData as String: kCFBooleanTrue!,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        
+        guard status == errSecSuccess,
+              let data = result as? Data,
               let session = try? JSONDecoder().decode(SupabaseSession.self, from: data) else {
+            // Also attempt to migrate from UserDefaults (one-time)
+            migrateSessionFromUserDefaults()
             return
         }
         self.session = session
@@ -493,10 +524,34 @@ public final class SupabaseClient: ObservableObject {
         self.isSignedIn = true
     }
     
+    /// One-time migration: move session from UserDefaults to Keychain, then delete from UserDefaults.
+    private func migrateSessionFromUserDefaults() {
+        guard let data = UserDefaults.standard.data(forKey: sessionKey),
+              let session = try? JSONDecoder().decode(SupabaseSession.self, from: data) else {
+            return
+        }
+        self.session = session
+        self.currentUser = session.user
+        self.isSignedIn = true
+        // Save to Keychain
+        saveSession()
+        // Remove from UserDefaults permanently
+        UserDefaults.standard.removeObject(forKey: sessionKey)
+        log("[SupabaseClient] Migrated session from UserDefaults to Keychain")
+    }
+    
     private func clearSession() {
         session = nil
         currentUser = nil
         isSignedIn = false
+        // Remove from Keychain
+        let deleteQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: sessionKey,
+            kSecAttrAccount as String: "supabase_session",
+        ]
+        SecItemDelete(deleteQuery as CFDictionary)
+        // Also remove from UserDefaults (in case migration hasn't happened)
         UserDefaults.standard.removeObject(forKey: sessionKey)
     }
 }

@@ -99,6 +99,23 @@ struct ExecutionPlan: Identifiable, Equatable {
                 isEnabled: true,
                 isAcknowledged: true
             ))
+
+        case .researchBrief:
+            // Research briefs are draft-only — no external distribution
+            effects.append(SideEffect(
+                type: .saveDraft,
+                description: "Save research brief draft (internal review only)",
+                requiresPermission: nil,
+                isEnabled: true,
+                isAcknowledged: true
+            ))
+            effects.append(SideEffect(
+                type: .saveToMemory,
+                description: "Save research findings to memory",
+                requiresPermission: nil,
+                isEnabled: true,
+                isAcknowledged: true
+            ))
             
         case .unknown:
             effects.append(SideEffect(

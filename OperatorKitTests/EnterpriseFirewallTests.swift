@@ -150,7 +150,8 @@ final class EnterpriseFirewallTests: XCTestCase {
         let guardList = BackgroundTasksGuard.allowlistedIdentifiers
         let runtimeList: Set<String> = [
             BackgroundScheduler.proposalTaskIdentifier,
-            BackgroundScheduler.mirrorTaskIdentifier
+            BackgroundScheduler.mirrorTaskIdentifier,
+            BackgroundScheduler.scoutTaskIdentifier
         ]
         XCTAssertEqual(guardList, runtimeList,
                        "CompileTimeGuards allowlist must match BackgroundScheduler identifiers")

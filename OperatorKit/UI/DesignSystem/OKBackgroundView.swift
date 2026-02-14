@@ -1,8 +1,8 @@
 import SwiftUI
 
 // MARK: - OperatorKit Background View
-/// Consistent dark background for all OperatorKit screens
-/// Uses the design token system for the unified mission-control aesthetic.
+/// Consistent adaptive background for all OperatorKit screens.
+/// Automatically adapts to Light Mode and Dark Mode via OKColor tokens.
 
 public struct OKBackgroundView: View {
 
@@ -17,7 +17,7 @@ public struct OKBackgroundView: View {
 // MARK: - View Extension for Easy Application
 
 public extension View {
-    /// Apply the standard OperatorKit dark background
+    /// Apply the standard OperatorKit adaptive background
     /// - Parameter isHome: Set to true for Home screen (uses its own styling)
     func okScreenBackground(isHome: Bool = false) -> some View {
         ZStack {
@@ -29,17 +29,29 @@ public extension View {
                 self
             }
         }
-        .preferredColorScheme(.dark)
     }
 }
 
-#Preview {
+#Preview("Light") {
     VStack {
         Text("OperatorKit")
             .font(.largeTitle)
             .foregroundColor(OKColor.textPrimary)
-        Text("Consistent Dark Background")
+        Text("Adaptive Background")
             .foregroundColor(OKColor.textSecondary)
     }
     .okScreenBackground()
+    .preferredColorScheme(.light)
+}
+
+#Preview("Dark") {
+    VStack {
+        Text("OperatorKit")
+            .font(.largeTitle)
+            .foregroundColor(OKColor.textPrimary)
+        Text("Adaptive Background")
+            .foregroundColor(OKColor.textSecondary)
+    }
+    .okScreenBackground()
+    .preferredColorScheme(.dark)
 }

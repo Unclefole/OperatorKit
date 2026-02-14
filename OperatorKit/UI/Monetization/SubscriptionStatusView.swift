@@ -106,7 +106,6 @@ struct SubscriptionStatusView: View {
         .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
         .refreshable {
             await refresh()
         }

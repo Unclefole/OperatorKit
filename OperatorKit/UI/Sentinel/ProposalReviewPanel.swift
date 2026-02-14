@@ -27,6 +27,8 @@ struct ProposalReviewPanel: View {
     let onDecision: (ApprovalSession.Decision) -> Void
 
     @State private var showingEscalateConfirm = false
+    @State private var isBiometricInProgress = false
+    @State private var biometricError: String?
 
     var body: some View {
         ScrollView {
@@ -58,7 +60,6 @@ struct ProposalReviewPanel: View {
             .padding(OKSpacing.md)
         }
         .background(OKColor.backgroundPrimary)
-        .preferredColorScheme(.dark)
     }
 
     // MARK: - Header
@@ -313,46 +314,73 @@ struct ProposalReviewPanel: View {
 
     private var decisionButtons: some View {
         VStack(spacing: OKSpacing.sm) {
-            // Primary: Approve
+            // Biometric error display
+            if let error = biometricError {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                    Text(error)
+                        .font(.system(size: 12, weight: .medium))
+                }
+                .foregroundStyle(OKColor.riskCritical)
+                .padding(.vertical, 6)
+            }
+
+            // Primary: Approve & Execute (BIOMETRIC GATED)
             Button {
-                onDecision(.approve)
+                Task { await biometricApprove(.approve) }
             } label: {
                 HStack {
-                    Image(systemName: "checkmark.shield.fill")
-                    Text("Approve All")
+                    if isBiometricInProgress {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "faceid")
+                        Image(systemName: "checkmark.shield.fill")
+                    }
+                    Text("Approve & Execute")
                         .font(.system(size: 16, weight: .semibold))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(OKColor.actionPrimary)
+                .background(session.isExpired || isBiometricInProgress ? OKColor.textMuted : OKColor.actionPrimary)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: OKRadius.button))
             }
-            .disabled(session.isExpired)
+            .disabled(session.isExpired || isBiometricInProgress)
+
+            Text("Face ID / Touch ID required to authorize execution")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(OKColor.textMuted)
 
             // Secondary row
             HStack(spacing: OKSpacing.sm) {
-                // Approve Step 1
+                // Approve Step 1 (also biometric gated)
                 if proposal.toolPlan.executionSteps.count > 1 {
                     Button {
-                        onDecision(.approvePartial)
+                        Task { await biometricApprove(.approvePartial) }
                     } label: {
-                        Text("Approve Step 1")
-                            .font(.system(size: 13, weight: .medium))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(OKColor.backgroundTertiary)
-                            .foregroundStyle(OKColor.textPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: OKRadius.button))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: OKRadius.button)
-                                    .stroke(OKColor.borderSubtle, lineWidth: 1)
-                            )
+                        HStack(spacing: 4) {
+                            Image(systemName: "faceid")
+                                .font(.system(size: 10))
+                            Text("Approve Step 1")
+                        }
+                        .font(.system(size: 13, weight: .medium))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(OKColor.backgroundTertiary)
+                        .foregroundStyle(OKColor.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: OKRadius.button))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: OKRadius.button)
+                                .stroke(OKColor.borderSubtle, lineWidth: 1)
+                        )
                     }
-                    .disabled(session.isExpired)
+                    .disabled(session.isExpired || isBiometricInProgress)
                 }
 
-                // Request Changes
+                // Request Changes (no biometric needed — not execution)
                 Button {
                     onDecision(.requestRevision)
                 } label: {
@@ -417,6 +445,50 @@ struct ProposalReviewPanel: View {
                     .foregroundStyle(OKColor.riskCritical)
             }
         }
+    }
+
+    // MARK: - Biometric Approval Gate
+    //
+    // INVARIANT: reasoning ≠ authority
+    // The model proposes. The human authorizes with biometric proof.
+    // This ensures no programmatic path can bypass the human gate.
+
+    @MainActor
+    private func biometricApprove(_ decision: ApprovalSession.Decision) async {
+        isBiometricInProgress = true
+        biometricError = nil
+
+        // Compute plan hash for SE signing
+        let planMaterial = "\(proposal.toolPlan.id)\(proposal.toolPlan.intent.summary)\(proposal.toolPlan.executionSteps.count)"
+        let planHash = planMaterial  // SE will hash this internally
+
+        // Trigger biometric signing via Secure Enclave
+        let signature = await SecureEnclaveApprover.shared.signApproval(planHash: planHash)
+
+        if let sig = signature {
+            // Biometric passed — signature obtained
+            SecurityTelemetry.shared.record(
+                category: .biometricPrompt,
+                detail: "Execution approval biometric authenticated for plan \(proposal.toolPlan.id.uuidString.prefix(8))",
+                outcome: .success
+            )
+            SecurityTelemetry.shared.record(
+                category: .executionGate,
+                detail: "Human SE signature obtained (\(sig.count) bytes), decision=\(decision)",
+                outcome: .success
+            )
+            onDecision(decision)
+        } else {
+            // Biometric failed or cancelled — DENY execution
+            biometricError = "Biometric authentication required. Tap to retry."
+            SecurityTelemetry.shared.record(
+                category: .biometricReject,
+                detail: "Execution approval biometric DENIED for plan \(proposal.toolPlan.id.uuidString.prefix(8))",
+                outcome: .denied
+            )
+        }
+
+        isBiometricInProgress = false
     }
 
     // MARK: - Components

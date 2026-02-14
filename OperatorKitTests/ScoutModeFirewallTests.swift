@@ -120,7 +120,7 @@ final class ScoutModeFirewallTests: XCTestCase {
     // MARK: - 3. Slack Payload Signing + Nonce
 
     func testSlackNonceReplayRejected() {
-        let store = ConsumedTokenStore(filename: "test_slack_nonces_\(UUID().uuidString).json")
+        var store = ConsumedTokenStore(filename: "test_slack_nonces_\(UUID().uuidString).json")
         let nonce = UUID()
         let expiry = Date().addingTimeInterval(3600)
 

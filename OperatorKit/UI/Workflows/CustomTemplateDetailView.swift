@@ -402,7 +402,7 @@ struct CustomTemplateDetailView_Previews: PreviewProvider {
             name: "Sample Template",
             description: "This is a sample custom workflow template for preview purposes.",
             icon: "star.fill",
-            color: OKColor.riskExtreme,
+            color: .purple,
             steps: [
                 TemplateStep(order: 1, title: "First Step", instructions: "Do the first thing"),
                 TemplateStep(order: 2, title: "Second Step", instructions: "Then do this")

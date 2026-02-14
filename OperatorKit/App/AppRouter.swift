@@ -93,8 +93,10 @@ struct AppRouter {
         case "audit-status": return .auditStatus
         case "pilot-runner": return .pilotRunner
         case "kill-switches": return .killSwitches
+        case "intelligence": return .intelligenceSettings
         case "review-pack": return .reviewPack
         case "scout": return .scoutDashboard
+        case "skills": return .skillsDashboard
         default: return nil
         }
     }
@@ -125,8 +127,14 @@ struct AppRouter {
         case .auditStatus: host = "audit-status"
         case .pilotRunner: host = "pilot-runner"
         case .killSwitches: host = "kill-switches"
+        case .intelligenceSettings: host = "intelligence"
         case .reviewPack: host = "review-pack"
         case .scoutDashboard: host = "scout"
+        case .skillsDashboard: host = "skills"
+        case .autopilot: host = "autopilot"
+        case .governedExecution: host = "governed-execution"
+        case .securityDashboard: host = "security"
+        case .vaultRecovery: host = "vault-recovery"
         }
         return URL(string: "operatorkit://\(host)")
     }

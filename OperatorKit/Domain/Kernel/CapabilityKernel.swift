@@ -505,6 +505,10 @@ public final class CapabilityKernel: ObservableObject {
 
     /// Hardened token issuance from a validated ProposalPack + ApprovalSession.
     /// Includes plan hash, approved scopes, reversibility, and session linkage.
+    ///
+    /// MAC CATALYST SAFETY: If Secure Enclave is unavailable (older Mac, VM),
+    /// require userPresence authentication before issuing tokens. Mac must
+    /// NEVER be a weaker trust environment than iPhone.
     public func issueHardenedToken(
         proposal: ProposalPack,
         session: ApprovalSession,
@@ -513,8 +517,36 @@ public final class CapabilityKernel: ObservableObject {
         // GATE 0: Kernel lockdown — no tokens issued during integrity failure
         guard !KernelIntegrityGuard.shared.isLocked else {
             logError("[KERNEL] Cannot issue token — EXECUTION LOCKDOWN active")
+            SecurityTelemetry.shared.record(
+                category: .tokenReject,
+                detail: "Token denied: kernel lockdown",
+                outcome: .denied
+            )
             return nil
         }
+
+        // GATE 0.5: SE availability — on Mac without SE, enforce posture check
+        #if targetEnvironment(macCatalyst)
+        if SecureEnclaveApprover.shared.deviceFingerprint == nil {
+            // SE unavailable on this Mac — require enterprise posture minimum
+            let posture = SecurityPostureManager.shared.currentPosture
+            if posture == .enterprise {
+                logError("[KERNEL] Cannot issue token — SE unavailable on Mac in Enterprise posture")
+                SecurityTelemetry.shared.record(
+                    category: .tokenReject,
+                    detail: "Token denied: SE unavailable on Mac, enterprise posture requires SE",
+                    outcome: .denied
+                )
+                return nil
+            }
+            // In consumer/professional posture, allow with warning
+            SecurityTelemetry.shared.record(
+                category: .executionGate,
+                detail: "Token issued on Mac WITHOUT SE signature (consumer/professional posture)",
+                outcome: .warning
+            )
+        }
+        #endif
 
         // GATE: Session must be approved and not expired
         guard session.isApproved else {
@@ -1241,7 +1273,7 @@ extension CapabilityKernel {
         if status != errSecSuccess {
             // Fallback: log but don't crash — key is already in memory
             #if DEBUG
-            print("[CapabilityKernel] WARNING: Failed to store signing key in Keychain (status: \(status))")
+            log("[CapabilityKernel] WARNING: Failed to store Keychain entry (status: \(status))")
             #endif
         }
     }
@@ -1453,26 +1485,23 @@ extension CapabilityKernel {
         let provider: ModelProvider
         if let requested = request.requestedProvider, requested.isCloud {
             // Validate specific provider flag
-            switch requested {
-            case .cloudOpenAI:
-                guard IntelligenceFeatureFlags.openAIEnabled else {
-                    return .onDeviceOnly(requestId: request.id, reason: "OpenAI provider disabled")
-                }
-                provider = .cloudOpenAI
-            case .cloudAnthropic:
-                guard IntelligenceFeatureFlags.anthropicEnabled else {
-                    return .onDeviceOnly(requestId: request.id, reason: "Anthropic provider disabled")
-                }
-                provider = .cloudAnthropic
-            default:
-                provider = .onDevice
+            guard IntelligenceFeatureFlags.isProviderEnabled(requested) else {
+                return .onDeviceOnly(requestId: request.id, reason: "\(requested.displayName) provider disabled")
             }
+            provider = requested
         } else {
-            // Auto-select: prefer OpenAI if enabled, else Anthropic
+            // Auto-select: prefer the first enabled cloud provider
+            // Priority: OpenAI > Anthropic > Gemini > Groq
             if IntelligenceFeatureFlags.openAIEnabled {
                 provider = .cloudOpenAI
             } else if IntelligenceFeatureFlags.anthropicEnabled {
                 provider = .cloudAnthropic
+            } else if IntelligenceFeatureFlags.geminiEnabled {
+                provider = .cloudGemini
+            } else if IntelligenceFeatureFlags.groqEnabled {
+                provider = .cloudGroq
+            } else if IntelligenceFeatureFlags.llamaEnabled {
+                provider = .cloudLlama
             } else {
                 return .onDeviceOnly(requestId: request.id, reason: "No cloud provider enabled")
             }
@@ -1759,7 +1788,7 @@ extension IntentType {
     
     var defaultReversibility: ReversibilityClass {
         switch self {
-        case .createDraft, .createReminder, .readCalendar, .readContacts:
+        case .createDraft, .createReminder, .readCalendar, .readContacts, .webResearch, .reviewDocument:
             return .reversible
         case .createCalendarEvent, .updateCalendarEvent, .fileWrite, .deleteCalendarEvent:
             return .partiallyReversible

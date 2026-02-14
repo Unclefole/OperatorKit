@@ -685,12 +685,99 @@ struct IntentInputView: View {
                 isProcessing = false
                 appState.setIdle()
 
+                let intentType = resolution.request.intentType
+
+                // ════════════════════════════════════════════════════
+                // FAILSAFE: DIRECT RESEARCH KEYWORD SCAN
+                // ════════════════════════════════════════════════════
+                //
+                // Belt-and-suspenders guard. Even if IntentResolver
+                // misclassifies a research request (e.g., as actionItems
+                // due to substring matching), this failsafe catches it.
+                //
+                // If the user's text contains strong research signals,
+                // FORCE route to GovernedExecution — no exceptions.
+                // ════════════════════════════════════════════════════
+                let lower = trimmedInput.lowercased()
+                let isResearchFailsafe: Bool = {
+                    // High-confidence compound signals
+                    if lower.contains("research") && (lower.contains("governed") || lower.contains("autonomous")) { return true }
+                    if lower.contains("web research") || lower.contains("market intelligence") { return true }
+                    if lower.contains("search the web") || lower.contains("search online") || lower.contains("search for") { return true }
+                    if lower.contains("research") && lower.contains("brief") { return true }
+                    if lower.contains("search") && lower.contains("intelligence") { return true }
+                    if lower.contains("search") && lower.contains("web") { return true }
+                    if lower.contains("look up") && !lower.contains("email") && !lower.contains("meeting") { return true }
+                    if lower.contains("find out") && !lower.contains("email") && !lower.contains("meeting") { return true }
+                    // Multi-keyword threshold — 2+ signals = research (lowered from 3)
+                    let signals = ["research", "search", "investigate", "market", "consumer",
+                                   "intelligence", "governed", "authoritative", "autonomous",
+                                   "spending", "trends", "competitive", "industry", "sector",
+                                   "web", "find", "data", "analysis"]
+                    let hits = signals.filter { lower.contains($0) }.count
+                    return hits >= 2
+                }()
+
+                if isResearchFailsafe && intentType != .researchBrief {
+                    log("[FAILSAFE] IntentResolver classified as .\(intentType) but keyword scan detected research — overriding to .researchBrief")
+                }
+
+                let effectiveIsAutonomous = !intentType.requiresOperatorContext || isResearchFailsafe
+
+                // ════════════════════════════════════════════════════
+                // AUTONOMOUS INTENT — DIRECT TO GOVERNED EXECUTION
+                // ════════════════════════════════════════════════════
+                //
+                // If the intent does NOT require operator-provided context
+                // (or the failsafe detected research keywords), skip
+                // ContextPicker entirely. The agent acquires public
+                // context itself. No intermediate screens. No draft flow.
+                //
+                // ARCHITECTURAL INVARIANT:
+                //   requiresOperatorContext == false → GovernedExecution
+                //   The operator provides INTENT — not raw inputs.
+                //
+                // Fail-closed checks (feature flags, connectors) happen
+                // INSIDE GovernedExecution, not at routing time.
+                // ════════════════════════════════════════════════════
+                if effectiveIsAutonomous {
+                    let skillId = intentType.defaultSkillId ?? "web_research"
+                    appState.selectedIntent = resolution.request
+                    nav.navigate(to: .governedExecution(skillId: skillId, requestText: trimmedInput))
+                    return
+                }
+
+                // ── CONTEXT-DEPENDENT INTENTS (drafts, emails, etc.) ──
+                // These require operator-provided data and go through
+                // ContextPicker → Draft flow as before.
+
                 if resolution.isLowConfidence {
                     appState.selectedIntent = resolution.request
                     nav.navigate(to: .fallback)
-                } else {
+                    return
+                }
+
+                // ── CAPABILITY ROUTER — EXECUTE > DRAFT ──────────────
+                // For context-dependent intents that may still have
+                // executable capabilities (future: inbox triage, etc.)
+                let routingDecision = CapabilityRouter.shared.decide(resolution: resolution)
+
+                switch routingDecision {
+                case .execute(let skillId, _):
+                    // Executable capability matched — bypass draft pipeline entirely
+                    appState.selectedIntent = resolution.request
+                    nav.navigate(to: .governedExecution(skillId: skillId, requestText: trimmedInput))
+
+                case .draft(_):
+                    // No executable capability — fall through to draft pipeline
                     appState.selectedIntent = resolution.request
                     nav.navigate(to: .context)
+
+                case .blocked(let reason):
+                    // Capability exists but requirements not met — FAIL CLOSED
+                    appState.selectedIntent = resolution.request
+                    appState.lastBlockedReason = reason
+                    nav.navigate(to: .fallback)
                 }
             }
         }

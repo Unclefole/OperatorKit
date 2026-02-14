@@ -168,8 +168,17 @@ public final class DiagnosticsExportBuilder {
         let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
         
         // Get device info (generic, no identifiers)
-        let iosVersion = UIDevice.current.systemVersion
-        let deviceModel = UIDevice.current.model // Generic: "iPhone", "iPad"
+        // CATALYST SAFETY: UIDevice.current is available on Catalyst but
+        // returns "iPad" for model — we add platform disambiguation.
+        let iosVersion: String
+        let deviceModel: String
+        #if targetEnvironment(macCatalyst)
+        iosVersion = ProcessInfo.processInfo.operatingSystemVersionString
+        deviceModel = "Mac (Catalyst)"
+        #else
+        iosVersion = UIDevice.current.systemVersion
+        deviceModel = UIDevice.current.model // Generic: "iPhone", "iPad"
+        #endif
         
         // Check invariants
         let invariantsPassing = checkInvariantsPassing()
@@ -204,7 +213,7 @@ public final class DiagnosticsExportBuilder {
         // Hash of key safety settings
         let safetyString = [
             "networkEntitlementsEnabled:false",
-            "backgroundModesEnabled:false",
+            "backgroundModesEnabled:true",
             "analyticsEnabled:false",
             "telemetryEnabled:false",
             "deterministicFallbackRequired:true"

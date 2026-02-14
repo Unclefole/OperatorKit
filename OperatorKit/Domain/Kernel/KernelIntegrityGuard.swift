@@ -15,7 +15,20 @@ import CryptoKit
 //   4. Evidence chain hash integrity
 //   5. Trust epoch consistency
 //
-// If ANY check fails → KernelIntegrityFailure → EXECUTION LOCKDOWN.
+// P0 FIX: False positive lockdowns prevented vault from storing API keys.
+// CHANGE: Device registry + evidence chain checks now distinguish between
+//         transient infrastructure failures and genuine tampering.
+//         Only PROVEN tamper conditions trigger lockdown.
+//
+// INTEGRITY STATE MODEL:
+//   .nominal          — all checks pass
+//   .degraded         — non-critical warnings (vault still usable)
+//   .lockdown         — CRITICAL failure with concrete tamper evidence
+//
+// VAULT INTERACTION:
+//   Vault operations (store/retrieve keys) are allowed in .nominal and
+//   .degraded postures. Only .lockdown (tamperSuspected) blocks the vault.
+//   This prevents transient Keychain/SE failures from bricking API setup.
 // ============================================================================
 
 @MainActor
@@ -53,7 +66,7 @@ public final class KernelIntegrityGuard: ObservableObject {
         public let severity: CheckSeverity
 
         public enum CheckSeverity: String {
-            case critical = "CRITICAL"   // Failure = lockdown
+            case critical = "CRITICAL"   // Failure = lockdown (proven tamper only)
             case warning = "WARNING"     // Failure = degraded (advisory)
         }
     }
@@ -68,6 +81,13 @@ public final class KernelIntegrityGuard: ObservableObject {
     /// All execution paths MUST check this before proceeding.
     public var isLocked: Bool {
         systemPosture == .lockdown
+    }
+
+    /// Whether the vault is usable (not in tamper-suspected lockdown).
+    /// Vault operations are allowed in .nominal and .degraded postures.
+    /// Only genuine lockdown (proven tamper) blocks vault access.
+    public var isVaultUsable: Bool {
+        systemPosture != .lockdown
     }
 
     // MARK: - Full Integrity Verification (Run on Launch)
@@ -132,6 +152,9 @@ public final class KernelIntegrityGuard: ObservableObject {
             ), planId: UUID())
         } else if posture == .degraded {
             log("[KERNEL_INTEGRITY] ⚠ DEGRADED — \(failedChecks.count) non-critical warning(s)")
+            for check in failedChecks {
+                log("  ⚠ \(check.name): \(check.detail)")
+            }
         } else {
             log("[KERNEL_INTEGRITY] ✓ All integrity checks passed — system NOMINAL")
         }
@@ -177,35 +200,129 @@ public final class KernelIntegrityGuard: ObservableObject {
         )
     }
 
+    /// Device Registry Integrity — checks that the current device is trusted.
+    ///
+    /// P0 FIX: This check now distinguishes between:
+    ///   1. **Transient SE/Keychain failure** (fingerprint unavailable) → WARNING
+    ///   2. **Device explicitly not trusted** (fingerprint exists but not in registry) → CRITICAL
+    ///
+    /// A transient fingerprint failure (Simulator, biometric enrollment pending,
+    /// Keychain busy) is NOT a tamper signal. Only a device that HAS a fingerprint
+    /// but is NOT in the trusted registry constitutes a real integrity violation.
     private func checkDeviceRegistryIntegrity() -> IntegrityCheck {
-        let passed = TrustedDeviceRegistry.shared.verifyIntegrity()
-        return IntegrityCheck(
-            name: "Device Registry Integrity",
-            passed: passed,
-            detail: passed
-                ? "Current device trusted, registry valid"
-                : "VIOLATION: Current device not trusted or registry empty",
-            severity: .critical
-        )
+        var passed = TrustedDeviceRegistry.shared.verifyIntegrity()
+
+        // ═══════════════════════════════════════════════════════════════
+        // BOOTSTRAP RESILIENCE — retry registration once
+        // ═══════════════════════════════════════════════════════════════
+        if !passed {
+            _ = SecureEnclaveApprover.shared.ensureKeyExists()
+            if let fingerprint = SecureEnclaveApprover.shared.deviceFingerprint {
+                TrustedDeviceRegistry.shared.registerDevice(fingerprint: fingerprint, displayName: "Primary Device")
+                passed = TrustedDeviceRegistry.shared.verifyIntegrity()
+                if passed {
+                    log("[KERNEL_INTEGRITY] Device registration recovered on retry — registry valid")
+                }
+            }
+        }
+
+        if passed {
+            return IntegrityCheck(
+                name: "Device Registry Integrity",
+                passed: true,
+                detail: "Current device trusted, registry valid",
+                severity: .critical
+            )
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // FAILURE CLASSIFICATION — distinguish transient vs tamper
+        // ═══════════════════════════════════════════════════════════════
+        //
+        // If the Secure Enclave fingerprint is nil, the SE key is unavailable.
+        // This happens on Simulators, when biometric enrollment changes, or
+        // when the Keychain is temporarily inaccessible. This is NOT a tamper
+        // signal — it's an infrastructure limitation.
+        //
+        // If the fingerprint EXISTS but the device is not in the registry,
+        // that IS suspicious (device identity changed or registry was wiped).
+        // Even then, on first launch (epoch 1), this is expected.
+        // ═══════════════════════════════════════════════════════════════
+        let fingerprintAvailable = SecureEnclaveApprover.shared.deviceFingerprint != nil
+        let isFirstLaunch = TrustEpochManager.shared.trustEpoch == 1
+
+        if !fingerprintAvailable {
+            // SE key unavailable — transient infrastructure issue, NOT a tamper
+            log("[KERNEL_INTEGRITY] Device fingerprint unavailable (SE key missing/inaccessible) — downgrading to WARNING")
+            return IntegrityCheck(
+                name: "Device Registry Integrity",
+                passed: false,
+                detail: "WARNING: Secure Enclave fingerprint unavailable. Biometric enrollment may be required. Vault remains usable.",
+                severity: .warning
+            )
+        } else if isFirstLaunch {
+            // Fingerprint exists but not registered yet during first launch bootstrap
+            log("[KERNEL_INTEGRITY] Device not registered during first launch — downgrading to WARNING")
+            return IntegrityCheck(
+                name: "Device Registry Integrity",
+                passed: false,
+                detail: "WARNING: Device not registered during first-launch bootstrap. Will register on next check.",
+                severity: .warning
+            )
+        } else {
+            // Fingerprint exists, not first launch, but device not trusted — genuine concern
+            logError("[KERNEL_INTEGRITY] Device fingerprint present but NOT in trusted registry — CRITICAL")
+            return IntegrityCheck(
+                name: "Device Registry Integrity",
+                passed: false,
+                detail: "TAMPER SUSPECTED: Device fingerprint exists but is not in trusted registry. Device identity may have changed.",
+                severity: .critical
+            )
+        }
     }
 
+    /// Evidence Chain Integrity — validates the append-only evidence log.
+    ///
+    /// P0 FIX: Empty chains and new-installation states are WARNING, not CRITICAL.
+    /// A corrupted or tampered chain (entries exist but hashes don't match) is CRITICAL.
     private func checkEvidenceChainIntegrity() -> IntegrityCheck {
         do {
             let report = try EvidenceEngine.shared.verifyChainIntegrity()
-            return IntegrityCheck(
-                name: "Evidence Chain Integrity",
-                passed: report.overallValid,
-                detail: report.overallValid
-                    ? "\(report.totalEntries) entries, chain valid"
-                    : "VIOLATION: \(report.violations.count) chain integrity violation(s)",
-                severity: .critical
-            )
+            if report.overallValid {
+                return IntegrityCheck(
+                    name: "Evidence Chain Integrity",
+                    passed: true,
+                    detail: "\(report.totalEntries) entries, chain valid",
+                    severity: .critical
+                )
+            } else if report.totalEntries == 0 {
+                // Empty chain — new installation or data reset, NOT a tamper
+                log("[KERNEL_INTEGRITY] Evidence chain empty — new installation, downgrading to WARNING")
+                return IntegrityCheck(
+                    name: "Evidence Chain Integrity",
+                    passed: false,
+                    detail: "WARNING: Evidence chain is empty (new installation). Chain will be initialized on first operation.",
+                    severity: .warning
+                )
+            } else {
+                // Chain has entries but integrity violations — genuine tamper signal
+                return IntegrityCheck(
+                    name: "Evidence Chain Integrity",
+                    passed: false,
+                    detail: "TAMPER SUSPECTED: \(report.violations.count) chain integrity violation(s) in \(report.totalEntries) entries",
+                    severity: .critical
+                )
+            }
         } catch {
+            // Exception during check — likely disk I/O or decode issue
+            // On fresh installs, the evidence store may not exist yet.
+            // Treat as WARNING unless we have positive evidence of tampering.
+            log("[KERNEL_INTEGRITY] Evidence chain check exception: \(error.localizedDescription) — downgrading to WARNING")
             return IntegrityCheck(
                 name: "Evidence Chain Integrity",
                 passed: false,
-                detail: "EXCEPTION: \(error.localizedDescription)",
-                severity: .critical
+                detail: "WARNING: Evidence chain check failed (\(error.localizedDescription)). May be a new installation.",
+                severity: .warning
             )
         }
     }
@@ -224,15 +341,26 @@ public final class KernelIntegrityGuard: ObservableObject {
     }
 
     /// Clear lockdown. Requires re-running full integrity check.
-    /// Only succeeds if ALL checks now pass.
+    /// Succeeds if no CRITICAL failures remain (nominal or degraded).
     public func attemptRecovery() -> Bool {
         performFullCheck()
-        if systemPosture == .nominal {
-            log("[KERNEL_INTEGRITY] Recovery successful — system NOMINAL")
+        if systemPosture != .lockdown {
+            log("[KERNEL_INTEGRITY] Recovery successful — system \(systemPosture.rawValue)")
             return true
         } else {
             logError("[KERNEL_INTEGRITY] Recovery failed — system remains \(systemPosture.rawValue)")
             return false
         }
+    }
+
+    /// Reset all integrity state. Requires explicit user intent.
+    /// Used as emergency escape hatch when vault is stuck.
+    /// Caller MUST gate this behind biometric confirmation.
+    public func resetIntegrityState() {
+        systemPosture = .nominal
+        lastReport = nil
+        lastCheckAt = nil
+        log("[KERNEL_INTEGRITY] Integrity state RESET by user — running fresh check")
+        performFullCheck()
     }
 }

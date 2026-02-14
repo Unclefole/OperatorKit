@@ -56,7 +56,16 @@ final class DraftGenerator: ObservableObject {
             switch result {
             case .success(let output, let provider):
                 lastDraftOutput = output
-                lastModelMetadata = modelRouter.currentModelMetadata()
+                // Use cloud-specific metadata for cloud providers, on-device metadata otherwise
+                if provider.isCloud {
+                    lastModelMetadata = modelRouter.cloudModelMetadata(
+                        provider: provider,
+                        modelId: provider.displayName,
+                        latencyMs: modelRouter.lastGenerationTimeMs
+                    )
+                } else {
+                    lastModelMetadata = modelRouter.currentModelMetadata()
+                }
                 lastProvider = provider
                 
                 let finalRecipient = recipient ?? extractRecipient(from: context, intent: intent)
@@ -190,6 +199,8 @@ extension DraftGenerator {
             return "# Document Review\n\n[Add review notes]"
         case .createReminder:
             return "Reminder: \(plan.intent.rawText)"
+        case .researchBrief:
+            return "# Executive Market Brief\n\n[Generating research brief via cloud AI...]\n\nThis is a draft for internal review only."
         case .unknown:
             return "[Generated content]"
         }
@@ -229,6 +240,7 @@ extension DraftGenerator {
         case .extractActionItems: return .taskList
         case .reviewDocument: return .documentSummary
         case .createReminder: return .reminder
+        case .researchBrief: return .researchBrief
         case .unknown: return .meetingSummary
         }
     }

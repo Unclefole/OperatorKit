@@ -20,7 +20,10 @@ import Foundation
 // INVARIANT: ProposalPack is immutable after creation.
 // ============================================================================
 
-public struct ProposalPack: Identifiable, Codable, Equatable {
+public struct ProposalPack: Identifiable, Codable, Equatable, Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     public let id: UUID
     public let createdAt: Date
     public let source: ProposalSource

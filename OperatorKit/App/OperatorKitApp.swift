@@ -11,6 +11,14 @@ struct OperatorKitApp: App {
     init() {
         // INVARIANT: Siri is routing-only. Never executes business logic.
 
+        // Register sensible defaults for feature flags.
+        // Web research is read-only (GET + HTTPS) so it's safe to enable by default.
+        // Existing users who explicitly turned it off keep their setting.
+        UserDefaults.standard.register(defaults: [
+            "ok_enterprise_web_research": true,
+            "ok_enterprise_research_host_allowlist": true
+        ])
+
         // Register background tasks (must happen before app finishes launching)
         BackgroundScheduler.registerTasks()
 
@@ -39,7 +47,6 @@ struct OperatorKitApp: App {
                 .environmentObject(templateStore)
                 .modelContainer(SwiftDataProvider.sharedModelContainer)
                 .launchTrustCalibration()
-                .preferredColorScheme(.dark)
                 .background(OKColor.backgroundPrimary)
                 .onAppear {
                     SiriRoutingBridge.shared.configure(appState: appState, nav: nav)
@@ -60,6 +67,27 @@ struct OperatorKitApp: App {
                     // EVIDENCE CHAIN: Verify hash chain integrity on launch
                     EvidenceEngine.shared.verifyOnLaunch()
 
+                    // CATALYST + MULTI-DEVICE SECURITY HARDENING
+                    // Apply pasteboard clearing, window snapshot protection,
+                    // environment variable validation, Keychain access group checks.
+                    CatalystSecurityHardening.applyAll()
+                    CatalystSecurityHardening.validateKeychainAccessGroup()
+
+                    // DEVICE ATTESTATION: Generate App Attest key + verify on first launch
+                    Task {
+                        try? await DeviceAttestationService.shared.generateKeyIfNeeded()
+                        _ = await AppAttestVerifier.shared.verify()
+                    }
+
+                    // TAMPER DETECTION: Lightweight anti-tamper scan
+                    // Checks: writable system paths, injected libraries,
+                    // debugger in release, sandbox integrity, jailbreak artifacts.
+                    // On failure → KernelIntegrityGuard.enterLockdown()
+                    let tamperReport = TamperDetection.performFullScan(triggerLockdownOnFailure: true)
+                    if tamperReport.isCompromised {
+                        log("[APP LAUNCH] ⛔ TAMPER DETECTED — \(tamperReport.failedCount) signal(s)")
+                    }
+
                     // NOTIFICATIONS: Request authorization
                     Task {
                         await NotificationBridge.shared.requestAuthorization()
@@ -71,6 +99,9 @@ struct OperatorKitApp: App {
                     if EnterpriseFeatureFlags.scoutModeEnabled {
                         BackgroundScheduler.scheduleScoutRun()
                     }
+
+                    // SKILLS: Register Day-One Micro-Operators
+                    SkillRegistry.shared.registerDayOneSkills()
                 }
                 .task {
                     await templateStore.load()

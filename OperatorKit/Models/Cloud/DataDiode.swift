@@ -77,16 +77,28 @@ enum DataDiode {
 
     // ── Sensitive Pattern Definitions ────────────────────
     private static let sensitivePatterns: [(pattern: String, category: String)] = [
+        // ORDER MATTERS: More specific patterns FIRST to avoid greedy consumption.
+        //
         // Email addresses
         (#"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"#, "EMAIL"),
-        // Phone numbers (various formats)
-        (#"\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}"#, "PHONE"),
-        // SSN-like patterns
+        // SSN-like patterns (BEFORE phone — SSN is more specific)
         (#"\d{3}-\d{2}-\d{4}"#, "SSN"),
+        // Case numbers (common federal formats — BEFORE phone)
+        (#"\b\d{1,2}:\d{2}-(?:cr|cv|mj|mc)-\d{4,6}(?:-[A-Z]{2,4})?\b"#, "CASE_NUMBER"),
+        // Date of birth patterns (MM/DD/YYYY, MM-DD-YYYY — BEFORE phone)
+        (#"\b(?:0[1-9]|1[0-2])[/\-](?:0[1-9]|[12]\d|3[01])[/\-](?:19|20)\d{2}\b"#, "DOB"),
         // Credit card numbers (13-19 digits, possibly spaced)
         (#"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{1,7}\b"#, "CC"),
+        // Phone numbers (various formats — AFTER SSN/CC to avoid over-matching)
+        (#"\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}"#, "PHONE"),
+        // US street addresses (number + street name pattern)
+        (#"\b\d{1,5}\s+(?:[A-Z][a-z]+\s?){1,4}(?:St|Ave|Blvd|Dr|Rd|Ct|Ln|Way|Pl|Cir|Pkwy|Hwy)\.?\b"#, "ADDRESS"),
+        // US zip codes (5 or 9 digit)
+        (#"\b\d{5}(?:-\d{4})?\b"#, "ZIPCODE"),
         // API keys / tokens (long alphanumeric strings)
         (#"(?:sk|pk|api|key|token|secret|bearer)[_-]?[A-Za-z0-9]{20,}"#, "KEY"),
+        // Bank routing numbers (exactly 9 digits)
+        (#"\b\d{9}\b"#, "ROUTING_NUM"),
     ]
 
     // ── Public API ───────────────────────────────────────
@@ -110,6 +122,22 @@ enum DataDiode {
                 result.replaceSubrange(range, with: token)
             }
         }
+
+        // Evidence log (non-blocking) — records that diode was applied
+        if session.tokenCount > 0 {
+            let count = session.tokenCount
+            let charCount = text.count
+            Task { @MainActor in
+                try? EvidenceEngine.shared.logGenericArtifact(
+                    type: "data_diode_applied",
+                    planId: UUID(),
+                    jsonString: """
+                    {"tokenizations":\(count),"inputChars":\(charCount),"timestamp":"\(Date().ISO8601Format())"}
+                    """
+                )
+            }
+        }
+
         return (result, session)
     }
 

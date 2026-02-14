@@ -170,6 +170,7 @@ final class PersistedMemoryItem {
         case createdCalendarEvent = "Created Calendar Event"   // Phase 3C: Actually created
         case updatedCalendarEvent = "Updated Calendar Event"   // Phase 3C: Actually updated
         case documentReview = "Document Review"
+        case researchBrief = "Research Brief"
     }
     
     enum DraftType: String, Codable {
@@ -178,6 +179,7 @@ final class PersistedMemoryItem {
         case actionItems = "Action Items"
         case documentReview = "Document Review"
         case reminder = "Reminder"
+        case researchBrief = "Research Brief"
     }
     
     enum ExecutionStatus: String, Codable {
@@ -244,6 +246,8 @@ final class PersistedMemoryItem {
             }
         case .documentReview:
             itemType = .documentReview
+        case .researchBrief:
+            itemType = .researchBrief
         }
         
         // Phase 3C: Check if calendar event was created/updated

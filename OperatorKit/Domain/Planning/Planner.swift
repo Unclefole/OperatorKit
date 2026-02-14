@@ -36,6 +36,8 @@ final class Planner {
             return createDocumentReviewSteps(context: context)
         case .createReminder:
             return createReminderSteps(context: context)
+        case .researchBrief:
+            return createResearchBriefSteps(context: context)
         case .unknown:
             return createFallbackSteps()
         }
@@ -214,9 +216,45 @@ final class Planner {
                 dueDate: Calendar.current.date(byAdding: .day, value: 2, to: Date()),
                 priority: .medium
             )
+        case .researchBrief:
+            return ReminderPreview(
+                title: "Review research brief: \(draft.title)",
+                notes: "Verify data sources and finalize strategic recommendations",
+                dueDate: Calendar.current.date(byAdding: .day, value: 1, to: Date()),
+                priority: .high
+            )
         }
     }
     
+    private func createResearchBriefSteps(context: ContextPacket) -> [PlanStep] {
+        [
+            PlanStep(
+                stepNumber: 1,
+                title: "Analyze research request",
+                description: "Parse the research question and identify key topics, segments, and data needs",
+                estimatedConfidence: 0.9
+            ),
+            PlanStep(
+                stepNumber: 2,
+                title: "Generate market intelligence",
+                description: "Use cloud AI to synthesize market data, consumer trends, and industry insights",
+                estimatedConfidence: 0.85
+            ),
+            PlanStep(
+                stepNumber: 3,
+                title: "Draft executive brief",
+                description: "Produce a structured 1-page executive market brief with strategic recommendations",
+                estimatedConfidence: 0.8
+            ),
+            PlanStep(
+                stepNumber: 4,
+                title: "Hold for review",
+                description: "Present draft for your review — stopped before any external distribution",
+                estimatedConfidence: 0.95
+            )
+        ]
+    }
+
     private func createFallbackSteps() -> [PlanStep] {
         [
             PlanStep(

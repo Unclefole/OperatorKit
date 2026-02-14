@@ -26,6 +26,9 @@ struct ScoutDashboardView: View {
         .background(OKColor.backgroundPrimary)
         .navigationTitle("Scout Mode")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: FindingPack.self) { pack in
+            FindingPackDetailView(pack: pack)
+        }
     }
 
     // MARK: - Control Card
@@ -227,7 +230,7 @@ struct ScoutDashboardView: View {
                 .padding()
             } else {
                 ForEach(store.packs.prefix(10)) { pack in
-                    NavigationLink(destination: FindingPackDetailView(pack: pack)) {
+                    NavigationLink(value: pack) {
                         findingPackRow(pack)
                     }
                 }
@@ -382,8 +385,8 @@ struct FindingPackDetailView: View {
                     }
                 }
 
-                // Generate Proposal (prefill, no execution)
-                NavigationLink(destination: EmptyView()) {
+                // Generate Proposal — routes to Skills Dashboard to create ProposalPack
+                NavigationLink(value: Route.skillsDashboard) {
                     HStack {
                         Image(systemName: "doc.text.fill")
                         Text("Generate ProposalPack from Findings")

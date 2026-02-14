@@ -46,7 +46,6 @@ struct ReferralView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(OKColor.backgroundPrimary, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }

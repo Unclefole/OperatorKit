@@ -92,6 +92,12 @@ final class StructuredOnDeviceBackend: OnDeviceModel {
                 calendarItems: input.contextItems.calendarItems,
                 emailItems: input.contextItems.emailItems
             )
+        case .researchBrief:
+            result = (
+                body: "# Executive Market Brief\n**INTERNAL DRAFT — DO NOT DISTRIBUTE**\n\n## Research Request\n\(input.intentText)\n\n*For full research analysis, enable a cloud AI provider in Intelligence Settings.*\n*All data should be verified against primary sources.*",
+                subject: "Executive Market Brief — INTERNAL DRAFT",
+                actionItems: ["Enable cloud AI for full research brief", "Verify data against primary sources"]
+            )
         }
 
         let latencyMs = Int(Date().timeIntervalSince(startTime) * 1000)
@@ -150,6 +156,9 @@ final class StructuredOnDeviceBackend: OnDeviceModel {
             notes.append("Task priorities are suggestions. Review and adjust.")
         case .reminder:
             notes.append("Reminder timing is a suggestion — adjust as needed.")
+        case .researchBrief:
+            notes.append("Research draft for internal review only — do not distribute externally.")
+            notes.append("All data should be verified against primary sources.")
         }
         if input.contextItems.isEmpty {
             notes.append("Generated without context — accuracy may be limited.")

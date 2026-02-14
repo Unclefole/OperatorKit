@@ -1027,42 +1027,57 @@ struct PrivacyControlsView: View {
                 .foregroundStyle(OKColor.textMuted)
 
             VStack(spacing: 0) {
-                NavigationLink(destination: ScoutDashboardView()) {
+                NavigationLink(value: Route.skillsDashboard) {
+                    enterpriseRow(icon: "brain.head.profile", title: "Micro-Operators", detail: "\(SkillRegistry.shared.registeredSkills.count) skills")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(value: Route.scoutDashboard) {
                     enterpriseRow(icon: "binoculars.fill", title: "Scout Mode", detail: EnterpriseFeatureFlags.scoutModeEnabled ? "Active" : "Off")
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: EnterpriseOnboardingView()) {
+                NavigationLink(value: Route.enterpriseOnboarding) {
                     enterpriseRow(icon: "building.2", title: "Onboarding Wizard", detail: OrgProvisioningService.shared.isProvisioned ? "Provisioned" : "Not configured")
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: TrustRegistryView()) {
+                NavigationLink(value: Route.trustRegistry) {
                     enterpriseRow(icon: "shield.checkered", title: "Trust Registry", detail: "\(TrustedDeviceRegistry.shared.devices.count) device(s)")
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: IntegrityIncidentView()) {
+                NavigationLink(value: Route.integrityIncident) {
                     enterpriseRow(icon: "exclamationmark.shield", title: "System Integrity", detail: KernelIntegrityGuard.shared.systemPosture.rawValue.uppercased())
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: AuditStatusView()) {
+                NavigationLink(value: Route.securityDashboard) {
+                    enterpriseRow(icon: "lock.shield", title: "Security Dashboard", detail: DeviceAttestationService.shared.isSupported ? "Attest: \(DeviceAttestationService.shared.state.rawValue)" : "Attest: N/A")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(value: Route.auditStatus) {
                     enterpriseRow(icon: "doc.badge.clock", title: "Audit Status", detail: EvidenceMirrorClient.shared.syncStatus.rawValue)
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: EnterpriseKillSwitchesView()) {
+                NavigationLink(value: Route.killSwitches) {
                     enterpriseRow(icon: "bolt.shield", title: "Kill Switches", detail: EnterpriseFeatureFlags.executionKillSwitch ? "ACTIVE" : "Nominal")
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: PilotRunnerView()) {
+                NavigationLink(value: Route.intelligenceSettings) {
+                    enterpriseRow(icon: "brain", title: "Intelligence", detail: IntelligenceFeatureFlags.cloudModelsEnabled ? "Cloud ON" : "On-Device Only")
+                }
+                Divider().background(OKColor.borderSubtle)
+
+                NavigationLink(value: Route.pilotRunner) {
                     enterpriseRow(icon: "play.circle", title: "Pilot Runner", detail: PilotRunner.shared.allPassed ? "Passed" : "Not run")
                 }
                 Divider().background(OKColor.borderSubtle)
 
-                NavigationLink(destination: EnterpriseReviewPackView()) {
+                NavigationLink(value: Route.reviewPack) {
                     enterpriseRow(icon: "doc.text.magnifyingglass", title: "Export Review Pack", detail: EnterpriseReviewPackBuilder.shared.lastExportAt != nil ? "Exported" : "Not exported")
                 }
             }

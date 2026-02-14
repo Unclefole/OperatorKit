@@ -15,13 +15,19 @@ import Foundation
 
 /// Identifies the intelligence provider tier.
 /// Kernel decides which provider is allowed based on risk + policy + flags.
-public enum ModelProvider: String, Codable, Sendable {
+public enum ModelProvider: String, Codable, Sendable, CaseIterable {
     case onDevice       = "on_device"
     case cloudOpenAI    = "cloud_openai"
     case cloudAnthropic = "cloud_anthropic"
+    case cloudGemini    = "cloud_gemini"
+    case cloudGroq      = "cloud_groq"       // Groq inference platform
+    case cloudLlama     = "cloud_llama"       // Meta Llama (via Together AI)
 
     public var isCloud: Bool {
-        self == .cloudOpenAI || self == .cloudAnthropic
+        switch self {
+        case .onDevice: return false
+        case .cloudOpenAI, .cloudAnthropic, .cloudGemini, .cloudGroq, .cloudLlama: return true
+        }
     }
 
     public var displayName: String {
@@ -29,7 +35,15 @@ public enum ModelProvider: String, Codable, Sendable {
         case .onDevice:       return "On-Device"
         case .cloudOpenAI:    return "OpenAI"
         case .cloudAnthropic: return "Anthropic"
+        case .cloudGemini:    return "Google Gemini"
+        case .cloudGroq:      return "Groq"
+        case .cloudLlama:     return "Meta Llama"
         }
+    }
+
+    /// All cloud providers for iteration
+    public static var allCloudProviders: [ModelProvider] {
+        allCases.filter { $0.isCloud }
     }
 }
 

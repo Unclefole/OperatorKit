@@ -138,6 +138,8 @@ public enum IntentType: String, Codable, CaseIterable {
     case externalAPICall = "external_api_call"
     case databaseMutation = "database_mutation"
     case systemConfiguration = "system_configuration"
+    case webResearch = "web_research"
+    case reviewDocument = "review_document"
     case unknown = "unknown"
 }
 

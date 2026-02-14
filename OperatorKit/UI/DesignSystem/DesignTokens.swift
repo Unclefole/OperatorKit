@@ -1,40 +1,83 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // ============================================================================
-// OPERATORKIT DESIGN SYSTEM — MISSION CONTROL DARK THEME
+// OPERATORKIT DESIGN SYSTEM — ADAPTIVE LIGHT / DARK THEME
 // SINGLE SOURCE OF TRUTH. NO INLINE COLORS ANYWHERE ELSE.
 //
 // This is not a cosmetic layer. This is an enforcement surface.
 // Every view in OperatorKit uses these tokens or FAILS review.
+//
+// All surface/text/border colors are ADAPTIVE — they respond automatically
+// to the system appearance (Light Mode / Dark Mode). Risk, status, and
+// brand accent colors stay fixed across both appearances.
 // ============================================================================
 
-// MARK: - Unified Dark Theme Tokens
+// MARK: - Adaptive Color Helper
+
+private extension Color {
+    /// Create an adaptive color that switches between light and dark variants
+    static func adaptive(light: String, dark: String) -> Color {
+        #if canImport(UIKit)
+        return Color(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(Color(hex: dark))
+            default:
+                return UIColor(Color(hex: light))
+            }
+        })
+        #else
+        return Color(hex: dark)
+        #endif
+    }
+
+    static func adaptive(light: String, dark: String, lightAlpha: CGFloat = 1.0, darkAlpha: CGFloat = 1.0) -> Color {
+        #if canImport(UIKit)
+        return Color(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(Color(hex: dark)).withAlphaComponent(darkAlpha)
+            default:
+                return UIColor(Color(hex: light)).withAlphaComponent(lightAlpha)
+            }
+        })
+        #else
+        return Color(hex: dark)
+        #endif
+    }
+}
+
+// MARK: - Unified Adaptive Theme Tokens
 
 public enum OKColor {
 
     // ── Surfaces ─────────────────────────────────────────
-    /// App root background — #0B0F14
-    public static let backgroundPrimary = Color(hex: "0B0F14")
-    /// Cards, panels, grouped content — #121821
-    public static let backgroundSecondary = Color(hex: "121821")
-    /// Elevated controls, popovers, modals — #18212B
-    public static let backgroundTertiary = Color(hex: "18212B")
+    //                                    LIGHT        DARK
+    /// App root background
+    public static let backgroundPrimary   = Color.adaptive(light: "F7F8FA", dark: "0B0F14")
+    /// Cards, panels, grouped content
+    public static let backgroundSecondary = Color.adaptive(light: "FFFFFF", dark: "121821")
+    /// Elevated controls, popovers, modals
+    public static let backgroundTertiary  = Color.adaptive(light: "EFF1F5", dark: "18212B")
 
     // ── Borders ──────────────────────────────────────────
-    /// Subtle card/section borders — #223041
-    public static let borderSubtle = Color(hex: "223041")
-    /// Strong/interactive borders — #2F4156
-    public static let borderStrong = Color(hex: "2F4156")
+    /// Subtle card/section borders
+    public static let borderSubtle = Color.adaptive(light: "DFE3E8", dark: "223041")
+    /// Strong/interactive borders
+    public static let borderStrong = Color.adaptive(light: "C4CBD6", dark: "2F4156")
 
     // ── Text ─────────────────────────────────────────────
-    /// Primary text (titles, body) — #E6EDF3
-    public static let textPrimary = Color(hex: "E6EDF3")
-    /// Secondary text (descriptions) — #9FB0C3
-    public static let textSecondary = Color(hex: "9FB0C3")
-    /// Muted text (timestamps, metadata, labels) — #6B7C8F
-    public static let textMuted = Color(hex: "6B7C8F")
+    /// Primary text (titles, body)
+    public static let textPrimary   = Color.adaptive(light: "1A1D21", dark: "E6EDF3")
+    /// Secondary text (descriptions)
+    public static let textSecondary = Color.adaptive(light: "4A5568", dark: "9FB0C3")
+    /// Muted text (timestamps, metadata, labels)
+    public static let textMuted     = Color.adaptive(light: "7B8A9A", dark: "6B7C8F")
 
-    // ── Risk / Authority ─────────────────────────────────
+    // ── Risk / Authority (fixed across appearances) ──────
     /// Nominal / success / safe — #00C853
     public static let riskNominal = Color(hex: "00C853")
     /// Operational / informational / blue — #3A86FF
@@ -46,7 +89,7 @@ public enum OKColor {
     /// Extreme / purple — #7C4DFF
     public static let riskExtreme = Color(hex: "7C4DFF")
 
-    // ── Controls ─────────────────────────────────────────
+    // ── Controls (fixed across appearances) ──────────────
     /// Emergency stop — #FF453A
     public static let emergencyStop = Color(hex: "FF453A")
     /// Primary action buttons — #4C8DFF
@@ -55,12 +98,18 @@ public enum OKColor {
     public static let escalate = Color(hex: "FF9F0A")
 
     // ── Utility ──────────────────────────────────────────
-    /// Shadow color for dark theme cards
-    public static let shadow = Color(hex: "000000")
+    /// Shadow color for cards
+    public static let shadow = Color.adaptive(light: "000000", dark: "000000", lightAlpha: 0.08, darkAlpha: 1.0)
     /// Overlay/scrim for modals
     public static let overlay = Color(hex: "000000")
     /// Bright white for icon tints on colored backgrounds
     public static let iconOnColor = Color(hex: "FFFFFF")
+
+    // ── Card surface (used for cards that were white/light in dark mode) ──
+    /// Card foreground surface (the "white" card face)
+    public static let cardSurface = Color.adaptive(light: "FFFFFF", dark: "E6EDF3")
+    /// Card text on cardSurface
+    public static let cardText    = Color.adaptive(light: "1A1D21", dark: "121821")
 }
 
 // MARK: - Legacy Aliases (OKDark → OKColor)

@@ -174,7 +174,7 @@ public final class ScoutEngine: ObservableObject {
                 detail: "KernelIntegrityGuard reports LOCKDOWN posture. All execution blocked.",
                 category: .integrityWarning,
                 confidence: 1.0,
-                impactedAssets: ["ExecutionEngine", "CapabilityKernel"],
+                impactedAssets: ["execution_pipeline", "capability_kernel"],
                 signals: ["KernelIntegrityGuard.isLocked == true"]
             ))
             actions.append(RecommendedAction(
@@ -221,7 +221,7 @@ public final class ScoutEngine: ObservableObject {
                     detail: "\(violations.count) policy violations in the last \(Int(window / 60)) minutes. Threshold: \(threshold).",
                     category: .policyDenialSpike,
                     confidence: 0.9,
-                    impactedAssets: ["PolicyEngine", "ExecutionEngine"],
+                    impactedAssets: ["policy_engine", "execution_pipeline"],
                     signals: violations.prefix(5).map { "violation_\($0.id)" }
                 ))
                 for v in violations.prefix(5) {

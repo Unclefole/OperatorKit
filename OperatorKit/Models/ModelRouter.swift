@@ -522,7 +522,7 @@ final class ModelRouter: ObservableObject {
 
             return .success(output: output, provider: .onDevice)
 
-        case .cloudOpenAI, .cloudAnthropic:
+        case .cloudOpenAI, .cloudAnthropic, .cloudGemini, .cloudGroq, .cloudLlama:
             // Cloud path: issue token, verify, consume, call, log
             return try await executeCloudCall(
                 request: request,
@@ -544,6 +544,17 @@ final class ModelRouter: ObservableObject {
     ) async throws -> GovernedModelResult {
         let kernel = CapabilityKernel.shared
         let evidence = EvidenceEngine.shared
+
+        // 0. FAIL CLOSED: Cloud models must be enabled + key must exist
+        guard IntelligenceFeatureFlags.cloudModelsEnabled else {
+            throw CloudModelError.featureFlagDisabled(decision.provider)
+        }
+        guard !EnterpriseFeatureFlags.cloudKillSwitch else {
+            throw CloudModelError.featureFlagDisabled(decision.provider)
+        }
+        guard APIKeyVault.shared.hasKey(for: decision.provider) else {
+            throw CloudModelError.apiKeyMissing(decision.provider)
+        }
 
         // 1. Issue ModelCallToken from kernel
         let token = kernel.issueModelCallToken(
@@ -587,6 +598,21 @@ final class ModelRouter: ObservableObject {
                     systemPrompt: systemPrompt,
                     userPrompt: userPrompt
                 )
+            case .cloudGemini:
+                cloudResponse = try await GeminiClient.shared.generate(
+                    systemPrompt: systemPrompt,
+                    userPrompt: userPrompt
+                )
+            case .cloudGroq:
+                cloudResponse = try await GroqClient.shared.generate(
+                    systemPrompt: systemPrompt,
+                    userPrompt: userPrompt
+                )
+            case .cloudLlama:
+                cloudResponse = try await TogetherLlamaClient.shared.generate(
+                    systemPrompt: systemPrompt,
+                    userPrompt: userPrompt
+                )
             default:
                 throw CloudModelError.featureFlagDisabled(decision.provider)
             }
@@ -620,7 +646,10 @@ final class ModelRouter: ObservableObject {
         )
         try? evidence.logModelCallResponse(successRecord)
 
-        // 9. Convert cloud response to DraftOutput
+        // 9. Record latency for cloud calls
+        lastGenerationTimeMs = latencyMs
+
+        // 10. Convert cloud response to DraftOutput
         let draftOutput = convertCloudResponse(cloudResponse, intent: intent, context: context)
         return .success(output: draftOutput, provider: decision.provider)
     }
@@ -665,6 +694,8 @@ final class ModelRouter: ObservableObject {
             outputType = .documentSummary
         case .createReminder:
             outputType = .reminder
+        case .researchBrief:
+            outputType = .researchBrief
         default:
             outputType = .taskList
         }
@@ -730,6 +761,22 @@ final class ModelRouter: ObservableObject {
     
     // MARK: - Model Info
     
+    /// Create metadata for a cloud model call.
+    func cloudModelMetadata(provider: ModelProvider, modelId: String, latencyMs: Int) -> ModelMetadata {
+        ModelMetadata(
+            modelId: modelId,
+            displayName: provider.displayName,
+            version: "cloud",
+            backend: .deterministic, // Cloud models don't have a local backend; use deterministic as placeholder
+            generatedAt: Date(),
+            deviceInfo: nil,
+            maxOutputChars: nil,
+            latencyMs: latencyMs,
+            capabilities: nil,
+            fallbackReason: nil
+        )
+    }
+
     /// Get metadata for the current model (with latency)
     func currentModelMetadata(latencyMs: Int? = nil) -> ModelMetadata {
         let model: any OnDeviceModel
@@ -908,6 +955,221 @@ final class ModelRouter: ObservableObject {
         return info
     }
     #endif
+
+    // ════════════════════════════════════════════════════════════════
+    // MARK: - GOVERNED V2 — CHEAP-FIRST + BUDGET + ESCALATION
+    // ════════════════════════════════════════════════════════════════
+    //
+    // New entrypoint that uses ModelRoutingPolicy, ModelBudgetGovernor,
+    // GovernedModelClient adapters, and output validation with escalation.
+    //
+    // INVARIANT: This is NON-ACTIONING — analysis/draft/proposal only.
+    // INVARIANT: No execution authority granted by any model call.
+    // INVARIANT: Budget denial → fail closed.
+    // ════════════════════════════════════════════════════════════════
+
+    /// V2 governed generation using cheap-first routing with escalation.
+    /// This is the preferred entrypoint for new code (Autopilot, Skills, Scout).
+    func generateGovernedV2(
+        taskType: ModelTaskType,
+        prompt: String,
+        context: String = "",
+        riskTier: RiskTier = .low,
+        sensitivity: ModelSensitivityLevel? = nil
+    ) async throws -> GovernedModelResponse {
+        let evidence = EvidenceEngine.shared
+
+        // 1. Resolve routing decision (cheap-first)
+        let routingRequest = ModelRoutingRequest(
+            taskType: taskType,
+            riskTier: riskTier,
+            sensitivity: sensitivity,
+            contextTokenEstimate: (prompt.count + context.count) / 4,
+            outputTokenEstimate: taskType.maxTokensSoft
+        )
+        let routingDecision = ModelRoutingPolicy.resolve(routingRequest)
+
+        guard !routingDecision.candidateChain.isEmpty else {
+            throw ModelError.generationFailed("No model candidates available for \(taskType.displayName)")
+        }
+
+        // 2. Log routing decision
+        try? evidence.logGenericArtifact(
+            type: "model_call_started",
+            planId: UUID(),
+            jsonString: """
+            {"taskType":"\(taskType.rawValue)","candidates":\(routingDecision.candidateChain.count),"primary":"\(routingDecision.primaryCandidate?.id ?? "none")","budgetAllowed":\(routingDecision.budgetAllowed),"reason":"\(routingDecision.reason)"}
+            """
+        )
+
+        // 3. Build request
+        let systemPrompt = "You are a professional assistant for OperatorKit. \(taskType.requiresJSON ? "Respond with valid JSON only." : "Be concise and professional.")"
+        let request = GovernedModelRequest(
+            taskType: taskType,
+            systemPrompt: systemPrompt,
+            userPrompt: context.isEmpty ? prompt : "\(prompt)\n\nContext:\n\(context)"
+        )
+
+        // 4. Try candidates in order (cheap → expensive)
+        var lastError: Error?
+        for (idx, candidate) in routingDecision.candidateChain.enumerated() {
+            do {
+                let response = try await executeCandidate(
+                    candidate: candidate,
+                    request: request,
+                    routingRequest: routingRequest,
+                    isEscalation: idx > 0
+                )
+
+                // 5. Validate output
+                let validation = ModelRoutingPolicy.validateOutput(
+                    response.text,
+                    taskType: taskType,
+                    context: context.isEmpty ? nil : context
+                )
+
+                if validation.shouldEscalate && idx < routingDecision.candidateChain.count - 1 {
+                    // Escalate to next candidate
+                    try? evidence.logGenericArtifact(
+                        type: "model_call_escalated",
+                        planId: UUID(),
+                        jsonString: """
+                        {"from":"\(candidate.id)","reason":"\(validation.issues.joined(separator: "; "))","taskType":"\(taskType.rawValue)"}
+                        """
+                    )
+                    continue
+                }
+
+                // 6. Record spend
+                if response.costCents > 0 {
+                    await ModelBudgetGovernor.shared.recordSpend(
+                        taskType: taskType,
+                        actualCostCents: response.costCents,
+                        provider: response.provider,
+                        modelId: response.modelId
+                    )
+                }
+
+                // 7. Log success
+                try? evidence.logGenericArtifact(
+                    type: "model_call_completed",
+                    planId: UUID(),
+                    jsonString: """
+                    {"taskType":"\(taskType.rawValue)","provider":"\(response.provider.rawValue)","modelId":"\(response.modelId)","latencyMs":\(response.latencyMs),"costCents":\(response.costCents),"outputChars":\(response.text.count),"escalated":\(idx > 0)}
+                    """
+                )
+
+                return response
+
+            } catch {
+                lastError = error
+                log("ModelRouter V2: candidate \(candidate.id) failed: \(error.localizedDescription)")
+
+                // Log failure, try next
+                try? evidence.logGenericArtifact(
+                    type: "model_call_failed",
+                    planId: UUID(),
+                    jsonString: """
+                    {"candidate":"\(candidate.id)","error":"\(error.localizedDescription)","taskType":"\(taskType.rawValue)"}
+                    """
+                )
+            }
+        }
+
+        throw lastError ?? ModelError.generationFailed("All candidates exhausted for \(taskType.displayName)")
+    }
+
+    /// Execute a single candidate model.
+    private func executeCandidate(
+        candidate: RegisteredModelCapability,
+        request: GovernedModelRequest,
+        routingRequest: ModelRoutingRequest,
+        isEscalation: Bool
+    ) async throws -> GovernedModelResponse {
+        let adapter = resolveAdapter(for: candidate)
+
+        // Cloud calls require: flags ON + key exists + kernel token
+        if candidate.provider.isCloud {
+            // FAIL CLOSED: Cloud master switch
+            guard IntelligenceFeatureFlags.cloudModelsEnabled else {
+                throw CloudModelError.featureFlagDisabled(candidate.provider)
+            }
+            // FAIL CLOSED: Cloud kill switch
+            guard !EnterpriseFeatureFlags.cloudKillSwitch else {
+                throw CloudModelError.featureFlagDisabled(candidate.provider)
+            }
+            // FAIL CLOSED: Provider-specific flag
+            guard IntelligenceFeatureFlags.isProviderEnabled(candidate.provider) else {
+                throw CloudModelError.featureFlagDisabled(candidate.provider)
+            }
+            // FAIL CLOSED: Key must exist in vault (non-authenticated check)
+            guard APIKeyVault.shared.hasKey(for: candidate.provider) else {
+                throw CloudModelError.apiKeyMissing(candidate.provider)
+            }
+            // Budget recheck for escalation
+            if isEscalation {
+                let costEst = candidate.estimateCostCents(
+                    inputTokens: routingRequest.contextTokenEstimate,
+                    outputTokens: routingRequest.outputTokenEstimate
+                )
+                let budgetOK = await ModelBudgetGovernor.shared.requestAllowance(
+                    taskType: request.taskType,
+                    estimatedCostCents: costEst
+                )
+                guard budgetOK.allowed else {
+                    throw ModelError.generationFailed("Budget denied for escalation to \(candidate.id)")
+                }
+            }
+
+            // Credential check
+            _ = try await CredentialBroker.shared.resolveCredential(
+                for: candidate.provider,
+                modelId: candidate.modelId,
+                taskType: request.taskType
+            )
+
+            // Kernel decision check (reuse existing path)
+            let kernel = await CapabilityKernel.shared
+            let callRequest = ModelCallRequest(
+                intentType: request.taskType.rawValue,
+                requestedProvider: candidate.provider,
+                contextSummaryRedacted: "[redacted]"
+            )
+            let decision = await kernel.evaluateModelCallEligibility(request: callRequest)
+            guard decision.allowed else {
+                throw CloudModelError.featureFlagDisabled(candidate.provider)
+            }
+
+            // Issue + consume ModelCallToken
+            let token = await kernel.issueModelCallToken(
+                requestId: callRequest.id,
+                provider: candidate.provider
+            )
+            guard token.verifySignature() else { throw CloudModelError.tokenInvalidSignature }
+            guard await CapabilityKernel.consumeModelCallToken(token) else { throw CloudModelError.tokenAlreadyConsumed }
+            guard token.isValid else { throw CloudModelError.tokenExpired }
+        }
+
+        return try await adapter.execute(request: request)
+    }
+
+    /// Resolve the appropriate adapter for a candidate.
+    private func resolveAdapter(for candidate: RegisteredModelCapability) -> any GovernedModelClient {
+        switch candidate.provider {
+        case .onDevice:
+            return LocalModelClientAdapter()
+        case .cloudOpenAI:
+            return OpenAIClientAdapter(capability: candidate)
+        case .cloudAnthropic:
+            return AnthropicClientAdapter(capability: candidate)
+        case .cloudGemini:
+            return GeminiClientAdapter(modelId: candidate.modelId)
+        case .cloudGroq:
+            return GroqClientAdapter(modelId: candidate.modelId)
+        case .cloudLlama:
+            return LlamaClientAdapter(modelId: candidate.modelId)
+        }
+    }
 }
 
 // MARK: - Generation Record

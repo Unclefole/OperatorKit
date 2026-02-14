@@ -56,7 +56,7 @@ final class SiriRoutingBridge: ObservableObject {
     
     /// Route an intent from Siri to the app
     /// INVARIANT: This is the ONLY entry point for Siri
-    /// INVARIANT: Only sets siriPrefillText and navigates to intentInput
+    /// INVARIANT: Only sets siriPrefillText and navigates to intentInput (or autopilot)
     /// INVARIANT: Never calls DraftGenerator, Planner, or ExecutionEngine
     func routeIntent(text: String, source: SiriRouteSource) async {
         guard let appState = appState else {
@@ -84,11 +84,23 @@ final class SiriRoutingBridge: ObservableObject {
         appState.siriPrefillText = text
         appState.siriRouteSource = source
         
-        // 2. Navigate to intent input (user must review and continue)
-        appState.navigateFromSiri()
-        
-        // INVARIANT: Log for audit
-        log("SiriRoutingBridge: Route complete - awaiting user review")
+        // 2. Navigate — Autopilot OR manual
+        if AutopilotFeatureFlags.autopilotEnabled {
+            // Autopilot: auto-advance pipeline to approval screen
+            // INVARIANT: Autopilot still stops at approval. No execution.
+            let input = AutopilotInput(
+                rawIntentText: text,
+                source: .siri
+            )
+            AutopilotOrchestrator.shared.start(input: input)
+            nav?.goHomeTab()
+            nav?.navigate(to: .autopilot)
+            log("SiriRoutingBridge: Route to AUTOPILOT — awaiting approval screen")
+        } else {
+            // Legacy: navigate to intent input (user must review and continue)
+            appState.navigateFromSiri()
+            log("SiriRoutingBridge: Route to intentInput — awaiting user review")
+        }
     }
     
     /// Clear Siri routing state

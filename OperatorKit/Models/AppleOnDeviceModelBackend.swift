@@ -200,6 +200,8 @@ final class AppleOnDeviceModelBackendImpl: OnDeviceModel {
             parts.append("Extract action items from the following:")
         case .reminder:
             parts.append("Create a reminder based on the following:")
+        case .researchBrief:
+            parts.append("Generate a concise executive market research brief based on the following request:")
         }
         
         // Add intent

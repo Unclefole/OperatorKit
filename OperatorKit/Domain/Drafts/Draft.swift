@@ -22,6 +22,7 @@ struct Draft: Identifiable, Equatable {
         case actionItems = "Action Items"
         case documentReview = "Document Review"
         case reminder = "Reminder"
+        case researchBrief = "Research Brief"
         
         var icon: String {
             switch self {
@@ -30,6 +31,7 @@ struct Draft: Identifiable, Equatable {
             case .actionItems: return "checklist"
             case .documentReview: return "doc.richtext.fill"
             case .reminder: return "bell.fill"
+            case .researchBrief: return "magnifyingglass.circle.fill"
             }
         }
     }
@@ -94,6 +96,7 @@ struct Draft: Identifiable, Equatable {
         case .documentSummary: return .documentReview
         case .taskList: return .actionItems
         case .reminder: return .reminder
+        case .researchBrief: return .researchBrief
         }
     }
     

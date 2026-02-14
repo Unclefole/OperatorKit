@@ -15,6 +15,9 @@ public final class SlackNotifier: ObservableObject {
 
     public static let shared = SlackNotifier()
 
+    /// Connector manifest — declares ALL permissions and constraints.
+    public let manifest: ConnectorManifest = ConnectorManifestRegistry.slackNotifier
+
     @Published private(set) var lastSentAt: Date?
     @Published private(set) var lastError: String?
     @Published private(set) var isSending = false
@@ -98,6 +101,20 @@ public final class SlackNotifier: ObservableObject {
         isSending = true
         defer { isSending = false }
 
+        // ── ConnectorGate pre-flight (HARD FAIL) ─────────
+        let gateRequest = ConnectorRequest(
+            connectorId: manifest.connectorId,
+            targetURL: webhookURL,
+            httpMethod: "POST",
+            payloadSize: 0  // Updated below after body is built
+        )
+        let gateDecision = ConnectorGate.validate(request: gateRequest, manifest: manifest)
+        guard gateDecision.isAllowed else {
+            lastError = "ConnectorGate denied: \(gateDecision.reason)"
+            logError("[SLACK] ConnectorGate DENIED: \(gateDecision.reason)")
+            return
+        }
+
         // Build Slack Block Kit payload
         let blocks = buildSlackBlocks(pack)
         let nonce = UUID()
@@ -139,24 +156,24 @@ public final class SlackNotifier: ObservableObject {
             lastError = nil
             log("[SLACK] FindingPack delivered: \(pack.id)")
 
-            // Evidence: successful delivery
+            // Evidence: successful delivery (includes connectorId/version)
             try? EvidenceEngine.shared.logGenericArtifact(
                 type: "slack_finding_delivered",
                 planId: pack.scoutRunId,
                 jsonString: """
-                {"findingPackId":"\(pack.id)","severity":"\(pack.severity.rawValue)","findingCount":\(pack.findings.count),"deliveredAt":"\(Date())"}
+                {"connectorId":"\(manifest.connectorId)","version":"\(manifest.version)","findingPackId":"\(pack.id)","severity":"\(pack.severity.rawValue)","findingCount":\(pack.findings.count),"deliveredAt":"\(Date())"}
                 """
             )
         } catch {
             lastError = error.localizedDescription
             logError("[SLACK] Delivery failed: \(error)")
 
-            // Evidence: delivery failure
+            // Evidence: delivery failure (includes connectorId/version)
             try? EvidenceEngine.shared.logGenericArtifact(
                 type: "slack_delivery_failed",
                 planId: pack.scoutRunId,
                 jsonString: """
-                {"findingPackId":"\(pack.id)","error":"\(error.localizedDescription)","timestamp":"\(Date())"}
+                {"connectorId":"\(manifest.connectorId)","version":"\(manifest.version)","findingPackId":"\(pack.id)","error":"\(error.localizedDescription)","timestamp":"\(Date())"}
                 """
             )
         }

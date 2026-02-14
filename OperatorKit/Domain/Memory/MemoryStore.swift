@@ -129,6 +129,8 @@ final class MemoryStore: ObservableObject {
             type = .reminder
         case .documentReview:
             type = .documentReview
+        case .researchBrief:
+            type = .researchBrief
         }
         
         let item = PersistedMemoryItem(
@@ -286,6 +288,7 @@ final class MemoryStore: ObservableObject {
         case .actionItems: return .actionItems
         case .documentReview: return .documentReview
         case .reminder: return .reminder
+        case .researchBrief: return .researchBrief
         }
     }
     
