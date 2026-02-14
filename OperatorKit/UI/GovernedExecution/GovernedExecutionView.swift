@@ -111,256 +111,264 @@ struct GovernedExecutionView: View {
         }
     }
 
-    // MARK: - Agent Progress View
+    // MARK: - Agent Progress View (Mission Control)
 
     private var agentProgressView: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Autonomous mode trust banner
-                autonomousModeBanner
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 16) {
+                    // ── Top: Autonomous mode banner + live stats ──
+                    autonomousModeBanner
 
-                // Header with pass indicator
-                headerSection
+                    // ── Live metrics bar ──
+                    liveMetricsBar
 
-                // Live status
-                statusSection
+                    // ── Active guardrail flash ──
+                    if let guardrail = agentLoop.activeGuardrail {
+                        guardrailFlashView(guardrail)
+                            .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .opacity))
+                    }
 
-                // Step indicators
-                stepsSection
+                    // ── Live telemetry feed (data drops) ──
+                    liveTelemetryFeed
 
-                // Tool call log
-                if !agentLoop.toolCallLog.isEmpty {
-                    toolCallLogSection
+                    // ── Step tracker (compact) ──
+                    compactStepsSection
+
+                    // ── Tool call results ──
+                    if !agentLoop.toolCallLog.isEmpty {
+                        toolCallLogSection
+                    }
+
+                    // Bottom anchor for auto-scroll
+                    Color.clear.frame(height: 1).id("bottom")
                 }
-
-                // Pass history
-                if !agentLoop.passes.isEmpty {
-                    passHistorySection
-                }
-
-                Spacer(minLength: 40)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 40)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
+            .onChange(of: agentLoop.liveFeed.count) { _, _ in
+                withAnimation(.easeOut(duration: 0.2)) {
+                    proxy.scrollTo("bottom", anchor: .bottom)
+                }
+            }
         }
     }
 
-    // MARK: - Autonomous Mode Banner (Critical UX Trust Signal)
+    // MARK: - Autonomous Mode Banner
 
     private var autonomousModeBanner: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(OKColor.actionPrimary.opacity(0.15))
-                        .frame(width: 32, height: 32)
-                    Image(systemName: "bolt.shield.fill")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(OKColor.actionPrimary)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("AUTONOMOUS MODE")
-                        .font(.system(size: 12, weight: .black, design: .monospaced))
-                        .kerning(1.5)
-                        .foregroundStyle(OKColor.actionPrimary)
-
-                    Text("No privileged data required. OperatorKit is gathering public intelligence using governed connectors.")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(OKColor.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-            }
-
-            HStack(spacing: 16) {
-                Label("ConnectorGate", systemImage: "lock.shield")
-                Label("DataDiode", systemImage: "shield.checkered")
-                Label("Bounded", systemImage: "timer")
-            }
-            .font(.system(size: 9, weight: .bold, design: .monospaced))
-            .foregroundStyle(OKColor.riskNominal)
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(OKColor.actionPrimary.opacity(0.06))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(OKColor.actionPrimary.opacity(0.2), lineWidth: 1)
-        )
-    }
-
-    private var headerSection: some View {
-        VStack(spacing: 8) {
-            // Animated ring showing pass progress
+        HStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .stroke(OKColor.borderSubtle, lineWidth: 3)
-                    .frame(width: 72, height: 72)
+                    .fill(OKColor.actionPrimary.opacity(0.15))
+                    .frame(width: 32, height: 32)
+                Image(systemName: "bolt.shield.fill")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(OKColor.actionPrimary)
+            }
 
+            VStack(alignment: .leading, spacing: 2) {
+                Text("AUTONOMOUS MODE")
+                    .font(.system(size: 11, weight: .black, design: .monospaced))
+                    .kerning(1.5)
+                    .foregroundStyle(OKColor.actionPrimary)
+                Text("Governed connectors active. All data flows through security kernel.")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(OKColor.textSecondary)
+            }
+
+            Spacer()
+
+            // Pulsing dot
+            if agentLoop.phase != .complete && agentLoop.phase != .idle {
                 Circle()
-                    .trim(from: 0, to: passProgress)
-                    .stroke(phaseColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                    .frame(width: 72, height: 72)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.easeInOut(duration: 0.4), value: passProgress)
-
-                Image(systemName: phaseIcon)
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(phaseColor)
-            }
-
-            Text("Pass \(max(1, agentLoop.currentPass)) of \(AgentLoopLimits.maxPasses)")
-                .font(.system(size: 13, weight: .bold, design: .monospaced))
-                .foregroundStyle(OKColor.textSecondary)
-        }
-    }
-
-    private var statusSection: some View {
-        VStack(spacing: 6) {
-            Text(agentLoop.statusMessage)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(OKColor.textPrimary)
-                .multilineTextAlignment(.center)
-                .animation(.easeInOut(duration: 0.2), value: agentLoop.statusMessage)
-
-            if agentLoop.phase != .idle && agentLoop.phase != .complete {
-                ProgressView()
-                    .tint(phaseColor)
-                    .scaleEffect(0.8)
+                    .fill(OKColor.riskNominal)
+                    .frame(width: 8, height: 8)
+                    .modifier(PulseModifier())
             }
         }
+        .padding(12)
+        .background(OKColor.actionPrimary.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(OKColor.actionPrimary.opacity(0.2), lineWidth: 1))
     }
 
-    private var stepsSection: some View {
-        VStack(spacing: 10) {
-            stepRow("Agent Pass 1 — Generating search queries",
-                    done: agentLoop.currentPass >= 1,
-                    active: agentLoop.phase == .planning)
-            stepRow("Agent Pass 2 — Fetching authoritative sources",
-                    done: searchComplete,
-                    active: agentLoop.phase == .searching)
-            stepRow("Agent Pass 3 — Extracting intelligence",
-                    done: fetchComplete,
-                    active: agentLoop.phase == .fetching)
-            stepRow("Agent Pass 4 — Evaluating gaps",
-                    done: agentLoop.currentPass >= 2,
-                    active: agentLoop.phase == .evaluating)
-            stepRow("Agent Pass 5 — Synthesizing executive brief",
-                    done: agentLoop.phase == .complete,
-                    active: agentLoop.phase == .synthesizing)
-            stepRow("Human Approval Required",
-                    done: proposal != nil,
-                    active: false)
+    // MARK: - Live Metrics Bar
+
+    private var liveMetricsBar: some View {
+        HStack(spacing: 0) {
+            metricPill(icon: "timer", label: String(format: "%.1fs", agentLoop.elapsedSeconds), color: .blue)
+            Spacer()
+            metricPill(icon: "brain", label: "Pass \(max(1, agentLoop.currentPass))/\(AgentLoopLimits.maxPasses)", color: .purple)
+            Spacer()
+            metricPill(icon: "wrench.and.screwdriver", label: "\(agentLoop.toolCallLog.count)/\(AgentLoopLimits.maxToolCalls)", color: .blue)
+            Spacer()
+            metricPill(icon: "number", label: "\(agentLoop.tokensUsed) tok", color: .muted)
         }
-        .padding(16)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
         .background(OKColor.backgroundSecondary)
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(OKColor.borderSubtle, lineWidth: 1)
-        )
-        .cornerRadius(14)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(OKColor.borderSubtle, lineWidth: 1))
+    }
+
+    private func metricPill(icon: String, label: String, color: LiveTelemetryEvent.LiveTelemetryColor) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .bold))
+            Text(label)
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+        }
+        .foregroundStyle(telemetryColor(color))
+    }
+
+    // MARK: - Guardrail Flash
+
+    private func guardrailFlashView(_ g: GuardrailFlash) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: g.icon)
+                .font(.system(size: 13, weight: .bold))
+            Text(g.name)
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
+            Spacer()
+            Text(g.status == .passed ? "PASSED" : g.status == .warned ? "REVIEW" : "BLOCKED")
+                .font(.system(size: 10, weight: .black, design: .monospaced))
+                .kerning(1)
+        }
+        .foregroundStyle(g.status == .passed ? OKColor.riskNominal : g.status == .warned ? OKColor.riskWarning : OKColor.emergencyStop)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background((g.status == .passed ? OKColor.riskNominal : g.status == .warned ? OKColor.riskWarning : OKColor.emergencyStop).opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .animation(.easeInOut(duration: 0.3), value: agentLoop.activeGuardrail?.id)
+    }
+
+    // MARK: - Live Telemetry Feed (The Data-Dropping Stream)
+
+    private var liveTelemetryFeed: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Image(systemName: "waveform.path.ecg")
+                    .font(.system(size: 10, weight: .bold))
+                Text("LIVE FEED")
+                    .font(.system(size: 10, weight: .black, design: .monospaced))
+                    .kerning(1.2)
+                Spacer()
+                Text("\(agentLoop.liveFeed.count) events")
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+            }
+            .foregroundStyle(OKColor.textMuted)
+            .padding(.bottom, 4)
+
+            ForEach(agentLoop.liveFeed.suffix(20)) { event in
+                telemetryRow(event)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            }
+        }
+        .padding(12)
+        .background(OKColor.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(OKColor.borderSubtle, lineWidth: 1))
+        .animation(.easeOut(duration: 0.25), value: agentLoop.liveFeed.count)
+    }
+
+    private func telemetryRow(_ event: LiveTelemetryEvent) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            // Timestamp
+            Text(timeString(event.timestamp))
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                .foregroundStyle(OKColor.textMuted)
+                .frame(width: 42, alignment: .leading)
+
+            // Icon
+            Image(systemName: event.icon)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(telemetryColor(event.color))
+                .frame(width: 14)
+
+            // Content
+            VStack(alignment: .leading, spacing: 1) {
+                Text(event.label)
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(telemetryColor(event.color))
+
+                if !event.detail.isEmpty {
+                    Text(String(event.detail.prefix(80)))
+                        .font(.system(size: 10))
+                        .foregroundStyle(OKColor.textMuted)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.vertical, 3)
+    }
+
+    // MARK: - Compact Steps
+
+    private var compactStepsSection: some View {
+        VStack(spacing: 6) {
+            stepRow("Planning", done: agentLoop.currentPass >= 1, active: agentLoop.phase == .planning)
+            stepRow("Searching", done: searchComplete, active: agentLoop.phase == .searching)
+            stepRow("Fetching sources", done: fetchComplete, active: agentLoop.phase == .fetching)
+            stepRow("Evaluating", done: agentLoop.currentPass >= 2, active: agentLoop.phase == .evaluating)
+            stepRow("Synthesizing", done: agentLoop.phase == .complete, active: agentLoop.phase == .synthesizing)
+            stepRow("Human Approval", done: proposal != nil, active: false)
+        }
+        .padding(12)
+        .background(OKColor.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(OKColor.borderSubtle, lineWidth: 1))
     }
 
     private var toolCallLogSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "terminal")
-                    .font(.system(size: 12, weight: .bold))
-                Text("TOOL CALLS")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: 10, weight: .bold))
+                Text("TOOL RESULTS")
+                    .font(.system(size: 10, weight: .black, design: .monospaced))
                     .kerning(1.2)
                 Spacer()
                 Text("\(agentLoop.toolCallLog.count)/\(AgentLoopLimits.maxToolCalls)")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
             }
             .foregroundStyle(OKColor.textMuted)
 
             ForEach(Array(agentLoop.toolCallLog.enumerated()), id: \.offset) { idx, result in
-                toolCallRow(index: idx + 1, result: result)
-            }
-        }
-        .padding(14)
-        .background(OKColor.backgroundSecondary)
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(OKColor.borderSubtle, lineWidth: 1)
-        )
-        .cornerRadius(14)
-    }
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(result.success ? OKColor.riskNominal : OKColor.emergencyStop)
 
-    private func toolCallRow(index: Int, result: AgentToolResult) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(result.success ? OKColor.riskNominal : OKColor.emergencyStop)
-
-            VStack(alignment: .leading, spacing: 3) {
-                HStack {
-                    Text(toolCallLabel(result.toolCall))
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(OKColor.textPrimary)
-                    Spacer()
-                    Text("\(result.durationMs)ms")
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundStyle(OKColor.textMuted)
-                }
-
-                Text(String(result.output.prefix(120)) + (result.output.count > 120 ? "..." : ""))
-                    .font(.system(size: 11))
-                    .foregroundStyle(OKColor.textSecondary)
-                    .lineLimit(2)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private var passHistorySection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 12, weight: .bold))
-                Text("REASONING PASSES")
-                    .font(.system(size: 11, weight: .bold))
-                    .kerning(1.2)
-                Spacer()
-            }
-            .foregroundStyle(OKColor.textMuted)
-
-            ForEach(agentLoop.passes) { pass in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Pass \(pass.id)")
-                            .font(.system(size: 12, weight: .bold))
-                        Spacer()
-                        Text("\(pass.toolCalls.count) tool call(s)")
-                            .font(.system(size: 11, weight: .medium))
-                        Text("\(pass.durationMs)ms")
-                            .font(.system(size: 10, weight: .medium, design: .monospaced))
-                            .foregroundStyle(OKColor.textMuted)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(toolCallLabel(result.toolCall))
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(OKColor.textPrimary)
+                            Spacer()
+                            Text("\(result.durationMs)ms")
+                                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                                .foregroundStyle(OKColor.textMuted)
+                        }
+                        Text(String(result.output.prefix(100)))
+                            .font(.system(size: 10))
+                            .foregroundStyle(OKColor.textSecondary)
+                            .lineLimit(2)
                     }
-                    .foregroundStyle(OKColor.textSecondary)
-
-                    Text(String(pass.modelReasoning.prefix(200)))
-                        .font(.system(size: 11))
-                        .foregroundStyle(OKColor.textMuted)
-                        .lineLimit(3)
                 }
-                .padding(10)
-                .background(OKColor.backgroundTertiary)
-                .cornerRadius(8)
+                .padding(.vertical, 3)
             }
         }
-        .padding(14)
+        .padding(12)
         .background(OKColor.backgroundSecondary)
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(OKColor.borderSubtle, lineWidth: 1)
-        )
-        .cornerRadius(14)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(OKColor.borderSubtle, lineWidth: 1))
     }
 
     // MARK: - Artifact Preview View
@@ -749,42 +757,53 @@ struct GovernedExecutionView: View {
     // MARK: - Helpers
 
     private func stepRow(_ label: String, done: Bool, active: Bool = false) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             ZStack {
                 Circle()
                     .fill(done ? OKColor.riskNominal.opacity(0.2) : active ? OKColor.actionPrimary.opacity(0.2) : OKColor.backgroundTertiary)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 20, height: 20)
                 if done {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 11, weight: .bold))
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(OKColor.riskNominal)
                 } else if active {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(OKColor.actionPrimary)
+                    ProgressView()
+                        .tint(OKColor.actionPrimary)
+                        .scaleEffect(0.5)
                 }
             }
 
             Text(label)
-                .font(.system(size: 14, weight: active ? .semibold : .regular))
+                .font(.system(size: 13, weight: active ? .semibold : .regular))
                 .foregroundStyle(done || active ? OKColor.textPrimary : OKColor.textMuted)
 
             Spacer()
-
-            if active {
-                ProgressView()
-                    .tint(OKColor.actionPrimary)
-                    .scaleEffect(0.7)
-            }
         }
     }
 
     private func toolCallLabel(_ call: AgentToolCall) -> String {
         switch call {
-        case .search(let query): return "Search: \(String(query.prefix(50)))"
-        case .fetchPage(let url): return "Fetch: \(String(url.prefix(50)))"
+        case .search(let query): return "Search: \(String(query.prefix(40)))"
+        case .fetchPage(let url): return "Fetch: \(String(url.prefix(40)))"
         case .synthesize: return "Synthesize"
         }
+    }
+
+    private func telemetryColor(_ c: LiveTelemetryEvent.LiveTelemetryColor) -> Color {
+        switch c {
+        case .blue: return OKColor.riskOperational
+        case .green: return OKColor.riskNominal
+        case .amber: return OKColor.riskWarning
+        case .red: return OKColor.emergencyStop
+        case .purple: return OKColor.riskExtreme
+        case .muted: return OKColor.textMuted
+        }
+    }
+
+    private func timeString(_ date: Date) -> String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "ss.SS"
+        return fmt.string(from: date)
     }
 
     private func riskBadge(_ tier: RiskTier) -> some View {
@@ -842,5 +861,19 @@ enum GovernedExecutionError: LocalizedError {
         case .skillNotFound(let id): return "Skill '\(id)' not found in registry."
         case .connectorFailed(let reason): return "Connector failed: \(reason)"
         }
+    }
+}
+
+// MARK: - Pulse Animation Modifier
+
+private struct PulseModifier: ViewModifier {
+    @State private var isPulsing = false
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isPulsing ? 1.6 : 1.0)
+            .opacity(isPulsing ? 0.4 : 1.0)
+            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
+            .onAppear { isPulsing = true }
     }
 }
